@@ -1,0 +1,3 @@
+[submodule "vendor/fastagent"]
+	path = vendor/fastagent
+	url = https://github.com/fastagent-sh/fastagent.git

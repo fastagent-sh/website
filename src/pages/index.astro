@@ -1,0 +1,158 @@
+---
+import CopyPrompt from "../components/CopyPrompt.astro";
+import fastagent from "../generated/fastagent.json";
+import "../styles/custom.css";
+
+const title = "FastAgent — Turn an agent directory into a live service";
+const description =
+  "Serve an existing agent definition in your app, on GitHub, in Telegram, or behind any channel — without rewriting it.";
+const site = "https://fastagent.sh";
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "FastAgent",
+  applicationCategory: "DeveloperApplication",
+  operatingSystem: "Node.js, Bun",
+  description,
+  url: site,
+  softwareVersion: fastagent.version,
+  codeRepository: "https://github.com/fastagent-sh/fastagent",
+  license: "https://github.com/fastagent-sh/fastagent/blob/main/LICENSE",
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0d0f12" />
+    <link rel="canonical" href={site} />
+    <link rel="icon" href="/logo-mark.png" />
+    <link rel="alternate" type="application/rss+xml" title="FastAgent Blog" href="/blog/rss.xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={site} />
+    <meta property="og:image" content={`${site}/social-preview.png`} />
+    <meta property="og:image:alt" content="FastAgent — Vibe first. Then FastAgent." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>{title}</title>
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  </head>
+  <body class="landing">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <nav class="shell nav" aria-label="Primary navigation">
+        <a class="brand" href="/" aria-label="FastAgent home">
+          <picture>
+            <source media="(prefers-color-scheme: dark)" srcset="/logo.png" />
+            <img src="/logo-light.png" alt="FastAgent" width="188" height="66" />
+          </picture>
+        </a>
+        <div class="nav-links">
+          <a href="/docs/">Docs</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/fastagent-sh/fastagent">GitHub</a>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero shell">
+        <a class="announcement" href="/blog/fastagent-is-now-open-source/">FastAgent is now open source <span aria-hidden="true">→</span></a>
+        <p class="eyebrow">Vibe first. Then FastAgent.</p>
+        <h1>Turn an agent directory into a live service.</h1>
+        <p class="lede">Serve the definition you already have in your app, on GitHub, in Telegram, over HTTP, or behind your own channel — without rewriting it.</p>
+        <CopyPrompt />
+        <p class="hero-links"><a href="/docs/quickstart/">Read the quickstart</a><span aria-hidden="true">·</span><a href="https://www.npmjs.com/package/@fastagent-sh/fastagent">FastAgent v{fastagent.version}</a></p>
+      </section>
+
+      <section class="shell demo" aria-labelledby="demo-title">
+        <div class="section-heading">
+          <p class="eyebrow">From terminal to trigger</p>
+          <h2 id="demo-title">The directory stays the agent.</h2>
+        </div>
+        <img src="/demo.svg" alt="A FastAgent workspace starts locally and handles a GitHub pull request webhook." width="860" height="496" loading="eager" />
+      </section>
+
+      <section class="shell split" aria-labelledby="definition-title">
+        <div>
+          <p class="eyebrow">No new DSL</p>
+          <h2 id="definition-title">Keep the files you can inspect, edit, and commit.</h2>
+          <p>FastAgent assembles identity, project context, skills, tools, channels, and schedules from the filesystem. Add only what the agent needs.</p>
+        </div>
+        <pre aria-label="Example FastAgent directory"><code>agent/
+├── persona.md
+├── AGENTS.md
+├── skills/
+├── tools/
+├── channels/
+├── schedules/
+└── fastagent.config.mjs</code></pre>
+      </section>
+
+      <section class="shell" aria-labelledby="surfaces-title">
+        <div class="section-heading">
+          <p class="eyebrow">One agent, real surfaces</p>
+          <h2 id="surfaces-title">Embed it or serve it directly.</h2>
+        </div>
+        <div class="card-grid">
+          <a class="card" href="/docs/embedding/"><strong>Your app</strong><span>Mount one Fetch-shaped handler. Keep your auth, database, routes, and host.</span></a>
+          <a class="card" href="/docs/github/"><strong>GitHub</strong><span>Verify webhooks, map events to turns, and review real pull requests.</span></a>
+          <a class="card" href="/docs/telegram/"><strong>Telegram</strong><span>Run a group-aware bot with streaming previews and durable turn intent.</span></a>
+          <a class="card" href="/docs/channels/"><strong>Any channel</strong><span>Adapt HTTP, Slack, queues, or your own trigger to the same contract.</span></a>
+        </div>
+      </section>
+
+      <section class="contract">
+        <div class="shell split">
+          <div>
+            <p class="eyebrow">The stable center</p>
+            <h2>A small, engine-neutral contract.</h2>
+            <p>Channels and hosts depend on <code>Agent</code>, not an engine. The included implementation uses <a href="https://pi.dev">pi</a> as its reference engine.</p>
+            <a class="text-link" href="/docs/spec/">Read the Agent Handler SPEC <span aria-hidden="true">→</span></a>
+          </div>
+          <pre><code>invoke(scope, prompt)
+  → AsyncIterable&lt;AgentEvent&gt;</code></pre>
+        </div>
+      </section>
+
+      <section class="shell split" aria-labelledby="quickstart-title">
+        <div>
+          <p class="eyebrow">Manual start</p>
+          <h2 id="quickstart-title">Four commands, then a real server.</h2>
+          <p>Prefer a coding agent? Use the prompt above. Prefer the terminal? Authenticate inside the workspace and choose a model explicitly.</p>
+          <a class="text-link" href="/docs/quickstart/">Follow the full quickstart <span aria-hidden="true">→</span></a>
+        </div>
+        <pre><code>npm i -g @fastagent-sh/fastagent
+fastagent init my-agent
+cd my-agent && fastagent login
+fastagent dev --model provider/id</code></pre>
+      </section>
+
+      <section class="shell deploy" aria-labelledby="deploy-title">
+        <p class="eyebrow">No hosted platform required</p>
+        <h2 id="deploy-title">Run it where your application already lives.</h2>
+        <p>Embed FastAgent in Node, Bun, Astro, Hono, or Next.js. Deploy the directory to Fly, Railway, or another Docker host.</p>
+        <a class="text-link" href="/docs/deploy/">Deployment guide <span aria-hidden="true">→</span></a>
+      </section>
+
+      <section class="final-cta">
+        <div class="shell">
+          <p class="eyebrow">Your existing agent, served</p>
+          <h2>Give your coding agent the shortest path.</h2>
+          <CopyPrompt compact />
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <p>FastAgent is MIT licensed and open source.</p>
+        <div><a href="/docs/">Docs</a><a href="/blog/">Blog</a><a href="https://github.com/fastagent-sh/fastagent">GitHub</a><a href="https://www.npmjs.com/package/@fastagent-sh/fastagent">npm</a></div>
+      </div>
+    </footer>
+  </body>
+</html>
