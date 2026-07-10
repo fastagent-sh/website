@@ -2,8 +2,16 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "fastagent-website",
   "compatibility_date": "2026-07-10",
+  "workers_dev": true,
+  "preview_urls": true,
   "assets": {
     "directory": "./dist",
     "not_found_handling": "404-page"
-  }
+  },
+  "routes": [
+    {
+      "pattern": "fastagent.sh",
+      "custom_domain": true
+    }
+  ]
 }
