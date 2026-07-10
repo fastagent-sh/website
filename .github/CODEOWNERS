@@ -1,6 +1,7 @@
 # Deployment, dependency, and generated-content boundaries require maintainer review.
 /.github/CODEOWNERS       @kid7st @Sukitly
 /.github/workflows/       @kid7st @Sukitly
+/SECURITY.md              @kid7st @Sukitly
 /package.json             @kid7st @Sukitly
 /package-lock.json        @kid7st @Sukitly
 /astro.config.mjs         @kid7st @Sukitly
