@@ -7,4 +7,4 @@ This repository owns the public landing page, rendered documentation, blog, and 
 - Blog posts live in `src/content/docs/blog/`.
 - Keep the site static: Astro, Starlight, and vanilla CSS. Do not add a client framework, CMS, database, or SSR without a demonstrated need.
 - Run `npm run check && npm run build` before opening a PR.
-- Maintainer-authored PRs may self-merge after required checks; external-contributor PRs require one maintainer approval.
+- Maintainer-authored PRs may self-merge after required checks; external-contributor PRs are reviewed and merged by a maintainer.
