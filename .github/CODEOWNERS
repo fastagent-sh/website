@@ -1,4 +1,4 @@
-# Deployment, dependency, and generated-content boundaries require maintainer review.
+# Ownership map for review routing. Maintainer-authored PRs do not require a second maintainer approval.
 /.github/CODEOWNERS       @kid7st @Sukitly
 /.github/workflows/       @kid7st @Sukitly
 /SECURITY.md              @kid7st @Sukitly
