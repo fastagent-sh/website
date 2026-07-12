@@ -1,0 +1,89 @@
+---
+// Shared shell for every custom (non-Starlight) page: landing, blog, and
+// whatever comes next. Head meta, header, and footer live here once.
+import BrandIcon from "../components/BrandIcon.astro";
+import fastagent from "../generated/fastagent.json";
+import "../styles/custom.css";
+
+interface Props {
+  title: string;
+  description: string;
+  /** Canonical path, e.g. "/blog/". */
+  path?: string;
+  ogType?: "website" | "article";
+}
+
+const site = "https://fastagent.sh";
+const { title, description, path = "/", ogType = "website" } = Astro.props;
+const canonical = `${site}${path}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0a0c0b" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.png" />
+    <link rel="alternate" type="application/rss+xml" title="FastAgent Blog" href="/blog/rss.xml" />
+    <link rel="preload" href="/fonts/plex-mono-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/plex-mono-600.woff2" as="font" type="font/woff2" crossorigin />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={`${site}/social-preview.png`} />
+    <meta property="og:image:alt" content="FastAgent — Vibe first. Then FastAgent." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>{title}</title>
+    <slot name="head" />
+  </head>
+  <body class="site">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <nav class="shell nav" aria-label="Primary navigation">
+        <a class="brand" href="/" aria-label="FastAgent home">
+          <img src="/logo.png" alt="FastAgent" width="940" height="312" />
+        </a>
+        <a class="brand-version" href="https://github.com/fastagent-sh/fastagent/releases" title="Release notes">v{fastagent.version}</a>
+        <div class="nav-links">
+          <a href="/docs/">Docs</a>
+          <a href="/blog/">Blog</a>
+          <a href="/docs/spec/">SPEC</a>
+          <a class="nav-cta" href="https://github.com/fastagent-sh/fastagent">
+            <BrandIcon name="github" size={13} />
+            GitHub
+          </a>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <div class="footer-brand">
+          <img class="footer-mark" src="/logo-mark.png" alt="" width="512" height="512" />
+          <span>
+            <strong>fastagent</strong> · MIT · open source · © {new Date().getFullYear()}
+            <br />
+            <span class="footer-tag">Vibe first. Then FastAgent.</span>
+          </span>
+        </div>
+        <div class="footer-links">
+          <a href="/docs/">Docs</a>
+          <a href="/blog/">Blog</a>
+          <a href="/docs/spec/">SPEC</a>
+          <a href="https://github.com/fastagent-sh/fastagent">GitHub</a>
+          <a href="https://github.com/fastagent-sh/fastagent/releases">Releases</a>
+          <a href="https://www.npmjs.com/package/@fastagent-sh/fastagent">npm</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
