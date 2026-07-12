@@ -85,19 +85,10 @@
   --sl-font-mono: var(--mono);
 }
 
-/* Dark docs/blog match the landing palette exactly — one brand, two renderers. */
 :root[data-theme="dark"] {
   --sl-color-accent-low: #0b3733;
   --sl-color-accent: #2dd4bf;
   --sl-color-accent-high: #b8f0e7;
-  --sl-color-white: #e4eae6;
-  --sl-color-gray-1: #c3ccc7;
-  --sl-color-gray-2: #8d9992;
-  --sl-color-gray-3: #6b7770;
-  --sl-color-gray-4: #2c3630;
-  --sl-color-gray-5: #1e2522;
-  --sl-color-gray-6: #101413;
-  --sl-color-black: #0a0c0b;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -105,14 +96,6 @@
     --sl-color-accent-low: #0b3733;
     --sl-color-accent: #2dd4bf;
     --sl-color-accent-high: #b8f0e7;
-    --sl-color-white: #e4eae6;
-    --sl-color-gray-1: #c3ccc7;
-    --sl-color-gray-2: #8d9992;
-    --sl-color-gray-3: #6b7770;
-    --sl-color-gray-4: #2c3630;
-    --sl-color-gray-5: #1e2522;
-    --sl-color-gray-6: #101413;
-    --sl-color-black: #0a0c0b;
   }
 }
 
@@ -1724,14 +1707,6 @@ a.tag-link:hover {
 
 .sl-markdown-content a:not(:where(.not-content *)) {
   text-underline-offset: 0.18em;
-}
-
-/* Headings echo the landing's mono voice across docs and blog. */
-.sl-markdown-content :is(h1, h2, h3, h4):not(:where(.not-content *)),
-.content-panel h1,
-.hero h1 {
-  font-family: var(--mono);
-  letter-spacing: -0.03em;
 }
 
 .site-title img {
