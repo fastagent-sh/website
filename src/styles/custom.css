@@ -575,9 +575,20 @@ body.landing {
   list-style: none;
 }
 
+/* "coming soon" items: dimmed + italic (non-color cue) + sr-only text. */
 .eco-soon,
 .eco-list li.eco-soon {
   color: var(--muted-2);
+  font-style: italic;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .eco-legend {
@@ -776,7 +787,7 @@ body.landing {
 }
 
 /* ────────────────────────────────────────────────────────────────────────
-   02 · extensions by composition — reference set vs yours
+   shared caption line (.design-center — used by sections 01 and 03)
    ──────────────────────────────────────────────────────────────────────── */
 
 
@@ -791,7 +802,7 @@ body.landing {
 }
 
 /* ────────────────────────────────────────────────────────────────────────
-   02 · shape
+   03 · the definition (file tree + notes)
    ──────────────────────────────────────────────────────────────────────── */
 
 .shape-grid {
@@ -831,7 +842,7 @@ body.landing {
 }
 
 /* ────────────────────────────────────────────────────────────────────────
-   03 · channels — mini demo windows
+   05 · live service — mini demo windows (also reused by 02’s code panes)
    ──────────────────────────────────────────────────────────────────────── */
 
 .demo-grid {
@@ -1013,7 +1024,7 @@ body.landing {
 }
 
 /* ────────────────────────────────────────────────────────────────────────
-   04 · embed — tabs
+   04 · add it to your app — framework tabs
    ──────────────────────────────────────────────────────────────────────── */
 
 .tabs {
@@ -1191,7 +1202,7 @@ body.landing {
 
 
 /* ────────────────────────────────────────────────────────────────────────
-   07 · deploy
+   06 · deploy anywhere — targets
    ──────────────────────────────────────────────────────────────────────── */
 
 .deploy-targets {
@@ -1252,7 +1263,7 @@ body.landing {
 }
 
 /* ────────────────────────────────────────────────────────────────────────
-   08 · start (CTA) + CopyPrompt
+   07 · start (CTA) + CopyPrompt
    ──────────────────────────────────────────────────────────────────────── */
 
 .cta {

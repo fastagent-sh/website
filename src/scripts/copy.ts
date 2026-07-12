@@ -7,24 +7,33 @@ for (const button of document.querySelectorAll<HTMLButtonElement>("[data-copy-pr
     // The status line, when present, is the button's sibling inside its action wrapper.
     const status = button.parentElement?.querySelector<HTMLElement>("[data-copy-status]") ?? null;
 
-    let message = "Copied";
+    let copied = true;
     try {
       await navigator.clipboard.writeText(text);
     } catch {
-      message = "Copy failed — select it manually";
+      copied = false;
+      // Recovery path: select the adjacent code text so the user can just ⌘C.
+      const code = button.parentElement?.parentElement?.querySelector("code") ?? null;
+      if (code) {
+        const range = document.createRange();
+        range.selectNodeContents(code);
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+      }
     }
 
     if (status) {
-      status.textContent = message;
+      status.textContent = copied ? "Copied" : "Copy failed — text selected, press ⌘C";
       window.setTimeout(() => {
         status.textContent = "";
       }, 2500);
     } else {
       const original = button.textContent;
-      button.textContent = message === "Copied" ? "Copied" : "Failed";
+      button.textContent = copied ? "Copied" : "Selected — press ⌘C";
       window.setTimeout(() => {
         button.textContent = original;
-      }, 1500);
+      }, 2500);
     }
   });
 }

@@ -7,7 +7,7 @@ import starlightLlmsTxt from "starlight-llms-txt";
 
 const site = "https://fastagent.sh";
 const description =
-  "An agent is just a directory — FastAgent serves it as a live service on GitHub, Telegram, Slack, or your own channel. No rewrite, no new format, no platform.";
+  "An agent is just a directory — FastAgent serves it as a live service on GitHub, Telegram, or any channel you compose. No rewrite, no new format, no platform.";
 
 export default defineConfig({
   site,

@@ -24,14 +24,14 @@
       <p class="tl l2"><span class="tg">✓</span> wrote persona.md · <span class="ft-dir">skills/</span> · <span class="ft-dir">tools/</span> · <span class="ft-accent">channels/</span></p>
       <p class="tl c2 gap"><span class="tcm"># then fastagent</span></p>
       <p class="tl l3"><span class="tp">❯</span> <span class="tc">fastagent dev</span></p>
-      <p class="tl l4"><span class="tlab td">[fastagent]</span><span class="td">assembled</span> persona · skills · tools · channels</p>
-      <p class="tl l5"><span class="tlab td">[fastagent]</span>github · telegram · http <span class="td">— listening on</span> <span class="tg">:8787</span></p>
-      <p class="tl l6 gap"><span class="tlab tpu">[github]</span><span class="td">▸</span> <span class="tpu">pull_request.opened</span>  <span class="tt">#128</span></p>
-      <p class="tl l7"><span class="tlab td">[agent]</span><span class="tg">✓</span> review posted · 2 inline comments <span class="td">(2.1s)</span></p>
-      <p class="tl l8 gap"><span class="tlab tbl">[telegram]</span><span class="td">▸</span> <span class="tbl">message</span>  <span class="tt">@ops-room</span> <span class="td">“order #9231?”</span></p>
-      <p class="tl l9"><span class="tlab td">[agent]</span><span class="tg">✓</span> replied · refund approved <span class="td">(1.4s)</span></p>
-      <p class="tl l10 gap"><span class="tlab tg2">[http]</span><span class="td">▸</span> <span class="tg2">POST /invoke</span>  <span class="tt">session=s_42</span></p>
-      <p class="tl l11"><span class="tlab td">[agent]</span><span class="tg">✓</span> streamed 14 events <span class="td">(0.9s)</span></p>
+      <p class="tl l4"><span class="tlab tdim">[fastagent]</span><span class="tdim">assembled</span> persona · skills · tools · channels</p>
+      <p class="tl l5"><span class="tlab tdim">[fastagent]</span>github · telegram · http <span class="tdim">— listening on</span> <span class="tg">:8787</span></p>
+      <p class="tl l6 gap"><span class="tlab tpu">[github]</span><span class="tdim">▸</span> <span class="tpu">pull_request.opened</span>  <span class="tt">#128</span></p>
+      <p class="tl l7"><span class="tlab tdim">[agent]</span><span class="tg">✓</span> review posted · 2 inline comments <span class="tdim">(2.1s)</span></p>
+      <p class="tl l8 gap"><span class="tlab tbl">[telegram]</span><span class="tdim">▸</span> <span class="tbl">message</span>  <span class="tt">@ops-room</span> <span class="tdim">“order #9231?”</span></p>
+      <p class="tl l9"><span class="tlab tdim">[agent]</span><span class="tg">✓</span> replied · refund approved <span class="tdim">(1.4s)</span></p>
+      <p class="tl l10 gap"><span class="tlab tg2">[http]</span><span class="tdim">▸</span> <span class="tg2">POST /invoke</span>  <span class="tt">session=s_42</span></p>
+      <p class="tl l11"><span class="tlab tdim">[agent]</span><span class="tg">✓</span> streamed 14 events <span class="tdim">(0.9s)</span></p>
       <p class="tl c3 gap"><span class="tcm"># ships anywhere</span></p>
       <p class="tl l12"><span class="tp">❯</span> <span class="tc">fastagent deploy fly --run</span></p>
       <p class="tl l13"><span class="tg">✓</span> live at <span class="tg2">https://support-agent.fly.dev</span></p>
@@ -115,19 +115,14 @@
   .tl { margin: 0; white-space: nowrap; }
   .tl.gap { margin-top: 0.85em; }
 
+  /* .tp/.tdim/.tstr/.tg/.tpu/.ft-dir/.ft-accent come from the global terminal
+     tokens in custom.css — only mock-local roles are defined here. */
   .tlab { display: inline-block; min-width: 12ch; }
-  .tp  { color: var(--term-accent); font-weight: 600; }
   .tc  { color: var(--term-text); font-weight: 600; }
-  .td  { color: var(--term-muted); }
   .tt  { color: var(--term-text); }
-  .tg  { color: var(--term-green); }
   .tg2 { color: var(--term-green); }
-  .tpu { color: var(--term-purple); }
   .tbl { color: var(--term-blue); }
-  .tstr { color: var(--term-amber); }
   .tcm { color: var(--term-muted); font-style: italic; }
-  .ft-dir { color: var(--term-blue); font-weight: 600; }
-  .ft-accent { color: var(--term-accent); font-weight: 600; }
 
   .caret {
     display: inline-block;

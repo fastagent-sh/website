@@ -7,7 +7,7 @@ import "../styles/custom.css";
 
 const title = "FastAgent — Vibe first. Then FastAgent.";
 const description =
-  "An agent is just a directory — FastAgent serves it as a live service on GitHub, Telegram, Slack, or your own channel. No rewrite, no new format, no platform.";
+  "An agent is just a directory — FastAgent serves it as a live service on GitHub, Telegram, or any channel you compose. No rewrite, no new format, no platform.";
 const site = "https://fastagent.sh";
 const structuredData = {
   "@context": "https://schema.org",
@@ -252,8 +252,8 @@ const concepts = [
           <h1>Vibe first.<br /><em>Then FastAgent.</em></h1>
           <p class="hero-lede">
             An agent is <strong>just a directory</strong> (persona.md, skills/, tools/, channels/) —
-            or embedded right in your app. FastAgent serves it: GitHub, Telegram, Discord,
-            Slack, or your own. <strong>No rewrite, no new format, no platform.</strong>
+            or embedded right in your app. FastAgent serves it: GitHub, Telegram,
+            or any channel you compose. <strong>No rewrite, no new format, no platform.</strong>
           </p>
           <div class="hero-actions">
             <a class="btn btn-primary" href="/docs/quickstart/">Quick start</a>
@@ -309,7 +309,7 @@ const concepts = [
                 <ul class="eco-list">
                   {g.items.map((e) => (
                     <li class:list={[{ "eco-soon": e.soon }]} title={e.soon ? "coming soon" : undefined}>
-                      {e.icon && <BrandIcon name={e.icon} size={15} color={e.soon ? undefined : e.color} />} {e.label}
+                      {e.icon && <BrandIcon name={e.icon} size={15} color={e.soon ? undefined : e.color} />} {e.label}{e.soon && <span class="sr-only"> (coming soon)</span>}
                     </li>
                   ))}
                   {g.more && <li class="eco-more">{g.more}</li>}
