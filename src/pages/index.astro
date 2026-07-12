@@ -247,19 +247,19 @@ const concepts = [
             <div class="install-card" data-im-panel="agent">
               <span class="ip">❯</span>
               <code class="is-truncated" title={DEFAULT_PROMPT}>{DEFAULT_PROMPT}</code>
-              <button type="button" data-copy-prompt={DEFAULT_PROMPT}>Copy</button>
+              <button type="button" data-copy-prompt={DEFAULT_PROMPT} data-track-method="agent-prompt" data-track-placement="hero">Copy</button>
             </div>
             <div class="install-card" data-im-panel="term">
               <span class="ip">$</span>
               <code>{npmInstall}</code>
               <span class="cmd-note"># cli</span>
-              <button type="button" data-copy-prompt={npmInstall}>Copy</button>
+              <button type="button" data-copy-prompt={npmInstall} data-track-method="npm-cli" data-track-placement="hero">Copy</button>
             </div>
             <div class="install-card stack" data-im-panel="term">
               <span class="ip">$</span>
               <code>{npmEmbed}</code>
               <span class="cmd-note"># embed in your app</span>
-              <button type="button" data-copy-prompt={npmEmbed}>Copy</button>
+              <button type="button" data-copy-prompt={npmEmbed} data-track-method="npm-embed" data-track-placement="hero">Copy</button>
             </div>
           </div>
 
@@ -485,6 +485,13 @@ const concepts = [
             <pre class="tab-panel" data-panel={fw.id}><code set:html={fw.html} /></pre>
           ))}
         </div>
+        <script>
+          import { track } from "@plausible-analytics/tracker";
+          // Which embed target people reach for — prioritizes the "soon" integrations.
+          for (const input of document.querySelectorAll<HTMLInputElement>('input[name="fw"]')) {
+            input.addEventListener("change", () => track("embed-tab", { props: { framework: input.id.replace("fw-", "") } }));
+          }
+        </script>
 
         <ul class="keep-list" aria-label="What stays yours">
           <li>your auth</li>

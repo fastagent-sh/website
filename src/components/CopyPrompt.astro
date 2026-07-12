@@ -13,7 +13,7 @@ const { compact = false, text = DEFAULT_PROMPT, label = "Copy prompt" } = Astro.
 <div class:list={["prompt", { compact }]}>
   <code>{text}</code>
   <div class="prompt-action">
-    <button type="button" data-copy-prompt={text}>{label}</button>
+    <button type="button" data-copy-prompt={text} data-track-method="agent-prompt" data-track-placement="cta">{label}</button>
     <span aria-live="polite" data-copy-status></span>
   </div>
 </div>
