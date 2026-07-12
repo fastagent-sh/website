@@ -4,7 +4,9 @@
    - the homepage embed tabs render their snippets with it via <Code>.
    Docs keep Starlight's stock github-dark/github-light pair.
    Colors mirror the --term-* custom properties in styles/custom.css. */
-export const fastagentCode = {
+import type { ThemeRegistration } from "shiki";
+
+export const fastagentCode: ThemeRegistration = {
   name: "fastagent-dark",
   type: "dark",
   colors: {
