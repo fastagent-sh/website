@@ -5,7 +5,6 @@ excerpt: FastAgent turns an existing agent directory into a live service without
 tags:
   - announcement
   - release
-featured: true
 ---
 
 Coding agents made it cheap to build useful agent directories. They can carry identity, project context, skills, tools, and the accumulated knowledge that makes an agent useful. But most of those agents still stop at the terminal.

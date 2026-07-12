@@ -6,7 +6,7 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { title, date, excerpt, tags, featured } = post.data;
+const { title, date, excerpt, tags } = post.data;
 const dateLabel = date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 const search = [title, excerpt, ...tags].join(" ").toLowerCase();
 ---
@@ -15,7 +15,6 @@ const search = [title, excerpt, ...tags].join(" ").toLowerCase();
   <a href={`/blog/${post.id}/`}>
     <header class="post-meta">
       <time datetime={date.toISOString().slice(0, 10)}>{dateLabel}</time>
-      {featured && <span class="post-featured">featured</span>}
     </header>
     <h2>{title}</h2>
     <p>{excerpt}</p>

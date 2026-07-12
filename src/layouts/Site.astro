@@ -3,6 +3,7 @@
 // whatever comes next. Head meta, header, and footer live here once.
 import BrandIcon from "../components/BrandIcon.astro";
 import fastagent from "../generated/fastagent.json";
+import { OG_IMAGE, SITE } from "../site";
 import "../styles/custom.css";
 
 interface Props {
@@ -13,9 +14,8 @@ interface Props {
   ogType?: "website" | "article";
 }
 
-const site = "https://fastagent.sh";
 const { title, description, path = "/", ogType = "website" } = Astro.props;
-const canonical = `${site}${path}`;
+const canonical = `${SITE}${path}`;
 ---
 
 <!doctype html>
@@ -35,10 +35,10 @@ const canonical = `${site}${path}`;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={`${site}/social-preview.png`} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="FastAgent — Vibe first. Then FastAgent." />
+    <meta property="og:image" content={OG_IMAGE.url} />
+    <meta property="og:image:width" content={OG_IMAGE.width} />
+    <meta property="og:image:height" content={OG_IMAGE.height} />
+    <meta property="og:image:alt" content={OG_IMAGE.alt} />
     <meta name="twitter:card" content="summary_large_image" />
     <title>{title}</title>
     <script>
