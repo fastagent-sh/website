@@ -8,29 +8,6 @@ const site = "https://fastagent.sh";
 const description =
   "An agent is just a directory — FastAgent serves it as a live service on GitHub, Telegram, or any channel you compose. No rewrite, no new format, no platform.";
 
-/* Expressive Code theme matching the landing's terminal palette
-   (see the token classes in src/styles/custom.css). */
-const fastagentCode = {
-  name: "fastagent-dark",
-  type: "dark",
-  colors: {
-    "editor.background": "#080a09",
-    "editor.foreground": "#d5dcd9",
-  },
-  tokenColors: [
-    { scope: ["comment", "punctuation.definition.comment"], settings: { foreground: "#5f6c68", fontStyle: "italic" } },
-    { scope: ["string", "string.quoted", "string.template"], settings: { foreground: "#e0bd68" } },
-    { scope: ["constant.numeric", "constant.language", "constant.character", "support.constant"], settings: { foreground: "#7ecf8a" } },
-    { scope: ["keyword", "storage.type", "storage.modifier", "keyword.control"], settings: { foreground: "#b795f5" } },
-    { scope: ["keyword.operator"], settings: { foreground: "#d5dcd9" } },
-    { scope: ["entity.name.function", "support.function", "meta.function-call entity.name.function"], settings: { foreground: "#2dd4bf" } },
-    { scope: ["entity.name.type", "entity.name.class", "support.type", "support.class", "entity.other.inherited-class"], settings: { foreground: "#6aa5f8" } },
-    { scope: ["entity.name.tag"], settings: { foreground: "#b795f5" } },
-    { scope: ["entity.other.attribute-name"], settings: { foreground: "#6aa5f8" } },
-    { scope: ["variable", "variable.parameter", "variable.other"], settings: { foreground: "#d5dcd9" } },
-  ],
-};
-
 export default defineConfig({
   site,
   output: "static",
@@ -38,18 +15,6 @@ export default defineConfig({
     starlight({
       title: "FastAgent",
       description,
-      expressiveCode: {
-        themes: [fastagentCode],
-        styleOverrides: {
-          borderColor: "#2c3630",
-          borderRadius: "8px",
-          codeBackground: "#080a09",
-          codeFontFamily: "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
-          codeFontSize: "0.85rem",
-          codeLineHeight: "1.75",
-          frames: { shadowColor: "transparent" },
-        },
-      },
       favicon: "/favicon.png",
       logo: {
         light: "./src/assets/logo-light.png",
