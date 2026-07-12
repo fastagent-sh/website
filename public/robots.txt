@@ -1,4 +1,7 @@
+# Content Signals (https://contentsignals.org/): FastAgent wants to be
+# searchable, quotable, and known to models — all uses welcome.
 User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 Sitemap: https://fastagent.sh/sitemap-index.xml

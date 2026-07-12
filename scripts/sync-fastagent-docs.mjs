@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -44,6 +45,28 @@ const start = rewriteDocLinks(await readFile(new URL("ai-start.md", sourceDocs),
   "](https://fastagent.sh/docs/",
 );
 await writeFile(new URL("start.md", publicDir), start);
+
+/* Agent Skills discovery (cloudflare/agent-skills-discovery-rfc v0.2.0): republish the
+   ai-start guide as a SKILL.md plus a digest index under /.well-known/agent-skills/. */
+const descLine = start.match(/^description: (.+)$/m)?.[1];
+if (!descLine) throw new Error("ai-start.md has no frontmatter description");
+const skillMd = start.replace(/^---\n[\s\S]*?\n---\n/, `---\nname: fastagent\ndescription: ${descLine}\n---\n`);
+const skillDir = new URL(".well-known/agent-skills/fastagent/", publicDir);
+await mkdir(skillDir, { recursive: true });
+await writeFile(new URL("SKILL.md", skillDir), skillMd);
+const index = {
+  $schema: "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  skills: [
+    {
+      name: "fastagent",
+      type: "skill-md",
+      description: JSON.parse(descLine),
+      url: "/.well-known/agent-skills/fastagent/SKILL.md",
+      digest: `sha256:${createHash("sha256").update(skillMd).digest("hex")}`,
+    },
+  ],
+};
+await writeFile(new URL(".well-known/agent-skills/index.json", publicDir), `${JSON.stringify(index, null, 2)}\n`);
 
 const commit = execFileSync("git", ["-C", new URL(source).pathname, "rev-parse", "HEAD"], {
   encoding: "utf8",

@@ -1,0 +1,6 @@
+# Agent discovery (RFC 8288): point agents at the markdown corpus, the
+# skills index, and the docs from the pages they actually land on.
+/
+  Link: </llms.txt>; rel="llms-txt", </.well-known/agent-skills/index.json>; rel="agent-skills", </docs/>; rel="service-doc"
+/docs/*
+  Link: </llms.txt>; rel="llms-txt", </.well-known/agent-skills/index.json>; rel="agent-skills"
