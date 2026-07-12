@@ -41,9 +41,9 @@ export default defineConfig({
         starlightLlmsTxt({
           projectName: "FastAgent",
           description,
-          details: "FastAgent is engine-, model-, and host-neutral. The included reference implementation is built on pi.",
+          details: "FastAgent is harness-, model-, and infra-neutral (the Agent Handler SPEC calls the harness the engine — same seam). The built-in harness is pi.",
           optionalLinks: [
-            { label: "AI-guided start", url: `${site}/start.md`, description: "Instructions for coding agents serving an existing agent definition." },
+            { label: "AI-guided start", url: `${site}/start.md`, description: "Instructions for coding agents building an agent: new, from existing files, or embedded in an app." },
             { label: "GitHub", url: "https://github.com/fastagent-sh/fastagent" },
             { label: "npm", url: "https://www.npmjs.com/package/@fastagent-sh/fastagent" },
           ],
