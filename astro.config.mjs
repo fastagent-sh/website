@@ -51,6 +51,9 @@ export default defineConfig({
         replacesTitle: true,
         alt: "FastAgent",
       },
+      components: {
+        Head: "./src/components/StarlightHead.astro",
+      },
       customCss: ["./src/styles/custom.css"],
       head: [
         { tag: "link", attrs: { rel: "preload", href: "/fonts/plex-mono-400.woff2", as: "font", type: "font/woff2", crossorigin: "anonymous" } },
