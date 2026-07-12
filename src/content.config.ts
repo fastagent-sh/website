@@ -7,9 +7,7 @@ import { z } from "astro/zod";
 export const collections = {
   docs: defineCollection({
     loader: docsLoader(),
-    schema: docsSchema({
-      extend: z.object({ status: z.string().optional() }),
-    }),
+    schema: docsSchema(),
   }),
   blog: defineCollection({
     loader: glob({ base: "./src/content/blog", pattern: "**/*.md" }),
@@ -18,7 +16,6 @@ export const collections = {
       date: z.coerce.date(),
       excerpt: z.string(),
       tags: z.array(z.string().regex(/^[a-z0-9-]+$/, "tags must be url-safe slugs")).default([]),
-      featured: z.boolean().default(false),
     }),
   }),
 };

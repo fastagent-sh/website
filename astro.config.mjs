@@ -4,9 +4,7 @@ import { defineConfig } from "astro/config";
 import starlightLinksValidator from "starlight-links-validator";
 import starlightLlmsTxt from "starlight-llms-txt";
 
-const site = "https://fastagent.sh";
-const description =
-  "An agent is just a directory — FastAgent serves it as a live service on GitHub, Telegram, or any channel you compose. No rewrite, no new format, no platform.";
+import { DESCRIPTION as description, OG_IMAGE, SITE as site } from "./src/site.ts";
 
 /* The landing's terminal palette as a shiki theme — used ONLY on blog pages
    (selected via data-theme="fastagent" on their <html>). Docs keep Starlight's
@@ -58,10 +56,10 @@ export default defineConfig({
       head: [
         { tag: "link", attrs: { rel: "preload", href: "/fonts/plex-mono-400.woff2", as: "font", type: "font/woff2", crossorigin: "anonymous" } },
         { tag: "link", attrs: { rel: "preload", href: "/fonts/plex-mono-600.woff2", as: "font", type: "font/woff2", crossorigin: "anonymous" } },
-        { tag: "meta", attrs: { property: "og:image", content: `${site}/social-preview.png` } },
-        { tag: "meta", attrs: { property: "og:image:width", content: "1200" } },
-        { tag: "meta", attrs: { property: "og:image:height", content: "630" } },
-        { tag: "meta", attrs: { property: "og:image:alt", content: "FastAgent — Vibe first. Then FastAgent." } },
+        { tag: "meta", attrs: { property: "og:image", content: OG_IMAGE.url } },
+        { tag: "meta", attrs: { property: "og:image:width", content: OG_IMAGE.width } },
+        { tag: "meta", attrs: { property: "og:image:height", content: OG_IMAGE.height } },
+        { tag: "meta", attrs: { property: "og:image:alt", content: OG_IMAGE.alt } },
         { tag: "meta", attrs: { name: "twitter:card", content: "summary_large_image" } },
         { tag: "link", attrs: { rel: "alternate", type: "application/rss+xml", href: `${site}/blog/rss.xml`, title: "FastAgent Blog" } },
       ],

@@ -2,6 +2,7 @@
 import { getCollection, render } from "astro:content";
 import PostCard from "../../components/PostCard.astro";
 import Site from "../../layouts/Site.astro";
+import { OG_IMAGE, SITE } from "../../site";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog");
@@ -19,10 +20,10 @@ const structuredData = {
   headline: title,
   description: excerpt,
   datePublished: date.toISOString(),
-  url: `https://fastagent.sh/blog/${post.id}/`,
-  image: "https://fastagent.sh/social-preview.png",
-  author: { "@type": "Organization", name: "The FastAgent team", url: "https://fastagent.sh" },
-  publisher: { "@type": "Organization", name: "FastAgent", url: "https://fastagent.sh" },
+  url: `${SITE}/blog/${post.id}/`,
+  image: OG_IMAGE.url,
+  author: { "@type": "Organization", name: "The FastAgent team", url: SITE },
+  publisher: { "@type": "Organization", name: "FastAgent", url: SITE },
 };
 
 /* Related posts: rank by shared tags, fall back to recency. */

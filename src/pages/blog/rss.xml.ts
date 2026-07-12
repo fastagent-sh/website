@@ -1,6 +1,5 @@
 import { getCollection } from "astro:content";
-
-const site = "https://fastagent.sh";
+import { SITE as site } from "../../site";
 
 const escape = (s: string) =>
   s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
