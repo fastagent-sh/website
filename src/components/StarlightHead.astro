@@ -1,9 +1,14 @@
 ---
 /* Starlight Head override: stock head + Plausible (bundled from npm). */
 import Default from "@astrojs/starlight/components/Head.astro";
+
+/* Build-time marker for the 404 page; src/scripts/plausible.ts reports the
+   missed path at runtime (the one page whose real URL isn't its build URL). */
+const is404 = Astro.url.pathname.replace(/\/$/, "") === "/404";
 ---
 
 <Default {...Astro.props}><slot /></Default>
+{is404 && <meta name="fastagent-404" />}
 <script>
   import "../scripts/plausible";
 </script>

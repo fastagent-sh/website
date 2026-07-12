@@ -1,9 +1,14 @@
 // Page-wide behavior for every [data-copy-prompt] button (hero install cards,
 // CopyPrompt instances). Imported by each consumer; Astro dedupes the module.
+import { track } from "@plausible-analytics/tracker";
+
 for (const button of document.querySelectorAll<HTMLButtonElement>("[data-copy-prompt]")) {
   button.addEventListener("click", async () => {
     const text = button.dataset.copyPrompt;
     if (!text) return;
+    // The activation metric: which install path converts (agent vs human), and where.
+    const { trackMethod, trackPlacement } = button.dataset;
+    if (trackMethod) track("copy-install", { props: { method: trackMethod, placement: trackPlacement ?? "unknown" } });
     // The status line, when present, is the button's sibling inside its action wrapper.
     const status = button.parentElement?.querySelector<HTMLElement>("[data-copy-status]") ?? null;
 
