@@ -47,7 +47,9 @@ Your application still owns authentication, users, data, routing, and policy. Fa
 FastAgent is centered on the engine-neutral Agent Handler contract:
 
 ```ts
-invoke(scope, prompt) => AsyncIterable<AgentEvent>
+interface Agent {
+  invoke(scope: Scope, prompt: Prompt): AsyncIterable<AgentEvent>;
+}
 ```
 
 Channels consume that contract rather than depending on a specific model engine. The included reference implementation is built on [pi](https://pi.dev), while the contract leaves engines, models, and hosts replaceable.
