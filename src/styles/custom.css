@@ -1579,31 +1579,11 @@ a.tag-link:hover {
   color: var(--muted);
 }
 
-.post-body pre {
+/* Fenced code is rendered by Expressive Code (Starlight's site-wide markdown
+   pipeline); data-theme="dark" on <html> selects its dark palette. Only spacing
+   is ours. */
+.post-body .expressive-code {
   margin: 1.4rem 0;
-  padding: 1.2rem 1.4rem;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-lg);
-  background: var(--term-bg) !important; /* wins over shiki's inline theme bg */
-  font: 400 0.85rem/1.75 var(--mono);
-  overflow-x: auto;
-}
-
-.post-body pre code {
-  background: none;
-  padding: 0;
-  color: inherit;
-  font: inherit;
-}
-
-/* Starlight configures shiki with dual themes; its var-flipping CSS only loads
-   on docs pages. Blog pages are always dark, so take the dark palette here. */
-.post-body pre span {
-  color: var(--shiki-dark, inherit) !important;
-}
-
-.post-body pre {
-  color: var(--term-text);
 }
 
 .post-related {
