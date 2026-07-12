@@ -1463,7 +1463,7 @@ a.tag-link:hover {
   text-transform: uppercase;
 }
 
-.post-card h3 {
+.post-card h2 {
   margin: 0;
   font: 600 1.1rem/1.35 var(--mono);
   letter-spacing: -0.02em;
