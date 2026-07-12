@@ -1,38 +1,23 @@
 ---
 interface Props {
   compact?: boolean;
+  text?: string;
+  label?: string;
 }
 
-const { compact = false } = Astro.props;
-const prompt =
-  "Read https://fastagent.sh/start.md, inspect this project, and help me serve its existing agent definition with FastAgent without rewriting it.";
+export const DEFAULT_PROMPT = "Read https://fastagent.sh/start.md and build an agent in this project.";
+
+const { compact = false, text = DEFAULT_PROMPT, label = "Copy prompt" } = Astro.props;
 ---
 
 <div class:list={["prompt", { compact }]}>
-  <code>{prompt}</code>
+  <code>{text}</code>
   <div class="prompt-action">
-    <button type="button" data-copy-prompt={prompt}>Copy prompt</button>
+    <button type="button" data-copy-prompt={text}>{label}</button>
     <span aria-live="polite" data-copy-status></span>
   </div>
 </div>
 
 <script>
-  for (const button of document.querySelectorAll<HTMLButtonElement>("[data-copy-prompt]")) {
-    button.addEventListener("click", async () => {
-      const text = button.dataset.copyPrompt;
-      const status = button.parentElement?.querySelector<HTMLElement>("[data-copy-status]");
-      if (!text || !status) return;
-
-      try {
-        await navigator.clipboard.writeText(text);
-        status.textContent = "Copied";
-      } catch {
-        status.textContent = "Select the prompt and copy it";
-      }
-
-      window.setTimeout(() => {
-        status.textContent = "";
-      }, 2500);
-    });
-  }
+  import "../scripts/copy";
 </script>

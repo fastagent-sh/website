@@ -1,0 +1,25 @@
+---
+import { brandIcons } from "./brand-icons";
+
+interface Props {
+  name: string;
+  size?: number;
+  title?: string;
+  color?: string;
+}
+
+const { name, size = 16, title, color } = Astro.props;
+const d = brandIcons[name];
+if (!d) throw new Error(`Unknown brand icon: ${name}`);
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  aria-hidden={title ? undefined : "true"}
+  role={title ? "img" : undefined}
+>
+  {title && <title>{title}</title>}
+  <path fill={color ?? "currentColor"} d={d} />
+</svg>
