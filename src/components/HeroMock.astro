@@ -1,0 +1,291 @@
+---
+// Hero product shot: the tagline enacted in one terminal, two acts.
+// Act 1 — vibe: a coding agent writes the directory.
+// Act 2 — then fastagent: the same directory serves GitHub, Telegram, and
+// HTTP, with the review card and chat reply popping in as the log advances.
+// Pure HTML/CSS, 26s loop. Faithful to the real CLI flow, condensed — e.g. the
+// deploy act compresses `--run`'s driven runbook into its end state (the live URL).
+---
+
+<figure
+  class="hero-mock"
+  role="img"
+  aria-label="A coding agent writes an agent directory; fastagent dev then serves it — handling a GitHub pull request review, a Telegram message, and an HTTP invoke. The review comment and chat reply appear as cards."
+>
+  <div class="mock-terminal">
+    <div class="mock-bar">
+      <span class="mock-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="mock-title">~/support-agent</span>
+      <span class="mock-live">live</span>
+    </div>
+    <div class="mock-body" aria-hidden="true">
+      <p class="tl c1"><span class="tcm"># vibe first</span></p>
+      <p class="tl l1"><span class="tp">❯</span> <span class="tc">claude</span> <span class="tstr">"read fastagent.sh/start.md, build a support agent"</span></p>
+      <p class="tl l2"><span class="tg">✓</span> wrote persona.md · <span class="ft-dir">skills/</span> · <span class="ft-dir">tools/</span> · <span class="ft-accent">channels/</span></p>
+      <p class="tl c2 gap"><span class="tcm"># then fastagent</span></p>
+      <p class="tl l3"><span class="tp">❯</span> <span class="tc">fastagent dev</span></p>
+      <p class="tl l4"><span class="tlab td">[fastagent]</span><span class="td">assembled</span> persona · skills · tools · channels</p>
+      <p class="tl l5"><span class="tlab td">[fastagent]</span>github · telegram · http <span class="td">— listening on</span> <span class="tg">:8787</span></p>
+      <p class="tl l6 gap"><span class="tlab tpu">[github]</span><span class="td">▸</span> <span class="tpu">pull_request.opened</span>  <span class="tt">#128</span></p>
+      <p class="tl l7"><span class="tlab td">[agent]</span><span class="tg">✓</span> review posted · 2 inline comments <span class="td">(2.1s)</span></p>
+      <p class="tl l8 gap"><span class="tlab tbl">[telegram]</span><span class="td">▸</span> <span class="tbl">message</span>  <span class="tt">@ops-room</span> <span class="td">“order #9231?”</span></p>
+      <p class="tl l9"><span class="tlab td">[agent]</span><span class="tg">✓</span> replied · refund approved <span class="td">(1.4s)</span></p>
+      <p class="tl l10 gap"><span class="tlab tg2">[http]</span><span class="td">▸</span> <span class="tg2">POST /invoke</span>  <span class="tt">session=s_42</span></p>
+      <p class="tl l11"><span class="tlab td">[agent]</span><span class="tg">✓</span> streamed 14 events <span class="td">(0.9s)</span></p>
+      <p class="tl c3 gap"><span class="tcm"># ships anywhere</span></p>
+      <p class="tl l12"><span class="tp">❯</span> <span class="tc">fastagent deploy fly --run</span></p>
+      <p class="tl l13"><span class="tg">✓</span> live at <span class="tg2">https://support-agent.fly.dev</span></p>
+      <p class="tl caret-line"><span class="caret"></span></p>
+    </div>
+  </div>
+
+  <aside class="mock-card mock-gh" aria-hidden="true">
+    <header>
+      <svg width="14" height="14" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.33c-2.22.48-2.69-1.07-2.69-1.07-.36-.92-.88-1.17-.88-1.17-.72-.49.05-.48.05-.48.8.06 1.22.82 1.22.82.71 1.21 1.86.86 2.32.66.07-.52.28-.87.5-1.07-1.77-.2-3.64-.88-3.64-3.94 0-.87.31-1.58.82-2.14-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.63 7.63 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.14 0 3.07-1.88 3.74-3.66 3.94.29.24.54.72.54 1.46v2.16c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg>
+      <strong>support-agent</strong><span class="bot-tag">bot</span> reviewed <b>#128</b>
+    </header>
+    <p>Missing timeout on the retry path — p95 will hang. Suggested fix inline.</p>
+    <footer>▸ 2 review comments</footer>
+  </aside>
+
+  <aside class="mock-card mock-tg" aria-hidden="true">
+    <header>
+      <strong>support-agent</strong><span class="bot-tag">bot</span><time>14:02</time>
+    </header>
+    <p>Refund for order <b>#9231</b> approved — receipt sent to the customer.</p>
+    <footer>seen ✓✓</footer>
+  </aside>
+
+  <figcaption>vibe → serve → ship · one directory end to end</figcaption>
+</figure>
+
+<style>
+  .hero-mock {
+    position: relative;
+    margin: 0;
+  }
+
+  /* ── terminal window ─────────────────────────────────────────────── */
+  .mock-terminal {
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--term-bg);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.4),
+      0 18px 50px -18px rgba(0, 0, 0, 0.75);
+  }
+
+  .mock-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 0.9rem;
+    border-bottom: 1px solid var(--term-border);
+    background: var(--term-bar);
+    color: var(--term-muted);
+    font: 400 0.72rem/1 var(--mono);
+  }
+
+  .mock-dots { display: inline-flex; gap: 0.35rem; }
+  .mock-dots i { width: 9px; height: 9px; border-radius: 999px; background: #3a3f3d; }
+  .mock-dots i:nth-child(1) { background: #e0604f; }
+  .mock-dots i:nth-child(2) { background: #dfa943; }
+  .mock-dots i:nth-child(3) { background: #4fb96a; }
+
+  .mock-title { flex: 1; text-align: center; letter-spacing: 0.02em; }
+
+  .mock-live {
+    padding: 0.14rem 0.45rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--term-green) 16%, transparent);
+    color: var(--term-green);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .mock-body {
+    padding: 1rem 1.15rem 0.9rem;
+    font: 400 clamp(0.68rem, 1.3vw, 0.78rem)/2 var(--mono);
+    color: var(--term-text);
+    overflow: hidden;
+  }
+
+  .tl { margin: 0; white-space: nowrap; }
+  .tl.gap { margin-top: 0.85em; }
+
+  .tlab { display: inline-block; min-width: 12ch; }
+  .tp  { color: var(--term-accent); font-weight: 600; }
+  .tc  { color: var(--term-text); font-weight: 600; }
+  .td  { color: var(--term-muted); }
+  .tt  { color: var(--term-text); }
+  .tg  { color: var(--term-green); }
+  .tg2 { color: var(--term-green); }
+  .tpu { color: var(--term-purple); }
+  .tbl { color: var(--term-blue); }
+  .tstr { color: var(--term-amber); }
+  .tcm { color: var(--term-muted); font-style: italic; }
+  .ft-dir { color: var(--term-blue); font-weight: 600; }
+  .ft-accent { color: var(--term-accent); font-weight: 600; }
+
+  .caret {
+    display: inline-block;
+    width: 0.6em;
+    height: 1.1em;
+    vertical-align: text-bottom;
+    background: var(--term-accent);
+    animation: caret-blink 1.1s steps(1) infinite;
+  }
+
+  @keyframes caret-blink { 50% { opacity: 0; } }
+
+  /* ── surface cards ───────────────────────────────────────────────── */
+  .mock-card {
+    position: absolute;
+    padding: 0.8rem 0.95rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    background: var(--bg-elevated);
+    box-shadow: 0 14px 34px -14px rgba(0, 0, 0, 0.8);
+    font: 400 0.74rem/1.55 var(--mono);
+    color: var(--text-soft);
+  }
+
+  .mock-card header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.2rem 0.4rem;
+    margin-bottom: 0.4rem;
+    color: var(--muted);
+    font-size: 0.7rem;
+  }
+
+  .mock-card header strong { color: var(--text); font-weight: 600; }
+  .mock-card header b { color: var(--accent); font-weight: 600; }
+  .mock-card header svg { flex: none; color: var(--text); }
+  .mock-card header time { margin-left: auto; font-size: 0.64rem; }
+
+  .bot-tag {
+    padding: 0.05rem 0.3rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 3px;
+    font-size: 0.58rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .mock-card p { margin: 0; }
+  .mock-card p b { color: var(--text); font-weight: 600; }
+
+  .mock-card footer {
+    margin-top: 0.45rem;
+    color: var(--muted);
+    font-size: 0.66rem;
+  }
+
+  .mock-gh {
+    top: 36%;
+    right: max(-1.25rem, -2vw);
+    width: min(17.5rem, 62%);
+    border-top: 2px solid var(--purple);
+  }
+
+  .mock-gh footer { color: var(--purple); }
+
+  .mock-tg {
+    top: 47%;
+    left: max(-1.5rem, -2vw);
+    width: min(16rem, 58%);
+    border-top: 2px solid var(--blue);
+  }
+
+  .mock-tg footer { color: var(--blue); text-align: right; }
+
+  figcaption {
+    margin-top: 0.85rem;
+    color: var(--muted);
+    font: 400 0.72rem/1.4 var(--mono);
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+
+  /* ── choreography (26s loop, shared fade at 92%) ─────────────────── */
+  .tl:not(.caret-line),
+  .mock-card {
+    opacity: 0;
+    animation-duration: 26s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+  }
+
+  /* act 1 — vibe */
+  .c1  { animation-name: in2; }
+  .l1  { animation-name: in4; }
+  .l2  { animation-name: in9; }
+  /* act 2 — then fastagent */
+  .c2  { animation-name: in14; }
+  .l3  { animation-name: in16; }
+  .l4  { animation-name: in19; }
+  .l5  { animation-name: in21; }
+  /* turns */
+  .l6  { animation-name: in27; }
+  .l7  { animation-name: in33; }
+  .l8  { animation-name: in44; }
+  .l9  { animation-name: in49; }
+  .l10 { animation-name: in60; }
+  .l11 { animation-name: in65; }
+  /* act 3 — ships anywhere */
+  .c3  { animation-name: in71; }
+  .l12 { animation-name: in73; }
+  .l13 { animation-name: in79; }
+  .mock-gh { animation-name: pop35; }
+  .mock-tg { animation-name: pop51; }
+
+  @keyframes in2  { 0%, 2%  { opacity: 0 } 3.5%  { opacity: 1 } 92% { opacity: 1 } 96%, 100% { opacity: 0 } }
+  @keyframes in4  { 0%, 4%  { opacity: 0 } 5.5%  { opacity: 1 } 92% { opacity: 1 } 96%, 100% { opacity: 0 } }
+  @keyframes in9  { 0%, 9%  { opacity: 0 } 10.5% { opacity: 1 } 92% { opacity: 1 } 96%, 100% { opacity: 0 } }
+  @keyframes in14 { 0%, 14% { opacity: 0 } 15.5% { opacity: 1 } 92% { opacity: 1 } 96%, 100% { opacity: 0 } }
+  @keyframes in16 { 0%, 16% { opacity: 0 } 17.5% { opacity: 1 } 92% { opacity: 1 } 96%, 100% { opacity: 0 } }
+  @keyframes in19 { 0%, 19% { opacity: 0 } 20.5% { opacity: 1 } 92% { opacity: 1 } 96%, 100% { opacity: 0 } }
+  @keyframes in21 { 0%, 21% { opacity: 0 } 22.5% { opacity: 1 } 92% { opacity: 1 } 96%, 100% { opacity: 0 } }
+  @keyframes in27 { 0%, 27% { opacity: 0 } 28.5% { opacity: 1 } 92% { opacity: 1 } 96%, 100% { opacity: 0 } }
+  @keyframes in33 { 0%, 33% { opacity: 0 } 34.5% { opacity: 1 } 92% { opacity: 1 } 96%, 100% { opacity: 0 } }
+  @keyframes in44 { 0%, 44% { opacity: 0 } 45.5% { opacity: 1 } 92% { opacity: 1 } 96%, 100% { opacity: 0 } }
+  @keyframes in49 { 0%, 49% { opacity: 0 } 50.5% { opacity: 1 } 92% { opacity: 1 } 96%, 100% { opacity: 0 } }
+  @keyframes in60 { 0%, 60% { opacity: 0 } 61.5% { opacity: 1 } 92% { opacity: 1 } 96%, 100% { opacity: 0 } }
+  @keyframes in65 { 0%, 65% { opacity: 0 } 66.5% { opacity: 1 } 92% { opacity: 1 } 96%, 100% { opacity: 0 } }
+  @keyframes in71 { 0%, 71% { opacity: 0 } 72.5% { opacity: 1 } 92% { opacity: 1 } 96%, 100% { opacity: 0 } }
+  @keyframes in73 { 0%, 73% { opacity: 0 } 74.5% { opacity: 1 } 92% { opacity: 1 } 96%, 100% { opacity: 0 } }
+  @keyframes in79 { 0%, 79% { opacity: 0 } 80.5% { opacity: 1 } 92% { opacity: 1 } 96%, 100% { opacity: 0 } }
+
+  @keyframes pop35 {
+    0%, 35%   { opacity: 0; transform: translateY(10px) }
+    37.5%     { opacity: 1; transform: translateY(0) }
+    92%       { opacity: 1; transform: translateY(0) }
+    96%, 100% { opacity: 0; transform: translateY(0) }
+  }
+
+  @keyframes pop51 {
+    0%, 51%   { opacity: 0; transform: translateY(10px) }
+    53.5%     { opacity: 1; transform: translateY(0) }
+    92%       { opacity: 1; transform: translateY(0) }
+    96%, 100% { opacity: 0; transform: translateY(0) }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tl,
+    .mock-card,
+    .caret {
+      opacity: 1 !important;
+      animation: none !important;
+      transform: none !important;
+    }
+  }
+
+  @media (max-width: 60rem) {
+    .mock-gh { right: 0.5rem; }
+    .mock-tg { left: 0.5rem; }
+  }
+</style>

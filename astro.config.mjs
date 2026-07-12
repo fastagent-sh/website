@@ -7,7 +7,7 @@ import starlightLlmsTxt from "starlight-llms-txt";
 
 const site = "https://fastagent.sh";
 const description =
-  "Turn an existing agent directory into a live service in your app, on GitHub, in Telegram, or behind any channel — without rewriting it.";
+  "An agent is just a directory — FastAgent serves it as a live service on GitHub, Telegram, Slack, or your own channel. No rewrite, no new format, no platform.";
 
 export default defineConfig({
   site,
@@ -16,7 +16,7 @@ export default defineConfig({
     starlight({
       title: "FastAgent",
       description,
-      favicon: "/logo-mark.png",
+      favicon: "/favicon.png",
       logo: {
         light: "./src/assets/logo-light.png",
         dark: "./src/assets/logo.png",
@@ -24,6 +24,8 @@ export default defineConfig({
       },
       customCss: ["./src/styles/custom.css"],
       head: [
+        { tag: "link", attrs: { rel: "preload", href: "/fonts/plex-mono-400.woff2", as: "font", type: "font/woff2", crossorigin: "anonymous" } },
+        { tag: "link", attrs: { rel: "preload", href: "/fonts/plex-mono-600.woff2", as: "font", type: "font/woff2", crossorigin: "anonymous" } },
         { tag: "meta", attrs: { property: "og:image", content: `${site}/social-preview.png` } },
         { tag: "meta", attrs: { property: "og:image:alt", content: "FastAgent — Vibe first. Then FastAgent." } },
         { tag: "meta", attrs: { name: "twitter:card", content: "summary_large_image" } },
