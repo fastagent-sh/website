@@ -1,5 +1,7 @@
 ---
+import { Code } from "astro:components";
 import BrandIcon from "../components/BrandIcon.astro";
+import { fastagentCode } from "../code-theme";
 import CopyPrompt, { DEFAULT_PROMPT } from "../components/CopyPrompt.astro";
 import HeroMock from "../components/HeroMock.astro";
 import Site from "../layouts/Site.astro";
@@ -119,137 +121,137 @@ const embedFrameworks = [
     id: "code",
     label: "Your code",
     icon: "typescript",
-    html: `<span class="tdim">// anywhere in your codebase — a job, a queue consumer, a test</span>
-<span class="tkw">import</span> { collect } <span class="tkw">from</span> <span class="tstr">"@fastagent-sh/fastagent"</span>;
+    code: `// anywhere in your codebase — a job, a queue consumer, a test
+import { collect } from "@fastagent-sh/fastagent";
 
-<span class="tkw">const</span> { text } = <span class="tkw">await</span> <span class="ct-fn">collect</span>(
-  agent.<span class="ct-fn">invoke</span>({ session: <span class="tstr">"job-42"</span> }, { text: <span class="tstr">"summarize today's failures"</span> })
+const { text } = await collect(
+  agent.invoke({ session: "job-42" }, { text: "summarize today's failures" })
 );`,
   },
   {
     id: "next",
     label: "Next",
     icon: "nextdotjs",
-    html: `<span class="tdim">// app/api/invoke/route.ts</span>
-<span class="tkw">import</span> { createInvokeHandler, createPiAgentFromDefinition } <span class="tkw">from</span> <span class="tstr">"@fastagent-sh/fastagent"</span>;
+    code: `// app/api/invoke/route.ts
+import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
 
-<span class="tkw">const</span> { agent } = <span class="tkw">await</span> <span class="ct-fn">createPiAgentFromDefinition</span>(<span class="tstr">"./agent"</span>, {
-  model: <span class="tstr">"openai-codex/gpt-5.5"</span>,
+const { agent } = await createPiAgentFromDefinition("./agent", {
+  model: "openai-codex/gpt-5.5",
 });
 
-<span class="tkw">export const</span> POST = <span class="ct-fn">createInvokeHandler</span>(agent);
-<span class="tkw">export const</span> runtime = <span class="tstr">"nodejs"</span>;`,
+export const POST = createInvokeHandler(agent);
+export const runtime = "nodejs";`,
   },
   {
     id: "hono",
     label: "Hono",
     icon: "hono",
-    html: `<span class="tdim">// app.ts</span>
-<span class="tkw">import</span> { Hono } <span class="tkw">from</span> <span class="tstr">"hono"</span>;
-<span class="tkw">import</span> { createInvokeHandler, createPiAgentFromDefinition } <span class="tkw">from</span> <span class="tstr">"@fastagent-sh/fastagent"</span>;
+    code: `// app.ts
+import { Hono } from "hono";
+import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
 
-<span class="tkw">const</span> { agent } = <span class="tkw">await</span> <span class="ct-fn">createPiAgentFromDefinition</span>(<span class="tstr">"./agent"</span>, {
-  model: <span class="tstr">"anthropic/claude-sonnet-4"</span>,
+const { agent } = await createPiAgentFromDefinition("./agent", {
+  model: "anthropic/claude-sonnet-4",
 });
 
-<span class="tkw">const</span> app = <span class="tkw">new</span> <span class="tty">Hono</span>();
-app.<span class="ct-fn">post</span>(<span class="tstr">"/invoke"</span>, <span class="ct-fn">createInvokeHandler</span>(agent));
+const app = new Hono();
+app.post("/invoke", createInvokeHandler(agent));
 
-<span class="tkw">export default</span> app;`,
+export default app;`,
   },
   {
     id: "express",
     label: "Express",
     icon: "express",
-    html: `<span class="tdim">// app.ts</span>
-<span class="tkw">import</span> express <span class="tkw">from</span> <span class="tstr">"express"</span>;
-<span class="tkw">import</span> { createInvokeHandler, createPiAgentFromDefinition, nodeListener } <span class="tkw">from</span> <span class="tstr">"@fastagent-sh/fastagent"</span>;
+    code: `// app.ts
+import express from "express";
+import { createInvokeHandler, createPiAgentFromDefinition, nodeListener } from "@fastagent-sh/fastagent";
 
-<span class="tkw">const</span> { agent } = <span class="tkw">await</span> <span class="ct-fn">createPiAgentFromDefinition</span>(<span class="tstr">"./agent"</span>, {
-  model: <span class="tstr">"anthropic/claude-sonnet-4"</span>,
+const { agent } = await createPiAgentFromDefinition("./agent", {
+  model: "anthropic/claude-sonnet-4",
 });
 
-<span class="tkw">const</span> app = <span class="ct-fn">express</span>();
-app.<span class="ct-fn">post</span>(<span class="tstr">"/invoke"</span>, <span class="ct-fn">nodeListener</span>(<span class="ct-fn">createInvokeHandler</span>(agent)));  <span class="tdim">// no body parser on this route</span>
-app.<span class="ct-fn">listen</span>(<span class="tg">8787</span>);`,
+const app = express();
+app.post("/invoke", nodeListener(createInvokeHandler(agent))); // no body parser on this route
+app.listen(8787);`,
   },
   {
     id: "astro",
     label: "Astro",
     icon: "astro",
-    html: `<span class="tdim">// src/pages/api/invoke.ts</span>
-<span class="tkw">import</span> { createInvokeHandler, createPiAgentFromDefinition } <span class="tkw">from</span> <span class="tstr">"@fastagent-sh/fastagent"</span>;
+    code: `// src/pages/api/invoke.ts
+import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
 
-<span class="tkw">const</span> { agent } = <span class="tkw">await</span> <span class="ct-fn">createPiAgentFromDefinition</span>(<span class="tstr">"./agent"</span>, {
-  model: <span class="tstr">"openai-codex/gpt-5.5"</span>,
+const { agent } = await createPiAgentFromDefinition("./agent", {
+  model: "openai-codex/gpt-5.5",
 });
 
-<span class="tkw">export const</span> POST = <span class="ct-fn">createInvokeHandler</span>(agent);`,
+export const POST = createInvokeHandler(agent);`,
   },
   {
     id: "nuxt",
     label: "Nuxt",
     icon: "nuxtdotjs",
-    html: `<span class="tdim">// server/api/invoke.post.ts</span>
-<span class="tkw">import</span> { createInvokeHandler, createPiAgentFromDefinition } <span class="tkw">from</span> <span class="tstr">"@fastagent-sh/fastagent"</span>;
+    code: `// server/api/invoke.post.ts
+import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
 
-<span class="tkw">const</span> { agent } = <span class="tkw">await</span> <span class="ct-fn">createPiAgentFromDefinition</span>(<span class="tstr">"./agent"</span>, {
-  model: <span class="tstr">"openai-codex/gpt-5.5"</span>,
+const { agent } = await createPiAgentFromDefinition("./agent", {
+  model: "openai-codex/gpt-5.5",
 });
-<span class="tkw">const</span> handler = <span class="ct-fn">createInvokeHandler</span>(agent);
+const handler = createInvokeHandler(agent);
 
-<span class="tkw">export default</span> <span class="ct-fn">defineEventHandler</span>((event) =&gt; <span class="ct-fn">handler</span>(<span class="ct-fn">toWebRequest</span>(event)));`,
+export default defineEventHandler((event) => handler(toWebRequest(event)));`,
   },
   {
     id: "svelte",
     label: "SvelteKit",
     icon: "svelte",
-    html: `<span class="tdim">// src/routes/invoke/+server.ts</span>
-<span class="tkw">import</span> { createInvokeHandler, createPiAgentFromDefinition } <span class="tkw">from</span> <span class="tstr">"@fastagent-sh/fastagent"</span>;
+    code: `// src/routes/invoke/+server.ts
+import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
 
-<span class="tkw">const</span> { agent } = <span class="tkw">await</span> <span class="ct-fn">createPiAgentFromDefinition</span>(<span class="tstr">"./agent"</span>, {
-  model: <span class="tstr">"anthropic/claude-sonnet-4"</span>,
+const { agent } = await createPiAgentFromDefinition("./agent", {
+  model: "anthropic/claude-sonnet-4",
 });
-<span class="tkw">const</span> handler = <span class="ct-fn">createInvokeHandler</span>(agent);
+const handler = createInvokeHandler(agent);
 
-<span class="tkw">export const</span> POST = ({ request }) =&gt; <span class="ct-fn">handler</span>(request);`,
+export const POST = ({ request }) => handler(request);`,
   },
   {
     id: "fastify",
     label: "Fastify",
     icon: "fastify",
-    html: `<span class="tdim">// server.ts — keep the body stream unread, hijack the reply</span>
-<span class="tkw">import</span> { createInvokeHandler, createPiAgentFromDefinition, nodeListener } <span class="tkw">from</span> <span class="tstr">"@fastagent-sh/fastagent"</span>;
+    code: `// server.ts — keep the body stream unread, hijack the reply
+import { createInvokeHandler, createPiAgentFromDefinition, nodeListener } from "@fastagent-sh/fastagent";
 
-<span class="tkw">const</span> { agent } = <span class="tkw">await</span> <span class="ct-fn">createPiAgentFromDefinition</span>(<span class="tstr">"./agent"</span>, {
-  model: <span class="tstr">"openai-codex/gpt-5.5"</span>,
+const { agent } = await createPiAgentFromDefinition("./agent", {
+  model: "openai-codex/gpt-5.5",
 });
-<span class="tkw">const</span> listener = <span class="ct-fn">nodeListener</span>(<span class="ct-fn">createInvokeHandler</span>(agent));
+const listener = nodeListener(createInvokeHandler(agent));
 
-app.<span class="ct-fn">register</span>(<span class="tkw">async</span> (scope) =&gt; {
-  scope.<span class="ct-fn">removeAllContentTypeParsers</span>();
-  scope.<span class="ct-fn">addContentTypeParser</span>(<span class="tstr">"*"</span>, (_req, payload, done) =&gt; <span class="ct-fn">done</span>(<span class="tg">null</span>, payload));
-  scope.<span class="ct-fn">post</span>(<span class="tstr">"/invoke"</span>, (req, reply) =&gt; { reply.<span class="ct-fn">hijack</span>(); <span class="ct-fn">listener</span>(req.raw, reply.raw); });
+app.register(async (scope) => {
+  scope.removeAllContentTypeParsers();
+  scope.addContentTypeParser("*", (_req, payload, done) => done(null, payload));
+  scope.post("/invoke", (req, reply) => { reply.hijack(); listener(req.raw, reply.raw); });
 });`,
   },
   {
     id: "bun",
     label: "Bun",
     icon: "bun",
-    html: `<span class="tdim">// server.ts</span>
-<span class="tkw">import</span> { createInvokeHandler, createPiAgentFromDefinition } <span class="tkw">from</span> <span class="tstr">"@fastagent-sh/fastagent"</span>;
+    code: `// server.ts
+import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
 
-<span class="tkw">const</span> { agent } = <span class="tkw">await</span> <span class="ct-fn">createPiAgentFromDefinition</span>(<span class="tstr">"./agent"</span>, {
-  model: <span class="tstr">"openai-codex/gpt-5.5"</span>,
+const { agent } = await createPiAgentFromDefinition("./agent", {
+  model: "openai-codex/gpt-5.5",
 });
 
-<span class="tkw">const</span> invoke = <span class="ct-fn">createInvokeHandler</span>(agent);
+const invoke = createInvokeHandler(agent);
 
-<span class="tty">Bun</span>.<span class="ct-fn">serve</span>({
-  port: <span class="tg">8787</span>,
-  <span class="ct-fn">fetch</span>(req) {
-    <span class="tkw">const</span> url = <span class="tkw">new</span> <span class="tty">URL</span>(req.url);
-    <span class="tkw">return</span> url.pathname === <span class="tstr">"/invoke"</span> ? <span class="ct-fn">invoke</span>(req) : <span class="tkw">new</span> <span class="tty">Response</span>(<span class="tstr">"ok"</span>);
+Bun.serve({
+  port: 8787,
+  fetch(req) {
+    const url = new URL(req.url);
+    return url.pathname === "/invoke" ? invoke(req) : new Response("ok");
   },
 });`,
   },
@@ -257,14 +259,14 @@ app.<span class="ct-fn">register</span>(<span class="tkw">async</span> (scope) =
     id: "node",
     label: "Node",
     icon: "nodedotjs",
-    html: `<span class="tdim">// server.ts</span>
-<span class="tkw">import</span> { createInvokeHandler, createPiAgentFromDefinition, router, serveNode } <span class="tkw">from</span> <span class="tstr">"@fastagent-sh/fastagent"</span>;
+    code: `// server.ts
+import { createInvokeHandler, createPiAgentFromDefinition, router, serveNode } from "@fastagent-sh/fastagent";
 
-<span class="tkw">const</span> { agent } = <span class="tkw">await</span> <span class="ct-fn">createPiAgentFromDefinition</span>(<span class="tstr">"./agent"</span>, {
-  model: <span class="tstr">"openai-codex/gpt-5.5"</span>,
+const { agent } = await createPiAgentFromDefinition("./agent", {
+  model: "openai-codex/gpt-5.5",
 });
 
-<span class="ct-fn">serveNode</span>(<span class="ct-fn">router</span>({ <span class="tstr">"POST /invoke"</span>: <span class="ct-fn">createInvokeHandler</span>(agent) }), { port: <span class="tg">8787</span> });`,
+serveNode(router({ "POST /invoke": createInvokeHandler(agent) }), { port: 8787 });`,
   },
 ];
 
@@ -325,7 +327,12 @@ const concepts = [
 
           <p class="hero-note">MIT · Node ≥ 22.19 / Bun · harness-neutral · no account, no telemetry</p>
           <script>
+            import { track } from "@plausible-analytics/tracker";
             import "../scripts/copy";
+            // Which embed target people reach for — prioritizes the "soon" integrations.
+            for (const input of document.querySelectorAll<HTMLInputElement>('input[name="fw"]')) {
+              input.addEventListener("change", () => track("embed-tab", { props: { framework: input.id.replace("fw-", "") } }));
+            }
           </script>
         </div>
 
@@ -542,16 +549,9 @@ const concepts = [
             ))}
           </div>
           {embedFrameworks.map((fw) => (
-            <pre class="tab-panel" data-panel={fw.id}><code set:html={fw.html} /></pre>
+            <Code code={fw.code} lang="ts" theme={fastagentCode} class="tab-panel" data-panel={fw.id} />
           ))}
         </div>
-        <script>
-          import { track } from "@plausible-analytics/tracker";
-          // Which embed target people reach for — prioritizes the "soon" integrations.
-          for (const input of document.querySelectorAll<HTMLInputElement>('input[name="fw"]')) {
-            input.addEventListener("change", () => track("embed-tab", { props: { framework: input.id.replace("fw-", "") } }));
-          }
-        </script>
 
         <ul class="keep-list" aria-label="What stays yours">
           <li>your auth</li>
