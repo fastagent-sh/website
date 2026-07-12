@@ -17,7 +17,7 @@ const search = [title, excerpt, ...tags].join(" ").toLowerCase();
       <time datetime={date.toISOString().slice(0, 10)}>{dateLabel}</time>
       {featured && <span class="post-featured">featured</span>}
     </header>
-    <h3>{title}</h3>
+    <h2>{title}</h2>
     <p>{excerpt}</p>
     <footer class="post-tags" aria-label="Tags">
       {tags.map((t) => (

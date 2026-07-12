@@ -9,18 +9,35 @@ const title = "FastAgent — Vibe first. Then FastAgent.";
 const description =
   "An agent is just a directory — FastAgent serves it as a live service on GitHub, Telegram, or any channel you compose. No rewrite, no new format, no platform.";
 const site = "https://fastagent.sh";
-const structuredData = {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "FastAgent",
-  applicationCategory: "DeveloperApplication",
-  operatingSystem: "Node.js, Bun",
-  description,
-  url: site,
-  softwareVersion: fastagent.version,
-  codeRepository: "https://github.com/fastagent-sh/fastagent",
-  license: "https://github.com/fastagent-sh/fastagent/blob/main/LICENSE",
-};
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "FastAgent",
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "Node.js, Bun",
+    description,
+    url: site,
+    softwareVersion: fastagent.version,
+    codeRepository: "https://github.com/fastagent-sh/fastagent",
+    license: "https://github.com/fastagent-sh/fastagent/blob/main/LICENSE",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "FastAgent",
+    url: site,
+    logo: `${site}/logo-mark.png`,
+    sameAs: ["https://github.com/fastagent-sh", "https://www.npmjs.com/package/@fastagent-sh/fastagent"],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "FastAgent",
+    url: site,
+  },
+];
 
 const npmInstall = "npm i -g @fastagent-sh/fastagent";
 const npmEmbed = "npm i @fastagent-sh/fastagent";
