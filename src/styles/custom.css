@@ -1521,8 +1521,15 @@ a.tag-link:hover {
   color: var(--accent);
 }
 
+/* The article reads as a centered column; the shell stays wide for related posts. */
+.post-head,
+.post-body {
+  max-width: 46rem;
+  margin-inline: auto;
+}
+
 .post-head h1 {
-  max-width: 22ch;
+  max-width: none;
 }
 
 .post-head .post-tags {
@@ -1530,7 +1537,6 @@ a.tag-link:hover {
 }
 
 .post-body {
-  max-width: 46rem;
   margin-top: 2.5rem;
   color: var(--text-soft);
   font-size: 1.02rem;
@@ -1588,6 +1594,16 @@ a.tag-link:hover {
   padding: 0;
   color: inherit;
   font: inherit;
+}
+
+/* Starlight configures shiki with dual themes; its var-flipping CSS only loads
+   on docs pages. Blog pages are always dark, so take the dark palette here. */
+.post-body pre span {
+  color: var(--shiki-dark, inherit) !important;
+}
+
+.post-body pre {
+  color: var(--term-text);
 }
 
 .post-related {
