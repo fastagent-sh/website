@@ -41,6 +41,9 @@ const canonical = `${site}${path}`;
     <meta property="og:image:alt" content="FastAgent — Vibe first. Then FastAgent." />
     <meta name="twitter:card" content="summary_large_image" />
     <title>{title}</title>
+    <script>
+      import "../scripts/plausible";
+    </script>
     <slot name="head" />
   </head>
   <body class="site">

@@ -1,0 +1,9 @@
+---
+/* Starlight Head override: stock head + Plausible (bundled from npm). */
+import Default from "@astrojs/starlight/components/Head.astro";
+---
+
+<Default {...Astro.props}><slot /></Default>
+<script>
+  import "../scripts/plausible";
+</script>
