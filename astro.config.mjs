@@ -1,7 +1,6 @@
 // @ts-check
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
-import starlightBlog from "starlight-blog";
 import starlightLinksValidator from "starlight-links-validator";
 import starlightLlmsTxt from "starlight-llms-txt";
 
@@ -32,12 +31,6 @@ export default defineConfig({
         { tag: "link", attrs: { rel: "alternate", type: "application/rss+xml", href: `${site}/blog/rss.xml`, title: "FastAgent Blog" } },
       ],
       plugins: [
-        starlightBlog({
-          title: "FastAgent Blog",
-          authors: {
-            fastagent: { name: "The FastAgent team", url: "https://github.com/fastagent-sh" },
-          },
-        }),
         starlightLlmsTxt({
           projectName: "FastAgent",
           description,
@@ -51,8 +44,8 @@ export default defineConfig({
             { label: "Core documentation", paths: ["docs", "docs/**"], description: "FastAgent guides and reference documentation." },
           ],
           promote: ["docs", "docs/quickstart", "docs/ai-start", "docs/configuration", "docs/overview"],
-          demote: ["blog/**", "docs/design/**"],
-          exclude: ["blog/**", "docs/design/**"],
+          demote: ["docs/design/**"],
+          exclude: ["docs/design/**"],
           rawContent: true,
         }),
         starlightLinksValidator(),

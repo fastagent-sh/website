@@ -85,10 +85,19 @@
   --sl-font-mono: var(--mono);
 }
 
+/* Dark docs/blog match the landing palette exactly — one brand, two renderers. */
 :root[data-theme="dark"] {
   --sl-color-accent-low: #0b3733;
   --sl-color-accent: #2dd4bf;
   --sl-color-accent-high: #b8f0e7;
+  --sl-color-white: #e4eae6;
+  --sl-color-gray-1: #c3ccc7;
+  --sl-color-gray-2: #8d9992;
+  --sl-color-gray-3: #6b7770;
+  --sl-color-gray-4: #2c3630;
+  --sl-color-gray-5: #1e2522;
+  --sl-color-gray-6: #101413;
+  --sl-color-black: #0a0c0b;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -96,6 +105,14 @@
     --sl-color-accent-low: #0b3733;
     --sl-color-accent: #2dd4bf;
     --sl-color-accent-high: #b8f0e7;
+    --sl-color-white: #e4eae6;
+    --sl-color-gray-1: #c3ccc7;
+    --sl-color-gray-2: #8d9992;
+    --sl-color-gray-3: #6b7770;
+    --sl-color-gray-4: #2c3630;
+    --sl-color-gray-5: #1e2522;
+    --sl-color-gray-6: #101413;
+    --sl-color-black: #0a0c0b;
   }
 }
 
@@ -111,7 +128,7 @@ html {
    Landing base
    ──────────────────────────────────────────────────────────────────────── */
 
-body.landing {
+body.site {
   color-scheme: dark;
   overflow-x: hidden;
   margin: 0;
@@ -124,27 +141,27 @@ body.landing {
   -webkit-font-smoothing: antialiased;
 }
 
-.landing ::selection {
+.site ::selection {
   background: var(--accent);
   color: var(--accent-ink);
 }
 
-.landing a {
+.site a {
   color: inherit;
   text-decoration: none;
 }
 
-.landing a:hover {
+.site a:hover {
   color: var(--accent);
 }
 
-.landing :focus-visible {
+.site :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: var(--radius-sm);
 }
 
-.landing code {
+.site code {
   font: 0.88em/1.5 var(--mono);
   color: var(--text-soft);
   background: color-mix(in srgb, var(--accent) 8%, transparent);
@@ -323,13 +340,13 @@ body.landing {
   font: 400 0.8rem/1.5 var(--mono);
 }
 
-.landing h1 {
+.site h1 {
   margin: 0;
   font: 600 clamp(2.1rem, 4.6vw, 3.4rem)/1.12 var(--mono);
   letter-spacing: -0.045em;
 }
 
-.landing h1 em {
+.site h1 em {
   font: italic 600 1.05em var(--serif);
   letter-spacing: -0.01em;
   color: var(--accent);
@@ -487,7 +504,7 @@ body.landing {
   white-space: nowrap;
 }
 
-.landing .install-card code {
+.site .install-card code {
   flex: 1;
   min-width: 0;
   background: none;
@@ -631,13 +648,13 @@ body.landing {
   font: 400 0.78rem/1 var(--mono);
 }
 
-.landing h2 {
+.site h2 {
   margin: 0;
   font: 600 clamp(1.5rem, 3vw, 2.2rem)/1.25 var(--mono);
   letter-spacing: -0.035em;
 }
 
-.landing h2 em {
+.site h2 em {
   font: italic 600 1.08em var(--serif);
   letter-spacing: -0.01em;
   color: var(--accent);
@@ -1362,6 +1379,226 @@ body.landing {
 }
 
 /* ────────────────────────────────────────────────────────────────────────
+   Blog — list, tags, search, article
+   ──────────────────────────────────────────────────────────────────────── */
+
+.blog-index .section-head {
+  margin-bottom: 2rem;
+}
+
+.blog-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.blog-search {
+  min-width: 16rem;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  color: var(--text);
+  font: 400 0.88rem/1 var(--mono);
+}
+
+.blog-search::placeholder {
+  color: var(--muted-2);
+}
+
+.blog-search:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.blog-tags,
+.post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0;
+}
+
+.post-tag {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  color: var(--muted);
+  font: 400 0.72rem/1 var(--mono);
+  white-space: nowrap;
+}
+
+a.tag-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tag-count {
+  color: var(--muted-2);
+}
+
+.post-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+  gap: 1rem;
+}
+
+.post-card a {
+  display: grid;
+  gap: 0.6rem;
+  height: 100%;
+  padding: 1.3rem 1.4rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.post-card a:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  color: inherit;
+}
+
+.post-card .post-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--muted-2);
+  font: 400 0.72rem/1 var(--mono);
+}
+
+.post-featured {
+  padding: 0.14rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.post-card h3 {
+  margin: 0;
+  font: 600 1.1rem/1.35 var(--mono);
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.post-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.blog-empty {
+  color: var(--muted);
+  font: 400 0.9rem/1.5 var(--mono);
+}
+
+/* article */
+.post {
+  padding-bottom: 2rem;
+}
+
+.post-head .post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0 0 1.1rem;
+  color: var(--muted-2);
+  font: 400 0.78rem/1 var(--mono);
+}
+
+.post-back {
+  color: var(--muted);
+}
+
+.post-back:hover {
+  color: var(--accent);
+}
+
+.post-head h1 {
+  max-width: 22ch;
+}
+
+.post-head .post-tags {
+  margin-top: 1.25rem;
+}
+
+.post-body {
+  max-width: 46rem;
+  margin-top: 2.5rem;
+  color: var(--text-soft);
+  font-size: 1.02rem;
+  line-height: 1.75;
+}
+
+.post-body h2,
+.post-body h3 {
+  margin: 2.4rem 0 0.9rem;
+  color: var(--text);
+  font-family: var(--mono);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.post-body h2 { font-size: 1.4rem; }
+.post-body h3 { font-size: 1.1rem; }
+
+.post-body p { margin: 1rem 0; }
+
+.post-body a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.post-body ul,
+.post-body ol {
+  margin: 1rem 0;
+  padding-left: 1.4rem;
+}
+
+.post-body li { margin: 0.35rem 0; }
+
+.post-body blockquote {
+  margin: 1.25rem 0;
+  padding-left: 1rem;
+  border-left: 3px solid var(--accent);
+  color: var(--muted);
+}
+
+.post-body pre {
+  margin: 1.4rem 0;
+  padding: 1.2rem 1.4rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--term-bg) !important; /* wins over shiki's inline theme bg */
+  font: 400 0.85rem/1.75 var(--mono);
+  overflow-x: auto;
+}
+
+.post-body pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+}
+
+.post-related {
+  border-top: 1px solid var(--line);
+}
+
+.post-related .section-index {
+  margin-bottom: 1.25rem;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
    Footer
    ──────────────────────────────────────────────────────────────────────── */
 
@@ -1491,6 +1728,14 @@ body.landing {
 
 .sl-markdown-content a:not(:where(.not-content *)) {
   text-underline-offset: 0.18em;
+}
+
+/* Headings echo the landing's mono voice across docs and blog. */
+.sl-markdown-content :is(h1, h2, h3, h4):not(:where(.not-content *)),
+.content-panel h1,
+.hero h1 {
+  font-family: var(--mono);
+  letter-spacing: -0.03em;
 }
 
 .site-title img {

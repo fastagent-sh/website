@@ -1,0 +1,37 @@
+---
+import { getCollection } from "astro:content";
+import PostCard from "../../../components/PostCard.astro";
+import Site from "../../../layouts/Site.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  const tags = new Set(posts.flatMap((p) => p.data.tags));
+  return [...tags].map((tag) => ({
+    params: { tag },
+    props: { posts: posts.filter((p) => p.data.tags.includes(tag)).sort((a, b) => +b.data.date - +a.data.date) },
+  }));
+}
+
+const { tag } = Astro.params;
+const { posts } = Astro.props;
+---
+
+<Site
+  title={`# ${tag} — FastAgent Blog`}
+  description={`FastAgent blog posts tagged ${tag}.`}
+  path={`/blog/tags/${tag}/`}
+>
+  <section class="section shell blog-index">
+    <header class="section-head">
+      <span class="section-index"><a class="post-back" href="/blog/"><span class="hash">#</span> blog</a> · {tag}</span>
+      <h1>Tagged <em># {tag}</em>.</h1>
+      <p class="section-lede">{posts.length} {posts.length === 1 ? "post" : "posts"} · <a class="text-link" href="/blog/">all posts →</a></p>
+    </header>
+
+    <div class="post-grid">
+      {posts.map((post) => (
+        <PostCard post={post} />
+      ))}
+    </div>
+  </section>
+</Site>

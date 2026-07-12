@@ -1,0 +1,60 @@
+---
+import { getCollection, render } from "astro:content";
+import PostCard from "../../components/PostCard.astro";
+import Site from "../../layouts/Site.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const { title, date, excerpt, tags } = post.data;
+const dateLabel = date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+
+/* Related posts: rank by shared tags, fall back to recency. */
+const all = await getCollection("blog");
+const related = all
+  .filter((p) => p.id !== post.id)
+  .map((p) => ({ p, score: p.data.tags.filter((t) => tags.includes(t)).length }))
+  .sort((a, b) => b.score - a.score || +b.p.data.date - +a.p.data.date)
+  .slice(0, 3)
+  .map(({ p }) => p);
+---
+
+<Site title={`${title} — FastAgent Blog`} description={excerpt} path={`/blog/${post.id}/`} ogType="article">
+  <article class="section shell post">
+    <header class="post-head">
+      <p class="post-meta">
+        <a class="post-back" href="/blog/"># blog</a>
+        <span aria-hidden="true">·</span>
+        <time datetime={date.toISOString().slice(0, 10)}>{dateLabel}</time>
+        <span aria-hidden="true">·</span>
+        <span>The FastAgent team</span>
+      </p>
+      <h1>{title}</h1>
+      <p class="section-lede">{excerpt}</p>
+      <p class="post-tags">
+        {tags.map((t) => (
+          <a class="post-tag tag-link" href={`/blog/tags/${t}/`}># {t}</a>
+        ))}
+      </p>
+    </header>
+
+    <div class="post-body">
+      <Content />
+    </div>
+  </article>
+
+  {related.length > 0 && (
+    <section class="section shell post-related" aria-label="Related posts">
+      <span class="section-index"><span class="hash">#</span> keep reading</span>
+      <div class="post-grid">
+        {related.map((p) => (
+          <PostCard post={p} />
+        ))}
+      </div>
+    </section>
+  )}
+</Site>
