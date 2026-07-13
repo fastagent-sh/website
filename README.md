@@ -29,3 +29,5 @@ npm run build
 ## Deployment
 
 The static Astro build in `dist/` deploys through Cloudflare Workers Static Assets. Production is `https://fastagent.sh`.
+
+CI deploys automatically on every push to `main` (the `deploy` job in `.github/workflows/ci.yml`, authenticated by the `CLOUDFLARE_API_TOKEN` repo secret). `npm run deploy` remains as the manual break-glass path.

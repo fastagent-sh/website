@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "fastagent-website",
+  "account_id": "9c7d4b22af3debd563ada97107628993",
   "compatibility_date": "2026-07-10",
   "workers_dev": true,
   "preview_urls": true,
