@@ -1,5 +1,5 @@
 import { getCollection } from "astro:content";
-import { SITE as site } from "../../site";
+import { BLOG_DESCRIPTION, SITE as site } from "../../site";
 
 const escape = (s: string) =>
   s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
@@ -25,7 +25,7 @@ ${p.data.tags.map((t) => `      <category>${escape(t)}</category>`).join("\n")}
   <channel>
     <title>FastAgent Blog</title>
     <link>${site}/blog/</link>
-    <description>Releases, design writeups, and what's shipping next — from the FastAgent team.</description>
+    <description>${escape(BLOG_DESCRIPTION)}</description>
     <language>en</language>
     <atom:link href="${site}/blog/rss.xml" rel="self" type="application/rss+xml"/>
 ${items}

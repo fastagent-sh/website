@@ -2,11 +2,11 @@
 import { Code } from "astro:components";
 import BrandIcon from "../components/BrandIcon.astro";
 import { fastagentCode } from "../code-theme";
-import CopyPrompt, { DEFAULT_PROMPT } from "../components/CopyPrompt.astro";
+import CopyPrompt from "../components/CopyPrompt.astro";
 import HeroMock from "../components/HeroMock.astro";
 import Site from "../layouts/Site.astro";
 import fastagent from "../generated/fastagent.json";
-import { DESCRIPTION as description, SITE as site } from "../site";
+import { DEFAULT_PROMPT, DESCRIPTION as description, SITE as site } from "../site";
 
 const title = "FastAgent — Ship your AI agent as a live service";
 const structuredData = [
@@ -42,6 +42,171 @@ const structuredData = [
 const npmInstall = "npm i -g @fastagent-sh/fastagent";
 const npmEmbed = "npm i @fastagent-sh/fastagent";
 
+/* One list drives both the section-04 tabs and the ecosystem strip's
+   "embed in" group ("Your code" appears only as a tab). */
+const embedFrameworks = [
+  {
+    id: "code",
+    label: "Your code",
+    icon: "typescript",
+    code: `// anywhere in your codebase — a job, a queue consumer, a test
+import { collect } from "@fastagent-sh/fastagent";
+
+const { text } = await collect(
+  agent.invoke({ session: "job-42" }, { text: "summarize today's failures" })
+);`,
+  },
+  {
+    id: "next",
+    label: "Next.js",
+    icon: "nextdotjs",
+    color: "#ffffff",
+    code: `// app/api/invoke/route.ts
+import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
+
+const { agent } = await createPiAgentFromDefinition("./agent", {
+  model: "openai-codex/gpt-5.5",
+});
+
+export const POST = createInvokeHandler(agent);
+export const runtime = "nodejs";`,
+  },
+  {
+    id: "hono",
+    label: "Hono",
+    icon: "hono",
+    color: "#e36002",
+    code: `// app.ts
+import { Hono } from "hono";
+import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
+
+const { agent } = await createPiAgentFromDefinition("./agent", {
+  model: "anthropic/claude-sonnet-4",
+});
+
+const app = new Hono();
+app.post("/invoke", createInvokeHandler(agent));
+
+export default app;`,
+  },
+  {
+    id: "express",
+    label: "Express",
+    icon: "express",
+    color: "#ffffff",
+    code: `// app.ts
+import express from "express";
+import { createInvokeHandler, createPiAgentFromDefinition, nodeListener } from "@fastagent-sh/fastagent";
+
+const { agent } = await createPiAgentFromDefinition("./agent", {
+  model: "anthropic/claude-sonnet-4",
+});
+
+const app = express();
+app.post("/invoke", nodeListener(createInvokeHandler(agent))); // no body parser on this route
+app.listen(8787);`,
+  },
+  {
+    id: "astro",
+    label: "Astro",
+    icon: "astro",
+    color: "#bc52ee",
+    code: `// src/pages/api/invoke.ts
+import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
+
+const { agent } = await createPiAgentFromDefinition("./agent", {
+  model: "openai-codex/gpt-5.5",
+});
+
+export const POST = createInvokeHandler(agent);`,
+  },
+  {
+    id: "nuxt",
+    label: "Nuxt",
+    icon: "nuxtdotjs",
+    color: "#00dc82",
+    code: `// server/api/invoke.post.ts
+import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
+
+const { agent } = await createPiAgentFromDefinition("./agent", {
+  model: "openai-codex/gpt-5.5",
+});
+const handler = createInvokeHandler(agent);
+
+export default defineEventHandler((event) => handler(toWebRequest(event)));`,
+  },
+  {
+    id: "svelte",
+    label: "SvelteKit",
+    icon: "svelte",
+    color: "#ff3e00",
+    code: `// src/routes/invoke/+server.ts
+import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
+
+const { agent } = await createPiAgentFromDefinition("./agent", {
+  model: "anthropic/claude-sonnet-4",
+});
+const handler = createInvokeHandler(agent);
+
+export const POST = ({ request }) => handler(request);`,
+  },
+  {
+    id: "fastify",
+    label: "Fastify",
+    icon: "fastify",
+    color: "#ffffff",
+    code: `// server.ts — keep the body stream unread, hijack the reply
+import { createInvokeHandler, createPiAgentFromDefinition, nodeListener } from "@fastagent-sh/fastagent";
+
+const { agent } = await createPiAgentFromDefinition("./agent", {
+  model: "openai-codex/gpt-5.5",
+});
+const listener = nodeListener(createInvokeHandler(agent));
+
+app.register(async (scope) => {
+  scope.removeAllContentTypeParsers();
+  scope.addContentTypeParser("*", (_req, payload, done) => done(null, payload));
+  scope.post("/invoke", (req, reply) => { reply.hijack(); listener(req.raw, reply.raw); });
+});`,
+  },
+  {
+    id: "bun",
+    label: "Bun",
+    icon: "bun",
+    color: "#fbf0df",
+    code: `// server.ts
+import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
+
+const { agent } = await createPiAgentFromDefinition("./agent", {
+  model: "openai-codex/gpt-5.5",
+});
+
+const invoke = createInvokeHandler(agent);
+
+Bun.serve({
+  port: 8787,
+  fetch(req) {
+    const url = new URL(req.url);
+    return url.pathname === "/invoke" ? invoke(req) : new Response("ok");
+  },
+});`,
+  },
+  {
+    id: "node",
+    label: "Node",
+    icon: "nodedotjs",
+    color: "#5fa04e",
+    code: `// server.ts
+import { createInvokeHandler, createPiAgentFromDefinition, router, serveNode } from "@fastagent-sh/fastagent";
+
+const { agent } = await createPiAgentFromDefinition("./agent", {
+  model: "openai-codex/gpt-5.5",
+});
+
+serveNode(router({ "POST /invoke": createInvokeHandler(agent) }), { port: 8787 });`,
+  },
+];
+
 const ecosystem = [
   {
     group: "channels",
@@ -70,17 +235,7 @@ const ecosystem = [
   },
   {
     group: "embed in",
-    items: [
-      { icon: "nextdotjs", label: "Next.js", color: "#ffffff" },
-      { icon: "hono", label: "Hono", color: "#e36002" },
-      { icon: "express", label: "Express", color: "#ffffff" },
-      { icon: "astro", label: "Astro", color: "#bc52ee" },
-      { icon: "nuxtdotjs", label: "Nuxt", color: "#00dc82" },
-      { icon: "svelte", label: "SvelteKit", color: "#ff3e00" },
-      { icon: "fastify", label: "Fastify", color: "#ffffff" },
-      { icon: "bun", label: "Bun", color: "#fbf0df" },
-      { icon: "nodedotjs", label: "Node", color: "#5fa04e" },
-    ],
+    items: embedFrameworks.filter((f) => f.id !== "code").map(({ icon, label, color }) => ({ icon, label, color, soon: undefined })),
   },
   {
     group: "deploy to",
@@ -116,159 +271,7 @@ const ecosystem = [
 /* Section 06 renders the same deploy list — single source of truth. */
 const deployTargets = ecosystem.find((g) => g.group === "deploy to")!.items;
 
-const embedFrameworks = [
-  {
-    id: "code",
-    label: "Your code",
-    icon: "typescript",
-    code: `// anywhere in your codebase — a job, a queue consumer, a test
-import { collect } from "@fastagent-sh/fastagent";
 
-const { text } = await collect(
-  agent.invoke({ session: "job-42" }, { text: "summarize today's failures" })
-);`,
-  },
-  {
-    id: "next",
-    label: "Next",
-    icon: "nextdotjs",
-    code: `// app/api/invoke/route.ts
-import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
-
-const { agent } = await createPiAgentFromDefinition("./agent", {
-  model: "openai-codex/gpt-5.5",
-});
-
-export const POST = createInvokeHandler(agent);
-export const runtime = "nodejs";`,
-  },
-  {
-    id: "hono",
-    label: "Hono",
-    icon: "hono",
-    code: `// app.ts
-import { Hono } from "hono";
-import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
-
-const { agent } = await createPiAgentFromDefinition("./agent", {
-  model: "anthropic/claude-sonnet-4",
-});
-
-const app = new Hono();
-app.post("/invoke", createInvokeHandler(agent));
-
-export default app;`,
-  },
-  {
-    id: "express",
-    label: "Express",
-    icon: "express",
-    code: `// app.ts
-import express from "express";
-import { createInvokeHandler, createPiAgentFromDefinition, nodeListener } from "@fastagent-sh/fastagent";
-
-const { agent } = await createPiAgentFromDefinition("./agent", {
-  model: "anthropic/claude-sonnet-4",
-});
-
-const app = express();
-app.post("/invoke", nodeListener(createInvokeHandler(agent))); // no body parser on this route
-app.listen(8787);`,
-  },
-  {
-    id: "astro",
-    label: "Astro",
-    icon: "astro",
-    code: `// src/pages/api/invoke.ts
-import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
-
-const { agent } = await createPiAgentFromDefinition("./agent", {
-  model: "openai-codex/gpt-5.5",
-});
-
-export const POST = createInvokeHandler(agent);`,
-  },
-  {
-    id: "nuxt",
-    label: "Nuxt",
-    icon: "nuxtdotjs",
-    code: `// server/api/invoke.post.ts
-import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
-
-const { agent } = await createPiAgentFromDefinition("./agent", {
-  model: "openai-codex/gpt-5.5",
-});
-const handler = createInvokeHandler(agent);
-
-export default defineEventHandler((event) => handler(toWebRequest(event)));`,
-  },
-  {
-    id: "svelte",
-    label: "SvelteKit",
-    icon: "svelte",
-    code: `// src/routes/invoke/+server.ts
-import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
-
-const { agent } = await createPiAgentFromDefinition("./agent", {
-  model: "anthropic/claude-sonnet-4",
-});
-const handler = createInvokeHandler(agent);
-
-export const POST = ({ request }) => handler(request);`,
-  },
-  {
-    id: "fastify",
-    label: "Fastify",
-    icon: "fastify",
-    code: `// server.ts — keep the body stream unread, hijack the reply
-import { createInvokeHandler, createPiAgentFromDefinition, nodeListener } from "@fastagent-sh/fastagent";
-
-const { agent } = await createPiAgentFromDefinition("./agent", {
-  model: "openai-codex/gpt-5.5",
-});
-const listener = nodeListener(createInvokeHandler(agent));
-
-app.register(async (scope) => {
-  scope.removeAllContentTypeParsers();
-  scope.addContentTypeParser("*", (_req, payload, done) => done(null, payload));
-  scope.post("/invoke", (req, reply) => { reply.hijack(); listener(req.raw, reply.raw); });
-});`,
-  },
-  {
-    id: "bun",
-    label: "Bun",
-    icon: "bun",
-    code: `// server.ts
-import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
-
-const { agent } = await createPiAgentFromDefinition("./agent", {
-  model: "openai-codex/gpt-5.5",
-});
-
-const invoke = createInvokeHandler(agent);
-
-Bun.serve({
-  port: 8787,
-  fetch(req) {
-    const url = new URL(req.url);
-    return url.pathname === "/invoke" ? invoke(req) : new Response("ok");
-  },
-});`,
-  },
-  {
-    id: "node",
-    label: "Node",
-    icon: "nodedotjs",
-    code: `// server.ts
-import { createInvokeHandler, createPiAgentFromDefinition, router, serveNode } from "@fastagent-sh/fastagent";
-
-const { agent } = await createPiAgentFromDefinition("./agent", {
-  model: "openai-codex/gpt-5.5",
-});
-
-serveNode(router({ "POST /invoke": createInvokeHandler(agent) }), { port: 8787 });`,
-  },
-];
 
 /* A curated five of the public concept set (docs/principles.md, “Concepts before
    features”) — Event and Session complete the set there. */
