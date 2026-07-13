@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import PostCard from "../../components/PostCard.astro";
 import Site from "../../layouts/Site.astro";
+import { BLOG_DESCRIPTION } from "../../site";
 
 const posts = (await getCollection("blog")).sort((a, b) => +b.data.date - +a.data.date);
 const tagCounts = new Map<string, number>();
@@ -11,18 +12,13 @@ for (const post of posts) {
 const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]);
 ---
 
-<Site
-  title="Blog — FastAgent"
-  description="Release notes, design writeups, and what's shipping next — from the FastAgent team."
-  path="/blog/"
->
+<Site title="Blog — FastAgent" description={BLOG_DESCRIPTION} path="/blog/">
   <section class="section shell blog-index">
     <header class="section-head">
       <span class="section-index"><span class="hash">#</span> blog</span>
       <h1>Shipping <em>notes</em>.</h1>
       <p class="section-lede">
-        Releases, design writeups, and what's coming next — from the FastAgent team.
-        Subscribe via <a class="text-link" href="/blog/rss.xml">RSS</a>.
+        {BLOG_DESCRIPTION} Subscribe via <a class="text-link" href="/blog/rss.xml">RSS</a>.
       </p>
     </header>
 

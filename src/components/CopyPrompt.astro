@@ -1,11 +1,11 @@
 ---
+import { DEFAULT_PROMPT } from "../site";
+
 interface Props {
   compact?: boolean;
   text?: string;
   label?: string;
 }
-
-export const DEFAULT_PROMPT = "Read https://fastagent.sh/start.md and build an agent in this project.";
 
 const { compact = false, text = DEFAULT_PROMPT, label = "Copy prompt" } = Astro.props;
 ---
