@@ -1723,3 +1723,73 @@ a.tag-link:hover {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ────────────────────────────────────────────────────────────────────────
+   Light mode — custom pages only (landing, blog). Docs are themed by
+   Starlight. The page shell flips via the page-level tokens below; the
+   terminal theater (hero mock, demo panes, term blocks, tabs, code) stays
+   dark by design — it reads from the pinned --term-* palette.
+   Selection: html[data-mode] is set pre-paint from the shared
+   "starlight-theme" localStorage key (docs and site follow each other),
+   falling back to prefers-color-scheme.
+   ──────────────────────────────────────────────────────────────────────── */
+html[data-mode="light"] {
+  color-scheme: light;
+
+  --bg: #f4f7f5;
+  --bg-elevated: #e8ede9;
+  --panel: #fcfdfc;
+  --line: #d8e0da;
+  --line-strong: #bccac2;
+  --text: #17211c;
+  --text-soft: #2f3d36;
+  --muted: #5a6961;
+  --muted-2: #78857d;
+
+  --accent: #0c8577;
+  --accent-dim: #0a6e63;
+  --green: #23713e;
+  --amber: #8a6a17;
+  --red: #bd3527;
+  --purple: #6a4ec2;
+  --blue: #1d5ec4;
+}
+
+/* Brand icons drawn white (or Bun's cream) for the dark strip would vanish
+   on the light shell; CSS fill wins over the presentation attribute. */
+html[data-mode="light"] :is(.eco-list, .host-chips) path[fill="#ffffff"] { fill: #28322c; }
+html[data-mode="light"] :is(.eco-list, .host-chips) path[fill="#fbf0df"] { fill: #7c6a45; }
+
+/* Wordmark swaps to the light asset; the near-white footer mark inverts. */
+.brand .logo-light { display: none; }
+html[data-mode="light"] .brand .logo-dark { display: none; }
+html[data-mode="light"] .brand .logo-light { display: block; }
+html[data-mode="light"] .footer-mark { filter: invert(1); }
+
+/* Theme toggle — lives in the header nav. Dark shows the sun (go light),
+   light shows the moon (go dark). */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.12s ease, border-color 0.12s ease;
+}
+
+.theme-toggle:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.theme-toggle .tt-moon { display: none; }
+html[data-mode="light"] .theme-toggle .tt-sun { display: none; }
+html[data-mode="light"] .theme-toggle .tt-moon { display: inline; }

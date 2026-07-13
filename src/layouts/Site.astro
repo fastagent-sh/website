@@ -25,6 +25,22 @@ const canonical = `${SITE}${path}`;
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#0a0c0b" />
+    <script is:inline>
+      /* Pre-paint theme pick — shares the "starlight-theme" key with the docs,
+         so toggling on either surface follows you to the other. */
+      document.documentElement.dataset.mode = (() => {
+        let stored = null;
+        try {
+          stored = localStorage.getItem("starlight-theme");
+        } catch {
+          /* storage blocked (private mode) — fall through to the system pick */
+        }
+        if (stored === "light" || stored === "dark") return stored;
+        return matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      })();
+      if (document.documentElement.dataset.mode === "light")
+        document.querySelector('meta[name="theme-color"]').setAttribute("content", "#f4f7f5");
+    </script>
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.png" />
     <link rel="alternate" type="application/rss+xml" title="FastAgent Blog" href="/blog/rss.xml" />
@@ -43,6 +59,17 @@ const canonical = `${SITE}${path}`;
     <title>{title}</title>
     <script>
       import "../scripts/plausible";
+
+      document.querySelector(".theme-toggle")?.addEventListener("click", () => {
+        const next = document.documentElement.dataset.mode === "light" ? "dark" : "light";
+        document.documentElement.dataset.mode = next;
+        document.querySelector('meta[name="theme-color"]')?.setAttribute("content", next === "light" ? "#f4f7f5" : "#0a0c0b");
+        try {
+          localStorage.setItem("starlight-theme", next);
+        } catch {
+          /* storage blocked — the toggle still works for this page view */
+        }
+      });
     </script>
     <slot name="head" />
   </head>
@@ -52,13 +79,18 @@ const canonical = `${SITE}${path}`;
     <header class="site-header">
       <nav class="shell nav" aria-label="Primary navigation">
         <a class="brand" href="/" aria-label="FastAgent home">
-          <img src="/logo.png" alt="FastAgent" width="940" height="312" />
+          <img class="logo-dark" src="/logo.png" alt="FastAgent" width="940" height="312" />
+          <img class="logo-light" src="/logo-light.png" alt="FastAgent" width="940" height="312" />
         </a>
         <a class="brand-version" href="https://github.com/fastagent-sh/fastagent/releases" title="Release notes">v{fastagent.version}</a>
         <div class="nav-links">
           <a href="/docs/">Docs</a>
           <a href="/blog/">Blog</a>
           <a href="/docs/spec/">SPEC</a>
+          <button class="theme-toggle" type="button" aria-label="Toggle light / dark theme">
+            <span class="tt-sun" aria-hidden="true">☀</span>
+            <span class="tt-moon" aria-hidden="true">☾</span>
+          </button>
           <a class="nav-cta" href="https://github.com/fastagent-sh/fastagent">
             <BrandIcon name="github" size={13} />
             GitHub
