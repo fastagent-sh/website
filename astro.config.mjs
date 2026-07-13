@@ -4,31 +4,10 @@ import { defineConfig } from "astro/config";
 import starlightLinksValidator from "starlight-links-validator";
 import starlightLlmsTxt from "starlight-llms-txt";
 
+import { fastagentCode } from "./src/code-theme.ts";
 import { DESCRIPTION as description, OG_IMAGE, SITE as site } from "./src/site.ts";
 
-/* The landing's terminal palette as a shiki theme — used ONLY on blog pages
-   (selected via data-theme="fastagent" on their <html>). Docs keep Starlight's
-   stock github-dark/github-light pair. Token classes: src/styles/custom.css. */
-const fastagentCode = {
-  name: "fastagent-dark",
-  type: "dark",
-  colors: {
-    "editor.background": "#080a09",
-    "editor.foreground": "#d5dcd9",
-  },
-  tokenColors: [
-    { scope: ["comment", "punctuation.definition.comment"], settings: { foreground: "#5f6c68", fontStyle: "italic" } },
-    { scope: ["string", "string.quoted", "string.template"], settings: { foreground: "#e0bd68" } },
-    { scope: ["constant.numeric", "constant.language", "constant.character", "support.constant"], settings: { foreground: "#7ecf8a" } },
-    { scope: ["keyword", "storage.type", "storage.modifier", "keyword.control"], settings: { foreground: "#b795f5" } },
-    { scope: ["keyword.operator"], settings: { foreground: "#d5dcd9" } },
-    { scope: ["entity.name.function", "support.function"], settings: { foreground: "#2dd4bf" } },
-    { scope: ["entity.name.type", "entity.name.class", "support.type", "support.class"], settings: { foreground: "#6aa5f8" } },
-    { scope: ["entity.name.tag"], settings: { foreground: "#b795f5" } },
-    { scope: ["entity.other.attribute-name"], settings: { foreground: "#6aa5f8" } },
-    { scope: ["variable", "variable.parameter", "variable.other"], settings: { foreground: "#d5dcd9" } },
-  ],
-};
+
 
 export default defineConfig({
   site,
