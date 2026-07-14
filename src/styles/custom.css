@@ -1755,6 +1755,12 @@ html[data-mode="light"] {
   --blue: #1d5ec4;
 }
 
+/* body.site declares its own color-scheme: dark, which beats the inherited
+   light value — form controls and scrollbars must follow the mode too. */
+html[data-mode="light"] body.site {
+  color-scheme: light;
+}
+
 /* Brand icons drawn white (or Bun's cream) for the dark strip would vanish
    on the light shell; CSS fill wins over the presentation attribute. */
 html[data-mode="light"] :is(.eco-list, .host-chips) path[fill="#ffffff"] { fill: #28322c; }
@@ -1778,8 +1784,8 @@ html[data-mode="light"] .footer-mark { filter: invert(1); }
   border: 1px solid var(--line-strong);
   border-radius: 999px;
   background: none;
-  color: var(--muted);
-  font-size: 0.85rem;
+  color: var(--text-soft);
+  font-size: 0.95rem;
   line-height: 1;
   cursor: pointer;
   transition: color 0.12s ease, border-color 0.12s ease;
