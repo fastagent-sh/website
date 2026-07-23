@@ -73,7 +73,7 @@ export default defineConfig({
         },
         {
           label: "Connect it",
-          items: ["docs/channels", "docs/github", "docs/telegram", "docs/channel-development"],
+          items: ["docs/channels", "docs/github", "docs/telegram", "docs/slack", "docs/feishu", "docs/channel-development"],
         },
         {
           label: "Run and deploy",
@@ -86,7 +86,7 @@ export default defineConfig({
         {
           label: "Maintainers",
           collapsed: true,
-          items: ["docs/design", "docs/design/core"],
+          items: ["docs/design", "docs/design/core", "docs/design/session-control"],
         },
       ],
       social: [{ icon: "github", label: "GitHub", href: "https://github.com/fastagent-sh/fastagent" }],
