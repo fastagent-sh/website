@@ -9,17 +9,19 @@ interface Props {
 }
 
 const { name, size = 16, title, color } = Astro.props;
-const d = brandIcons[name];
-if (!d) throw new Error(`Unknown brand icon: ${name}`);
+const icon = brandIcons[name];
+if (!icon) throw new Error(`Unknown brand icon: ${name}`);
+const body = typeof icon === "object" ? icon : undefined;
 ---
 
 <svg
   width={size}
   height={size}
-  viewBox="0 0 24 24"
+  viewBox={body ? body.viewBox : "0 0 24 24"}
+  style={body && color ? `color:${color}` : undefined}
   aria-hidden={title ? undefined : "true"}
   role={title ? "img" : undefined}
 >
   {title && <title>{title}</title>}
-  <path fill={color ?? "currentColor"} d={d} />
+  {body ? <g set:html={body.body} /> : <path fill={color ?? "currentColor"} d={icon as string} />}
 </svg>

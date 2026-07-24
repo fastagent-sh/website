@@ -213,7 +213,8 @@ const ecosystem = [
     items: [
       { icon: "github", label: "GitHub", color: "#ffffff" },
       { icon: "telegram", label: "Telegram", color: "#26a5e4" },
-      { icon: "slack", label: "Slack", color: "#e01e5a", soon: true },
+      { icon: "slack", label: "Slack", color: "#e01e5a" },
+      { icon: "lark", label: "Feishu · Lark", color: "#3370ff" },
       { icon: "discord", label: "Discord", color: "#5865f2", soon: true },
       { icon: "whatsapp", label: "WhatsApp", color: "#25d366", soon: true },
       { icon: "gitlab", label: "GitLab", color: "#fc6d26", soon: true },
@@ -293,7 +294,7 @@ const concepts = [
           <h1>Vibe first.<br /><em>Then FastAgent.</em></h1>
           <p class="hero-lede">
             An agent is <strong>just a directory</strong> (persona.md, skills/, tools/, channels/) —
-            or embedded right in your app. FastAgent serves it: GitHub, Telegram,
+            or embedded right in your app. FastAgent serves it: GitHub, Telegram, Slack, Feishu,
             or any channel you compose. <strong>No rewrite, no new format, no platform.</strong>
           </p>
           <div class="hero-actions">
@@ -630,16 +631,16 @@ const concepts = [
           <!-- Custom -->
           <a class="demo-win tint-amber" href="/docs/channel-development/">
             <div class="demo-bar">
-              <BrandIcon name="slack" size={13} />
-              <span>channels/slack.ts · yours</span>
+              <BrandIcon name="discord" size={13} />
+              <span>channels/discord.ts · yours</span>
               <span class="demo-go" aria-hidden="true">→</span>
             </div>
             <div class="demo-body code-pane">
               <p><span class="tkw">const</span> channel: <span class="tty">ChannelModule</span> = ({'{'} agent {'}'}) =&gt; ({'{'}</p>
-              <p>  <span class="tstr">"POST /slack"</span>: <span class="tkw">async</span> (req) =&gt; {'{'} <span class="tdim">/* verify, map, invoke */</span> {'}'},</p>
+              <p>  <span class="tstr">"POST /discord"</span>: <span class="tkw">async</span> (req) =&gt; {'{'} <span class="tdim">/* verify, map, invoke */</span> {'}'},</p>
               <p>{'}'});</p>
               <p><span class="tkw">export default</span> channel;</p>
-              <footer class="demo-foot">▸ a file in channels/ is the channel — Slack, queues, your trigger</footer>
+              <footer class="demo-foot">▸ a file in channels/ is the channel — Discord, queues, your trigger</footer>
             </div>
           </a>
 

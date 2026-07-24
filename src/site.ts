@@ -2,7 +2,7 @@
    the custom layout (Site.astro, pages) and the Starlight config. */
 export const SITE = "https://fastagent.sh";
 export const DESCRIPTION =
-  "An agent is just a directory — FastAgent serves it as a live service on GitHub, Telegram, or any channel you compose. No rewrite, no new format, no platform.";
+  "An agent is just a directory — FastAgent serves it as a live service on GitHub, Telegram, Slack, Feishu, or any channel you compose. No rewrite, no new format, no platform.";
 export const OG_IMAGE = {
   url: `${SITE}/social-preview.png`,
   width: "1200",
