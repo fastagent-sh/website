@@ -71,8 +71,11 @@ const llmsUrl = Astro.site
         const applyTheme = () => {
           const root = document.documentElement;
           const mode = resolveMode();
+          /* data-mode is the whole signal: base.css turns it into
+             color-scheme, which is what light-dark() resolves against. The
+             starter also wrote colorScheme inline here, which would have
+             shadowed that rule and left it untested. */
           root.setAttribute("data-mode", mode);
-          root.style.colorScheme = mode;
           document.querySelector('meta[name="theme-color"]')?.setAttribute("content", themeColor[mode]);
           document.querySelectorAll("[data-nb-theme-toggle]").forEach((b) => {
             b.setAttribute("data-nb-state", mode);

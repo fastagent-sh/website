@@ -7,6 +7,11 @@
  * sibling route `pages/<collection>/[...slug]/index.md.ts`. This route
  * filters to the primary collection so multi-collection sites don't
  * generate conflicting `[...slug]` paths at root.
+ *
+ * The starter's `.mdx` twin (the authored source, JSX intact) is not
+ * installed here: these pages are `.md` copies of vendor/fastagent, so the
+ * markdown below *is* the source and a second URL claiming otherwise would
+ * be a lie. `Source:` points upstream instead.
  */
 
 import { getIndexedEntries, renderEntryAsMarkdown, type IndexedEntry } from "@cloudflare/nimbus-docs";
@@ -38,7 +43,7 @@ export async function getStaticPaths() {
 
 export async function GET({ props }: { props: SlugProps }) {
   const { item } = props;
-  const { entry, title, description, markdownUrl, sourceUrl, version } = item;
+  const { entry, title, description, version } = item;
   const data = (entry.data ?? {}) as Record<string, unknown>;
   const rawImage = data.socialImage;
   const socialImage =
@@ -66,9 +71,8 @@ export async function GET({ props }: { props: SlugProps }) {
     "",
     markdown,
     "",
-    // Point at the authored source (`.mdx` twin) when it exists — the
-    // `.md` alternate referencing itself was a placeholder.
-    `Source: ${new URL(sourceUrl ?? markdownUrl, config.site).href}`,
+    // The file this page was rendered from, in the repository that owns it.
+    `Source: ${typeof data.editUrl === "string" ? data.editUrl : new URL(item.url, config.site).href}`,
     "",
   ].join("\n");
 

@@ -95,7 +95,10 @@ const hasPagination = Astro.slots.has("pagination");
                   <Sidebar items={sidebar} persist />
                 </nav>
               )}
-              <div class="pointer-events-none sticky bottom-0 h-8 bg-gradient-to-t from-base to-transparent" />
+              {/* Fade the last sidebar row out against the page. `base` is not
+                  a color in this project's @theme (globals.css), so the
+                  starter's `from-base` painted nothing. */}
+              <div class="pointer-events-none sticky bottom-0 h-8 bg-gradient-to-t from-background to-transparent" />
             </aside>
           )}
 
