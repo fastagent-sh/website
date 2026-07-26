@@ -36,7 +36,9 @@ export async function GET() {
 
   for (const group of groups) {
     // Older doc versions have their own /<v>/llms.txt; don't list them here.
-    if (group.kind === "version") continue;
+    // Hidden ones get no index file at all (see [section]/llms.txt.ts), so
+    // linking one would be a promise the build doesn't keep.
+    if (group.kind === "version" || group.hidden) continue;
     rows.push({
       key: `/${group.slug}`,
       line: `- [${SECTIONS[group.slug]?.label ?? group.label}](${new URL(`/${group.slug}/llms.txt`, config.site).href})${SECTIONS[group.slug] ? ` — ${SECTIONS[group.slug].description}` : ""}`,

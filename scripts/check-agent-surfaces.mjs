@@ -38,6 +38,24 @@ for (const surface of surfaces) {
   }
 }
 
+/* The pages advertise their own twin too — `rel="alternate" type="text/markdown"`
+   in the head, and the visible "View as Markdown" / "view as markdown" link.
+   Those hrefs are built by the page from its own URL, while the file is built
+   by a route from the entry's; nothing above reads HTML, so this is where the
+   two are held to the same answer. */
+let advertised = 0;
+for (const page of files.filter((f) => f.endsWith(".html"))) {
+  const html = readFileSync(new URL(page, dist), "utf8");
+  for (const [, href] of html.matchAll(/<link rel="alternate" type="text\/markdown" href="([^"]+)"/g)) {
+    advertised += 1;
+    const path = href.startsWith(SITE) ? href.slice(SITE.length) : href;
+    if (!existsSync(new URL(path.replace(/^\//, ""), dist))) {
+      problems.push(`${page} advertises ${href}, which the build does not emit`);
+    }
+  }
+}
+if (!advertised) problems.push("no page advertises a markdown alternate: the head scan is broken");
+
 /* And the other way: a page the site serves but no index names is a page an
    agent has to guess at. Only the .md twins are checked — the HTML pages have
    the sitemap, which @astrojs/sitemap builds from the same routes.
@@ -45,15 +63,18 @@ for (const surface of surfaces) {
    list of URLs to follow. What can drift is the twin route's own path list
    against the indexes — the route filtered itself to one collection once
    while /blog/llms.txt kept advertising the twins it no longer emitted, and
-   this is the direction that catches that. */
+   this is the direction that catches that. A per-section index nothing links
+   to is the same failure one level up, so those are checked as well. */
 const indexed = new Set(
   surfaces
     .filter((f) => f === "llms.txt" || f.endsWith("/llms.txt"))
     .flatMap((f) => [...readFileSync(new URL(f, dist), "utf8").matchAll(new RegExp(`${SITE}(/[^)\\s>"']*)`, "g"))])
     .map(([, path]) => clean(path).replace(/^\//, "")),
 );
-const orphans = files.filter((f) => /(^|\/)index\.md$/.test(f) && !indexed.has(f));
-if (orphans.length) problems.push(`markdown pages no llms.txt names: ${orphans.join(", ")}`);
+const orphans = files.filter(
+  (f) => (/(^|\/)index\.md$/.test(f) || /\/llms\.txt$/.test(f)) && !indexed.has(f),
+);
+if (orphans.length) problems.push(`agent files no llms.txt names: ${orphans.join(", ")}`);
 
 if (problems.length) {
   for (const line of problems) console.error(line);
@@ -61,5 +82,6 @@ if (problems.length) {
 }
 const bytes = surfaces.reduce((sum, f) => sum + statSync(new URL(f, dist)).size, 0);
 console.log(
-  `agent surfaces: ${surfaces.length} files, ${(bytes / 1024).toFixed(0)} kB, every link resolves`,
+  `agent surfaces: ${surfaces.length} files, ${(bytes / 1024).toFixed(0)} kB,` +
+    ` ${advertised} pages offer their twin, every link resolves`,
 );

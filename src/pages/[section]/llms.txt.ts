@@ -1,16 +1,12 @@
 /**
- * Per-section /<section>/llms.txt — sub-index files that drill down
- * from the root `/llms.txt` into a named slice of the site's docs.
+ * Per-section /<section>/llms.txt — the sub-index the root `/llms.txt`
+ * hops into. One rule for an agent: a link there of the shape
+ * `/<section>/llms.txt` is answered here.
  *
- * A "section" is one of two things:
- *   1. A folder inside the primary `docs` collection with more than
- *      one page (e.g. `src/content/docs/<folder>/*` → `/<folder>/llms.txt`).
- *   2. A whole non-primary collection — `api`, `blog`, etc. — which
- *      becomes a single section mounted at `/<collection>/llms.txt`.
- *
- * Both cases produce the same shape at the same URL pattern, so
- * agents follow one rule: every link in `/llms.txt` that ends in
- * `.llms.txt` resolves here.
+ * This site has two sections, one per content collection — `/docs` and
+ * `/blog`. (The framework would also raise a multi-page folder inside the
+ * primary collection into a section; ours is flat, so `docs/design/**`
+ * lists inside `/docs/llms.txt` rather than getting its own.)
  *
  * `getIndexedTopLevel()` decides which sections exist and what they
  * contain; this route just renders one file per section it returns.
