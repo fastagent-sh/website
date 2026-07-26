@@ -11,7 +11,7 @@ import { readdirSync, readFileSync } from "node:fs";
 
 import sharp from "sharp";
 
-import { roles, starlight, term, themeColor } from "../src/theme.ts";
+import { nimbus, roles, term, themeColor } from "../src/theme.ts";
 import { CARD } from "./render-og.mjs";
 
 const srcDir = new URL("../src/", import.meta.url);
@@ -83,15 +83,29 @@ for (const [fg, bg, floor] of termPairs) {
   }
 }
 
-/* The docs pill is Starlight's: it paints text-accent and writes text-invert
-   on top, which in dark mode is accent-low and in light mode the page. */
-const pill = [
-  ["dark", starlight["color-accent-low"][DARK], starlight["color-accent-high"][DARK]],
-  ["light", starlight["color-black"][LIGHT], starlight["color-accent"][LIGHT]],
+/* The docs shell paints from --nb-*, which src/theme.ts aliases to the roles
+   above. The aliasing is the point of failure the pairs above cannot see: a
+   token pointed at the wrong role reads fine as a name and fails as a color.
+   So the docs surfaces are sampled under their own names.
+   Ink on the three docs surfaces, plus the button that inverts them. */
+const docsPairs = [
+  ...["background", "card", "muted", "accent"].flatMap((surface) => [
+    ["foreground", surface, 4.5],
+    ["muted-foreground", surface, 4.5],
+    ["primary", surface, 4.5],
+  ]),
+  ["primary-foreground", "primary", 4.5],
+  /* Status hues label an aside's title and border on the page. */
+  ...["info", "danger"].map((hue) => [hue, "background", 4.5]),
+  ...["warning", "success"].map((hue) => [hue, "background", 3]),
 ];
-for (const [mode, fg, bg] of pill) {
-  const got = ratio(fg, bg);
-  if (got < 4.5) problems.push(`${mode} docs pill: ${fg} on ${bg} is ${got.toFixed(2)}:1, floor 4.5:1`);
+for (const [fg, bg, floor] of docsPairs) {
+  for (const [mode, side] of [["light", LIGHT], ["dark", DARK]]) {
+    const got = ratio(nimbus[fg][side], nimbus[bg][side]);
+    if (got < floor) {
+      problems.push(`${mode} docs: --nb-${fg} on --nb-${bg} is ${got.toFixed(2)}:1, floor ${floor}:1`);
+    }
+  }
 }
 
 /* ── panes pin their own color-scheme ──────────────────────────────────── */
@@ -118,19 +132,69 @@ for (const [file, src] of styled) {
 if (!panes) throw new Error("no --term-bg panes found: the pane scan is broken");
 
 /* The panes are the exception to the mode wiring, so the wiring itself has to
-   hold — and it is what every color on the site now hangs from. Three claims:
-   a document with no attribute (JavaScript off) resolves dark, and each shell's
-   light signal reaches color-scheme. Starlight states the second one too, but
-   inside @layer starlight.base, which base.css's unlayered rules outrank. */
+   hold — and it is what every color on the site now hangs from. Two claims: a
+   document with no attribute (JavaScript off) resolves dark, and the light
+   signal both shells write reaches color-scheme. */
 const base = read("../src/styles/base.css");
 const modeWiring = [
   [/(^|\})\s*html\s*\{[^}]*color-scheme:\s*dark/m, "a document with no mode attribute gets dark"],
-  [/html\[data-mode="light"\][^{]*\{[^}]*color-scheme:\s*light/, "the custom shell's light mode"],
-  [/html\[data-theme="light"\][^{]*\{[^}]*color-scheme:\s*light/, "the docs shell's light mode"],
+  [/html\[data-mode="light"\][^{]*\{[^}]*color-scheme:\s*light/, "the light mode both shells signal"],
 ];
 for (const [pattern, claim] of modeWiring) {
   if (!pattern.test(base)) problems.push(`base.css no longer wires ${claim}`);
 }
+
+/* Both shells have to agree on how that signal is written and where it is
+   kept: one localStorage key, and data-mode spelled out for light as well as
+   dark (site.css keys rules on it, and the docs' wordmark swap does too). */
+for (const shell of ["../src/layouts/Site.astro", "../src/layouts/BaseLayout.astro"]) {
+  const src = read(shell);
+  if (!/"ui-mode"/.test(src)) problems.push(`${shell} no longer reads the shared "ui-mode" key`);
+  if (!/data-mode|dataset\.mode/.test(src)) problems.push(`${shell} no longer writes data-mode`);
+}
+
+/* ── every /docs/ link points at a page that exists ────────────────────── */
+
+/* The docs are copied from vendor/fastagent, and sync-fastagent-docs.mjs
+   rewrites their relative .md links into site routes. It checks that a link
+   stays inside docs/, not that its target is there — so a page renamed
+   upstream leaves a live link to a 404. Nimbus' own link rule can't cover
+   this: its linter walks .mdx, and this content is .md (MDX would parse the
+   angle brackets and braces in the prose as JSX).
+   Both halves of the map are checked here: the links inside the pages, and
+   the slugs the sidebar in astro.config.mjs names. */
+const docsDir = new URL("docs/", new URL("content/docs/", srcDir));
+const docSlugs = new Set(
+  readdirSync(docsDir, { recursive: true })
+    .filter((f) => f.endsWith(".md"))
+    .map((f) => `docs/${f}`.replaceAll("\\", "/").toLowerCase().replace(/\.md$/, "").replace(/\/index$/, "")),
+);
+if (docSlugs.size < 10) throw new Error("docs collection looks empty: run npm run sync:docs");
+
+const routeSlug = (href) => href.replace(/^\//, "").replace(/\/$/, "").toLowerCase();
+const deadLinks = new Set();
+for (const file of readdirSync(docsDir, { recursive: true }).filter((f) => f.endsWith(".md"))) {
+  const src = readFileSync(new URL(file, docsDir), "utf8");
+  for (const [, href] of src.matchAll(/\]\((\/docs\/[^)\s#]*)/g)) {
+    if (!docSlugs.has(routeSlug(href))) deadLinks.add(`${file} → ${href}`);
+  }
+}
+if (deadLinks.size) {
+  problems.push(`docs links with no page behind them: ${[...deadLinks].join(", ")}`);
+}
+
+const config = read("../astro.config.mjs");
+const sidebar = config.slice(config.indexOf("sidebar: {"), config.indexOf("export default"));
+const navSlugs = [
+  ...[...sidebar.matchAll(/"(docs(?:\/[\w-]+)*)"/g)].map(([, slug]) => slug),
+  ...[...sidebar.matchAll(/link: "(\/docs\/[^"]*)"/g)].map(([, href]) => routeSlug(href)),
+];
+if (navSlugs.length < 10) throw new Error("the sidebar scan found nothing: astro.config.mjs changed shape");
+const navMisses = navSlugs.filter((slug) => !docSlugs.has(slug));
+if (navMisses.length) problems.push(`sidebar entries with no page: ${navMisses.join(", ")}`);
+/* And the other way: a page nothing links to is a page nobody finds. */
+const orphans = [...docSlugs].filter((slug) => !navSlugs.includes(slug));
+if (orphans.length) problems.push(`docs pages missing from the sidebar: ${orphans.join(", ")}`);
 
 /* ── brand marks that would vanish on the light page ───────────────────── */
 
@@ -199,8 +263,8 @@ for (const [file, got, expected, how] of baked) {
 /* Renaming a role is a sweep across CSS and markup, and a missed one is
    silent: `var(--gone)` resolves to nothing and the property falls back to
    inherited or initial, which on a dark pane usually still looks plausible.
-   Starlight ships its own --sl-* set, so those count as defined elsewhere;
-   everything else has to exist here. */
+   Two sets count as defined elsewhere: Tailwind generates --tw-*, and Shiki
+   writes --shiki-* onto the tokens it emits. Everything else has to exist. */
 const names = (src, pattern) => [...src.matchAll(pattern)].map(([, name]) => name);
 const DEFINE = /(--[\w-]+):/g;
 const USE = /var\((--[\w-]+)/g;
@@ -217,7 +281,7 @@ for (const [file, src] of styled) {
   const local = new Set([...globalTokens, ...names(src, DEFINE)]);
   for (const name of names(src, USE)) {
     used.add(name);
-    if (!local.has(name) && !name.startsWith("--sl-")) {
+    if (!local.has(name) && !/^--(tw|shiki)-/.test(name)) {
       problems.push(`${file}: var(${name}) is never defined where that file can see it`);
     }
   }
@@ -287,8 +351,9 @@ if (problems.length) {
   process.exit(1);
 }
 console.log(
-  `site: ${rolePairs.length * 2 + termPairs.length + pill.length} contrast pairs pass,` +
+  `site: ${(rolePairs.length + docsPairs.length) * 2 + termPairs.length} contrast pairs pass,` +
     ` ${panes} panes pinned, ${baked.length} rasters current,` +
+    ` ${docSlugs.size} docs pages linked and in the sidebar,` +
     ` ${used.size} tokens used, ${cued.size} mock cues,` +
     ` ${tabCount}/${TAB_LIMIT} tabs wired`,
 );

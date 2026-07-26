@@ -1,6 +1,7 @@
 ---
-// Shared shell for every custom (non-Starlight) page: landing, blog, and
-// whatever comes next. Head meta, header, and footer live here once.
+// Shared shell for every page outside the docs: landing, blog, and whatever
+// comes next. Head meta, header, and footer live here once. (The docs run on
+// Nimbus, whose shell is src/layouts/BaseLayout.astro + DocsLayout.astro.)
 import BrandIcon from "../components/BrandIcon.astro";
 import fastagent from "../generated/fastagent.json";
 import { OG_IMAGE, SITE } from "../site";
@@ -22,24 +23,20 @@ const canonical = `${SITE}${path}`;
 ---
 
 <!doctype html>
-{/* data-theme is pinned to dark, and is not this page's mode: it is the switch
-    Expressive Code keys its palette on, and blog fences belong to the terminal
-    theater, which stays dark in both modes. The reader's mode is data-mode,
-    set by the pre-paint script below. Nothing else reads data-theme here —
-    Starlight's own stylesheets, which do, never load on these pages. */}
-<html lang="en" data-theme="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
     <meta name="theme-color" content={themeColor.dark} />
     <script is:inline define:vars={{ themeColor }}>
-      /* Pre-paint theme pick — shares the "starlight-theme" key with the docs,
-         so toggling on either surface follows you to the other. */
+      /* Pre-paint theme pick — shares the "ui-mode" key with the docs shell
+         (BaseLayout.astro), so toggling on either surface follows you to the
+         other. */
       document.documentElement.dataset.mode = (() => {
         let stored = null;
         try {
-          stored = localStorage.getItem("starlight-theme");
+          stored = localStorage.getItem("ui-mode");
         } catch {
           /* storage blocked (private mode) — fall through to the system pick */
         }
@@ -75,7 +72,7 @@ const canonical = `${SITE}${path}`;
         document.documentElement.dataset.mode = next;
         document.querySelector('meta[name="theme-color"]')?.setAttribute("content", themeColor[next]);
         try {
-          localStorage.setItem("starlight-theme", next);
+          localStorage.setItem("ui-mode", next);
         } catch {
           /* storage blocked — the toggle still works for this page view */
         }

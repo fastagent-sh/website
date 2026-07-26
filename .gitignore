@@ -26,3 +26,6 @@ pnpm-debug.log*
 .DS_Store
 public/.well-known/
 src/styles/tokens.css
+
+# Nimbus build scratch (nimbus.json is committed; this is not)
+.nimbus/

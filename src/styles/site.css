@@ -1505,11 +1505,24 @@ a.tag-link:hover {
   color: var(--muted);
 }
 
-/* Fenced code is rendered by Expressive Code (Starlight's site-wide markdown
-   pipeline); data-theme="dark" on <html> selects its dark palette. Only spacing
-   is ours. */
-.post-body .expressive-code {
+/* Fenced code is Shiki, through Astro's own markdown pipeline (themed in
+   astro.config.mjs). Both palettes ride on every token as --shiki-light /
+   --shiki-dark; a blog fence belongs to the terminal theater, which stays
+   dark in both modes, so it takes the dark one and pins the scheme with it. */
+.post-body pre.astro-code {
+  color-scheme: dark;
   margin: 1.4rem 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-md);
+  background: var(--term-bg);
+  overflow-x: auto;
+  font-size: 0.86rem;
+  line-height: 1.65;
+}
+
+.post-body pre.astro-code span {
+  color: var(--shiki-dark, inherit);
 }
 
 .post-related {
@@ -1645,11 +1658,11 @@ a.tag-link:hover {
 }
 
 /* ────────────────────────────────────────────────────────────────────────
-   Light mode — custom pages only (landing, blog); docs are Starlight's.
+   Light mode — landing and blog only; the docs shell has its own rules.
    The tokens themselves flip in tokens.css via light-dark(); what is left
    here is the handful of assets that cannot be expressed as a token.
-   html[data-mode] is set pre-paint from the shared "starlight-theme"
-   localStorage key (docs and site follow each other), falling back to
+   html[data-mode] is set pre-paint from the shared "ui-mode" localStorage
+   key (docs and site follow each other), falling back to
    prefers-color-scheme.
    ──────────────────────────────────────────────────────────────────────── */
 
