@@ -5,15 +5,17 @@
   "version": "0.0.0",
   "scripts": {
     "sync:docs": "node scripts/sync-fastagent-docs.mjs",
-    "predev": "npm run sync:docs",
+    "og": "node scripts/render-og.mjs",
+    "predev": "npm run sync:docs && npm run tokens",
     "dev": "astro dev",
-    "precheck": "npm run sync:docs",
-    "check": "astro check",
-    "prebuild": "npm run sync:docs",
+    "precheck": "npm run sync:docs && npm run tokens",
+    "check": "node scripts/check-site.mjs && astro check",
+    "prebuild": "npm run sync:docs && npm run tokens",
     "build": "astro build",
     "preview": "astro preview",
     "deploy": "npm run build && wrangler deploy",
-    "deploy:www": "wrangler deploy --config wrangler.www.jsonc"
+    "deploy:www": "wrangler deploy --config wrangler.www.jsonc",
+    "tokens": "node scripts/build-tokens.mjs"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.41.3",
@@ -29,6 +31,6 @@
     "wrangler": "^4.110.0"
   },
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.18.0"
   }
 }

@@ -25,16 +25,16 @@
       <p class="tl c2 gap"><span class="tcm"># then fastagent</span></p>
       <p class="tl l3"><span class="tp">❯</span> <span class="tc">fastagent dev</span></p>
       <p class="tl l4"><span class="tlab tdim">[fastagent]</span><span class="tdim">assembled</span> persona · skills · tools · channels</p>
-      <p class="tl l5"><span class="tlab tdim">[fastagent]</span>github · telegram · http <span class="tdim">— listening on</span> <span class="tg">:8787</span></p>
-      <p class="tl l6 gap"><span class="tlab tpu">[github]</span><span class="tdim">▸</span> <span class="tpu">pull_request.opened</span>  <span class="tt">#128</span></p>
+      <p class="tl l5"><span class="tlab tdim">[fastagent]</span>github · telegram · http <span class="tdim">— listening on</span> <span class="tref">:8787</span></p>
+      <p class="tl l6 gap"><span class="tlab tch-github">[github]</span><span class="tdim">▸</span> <span class="tch-github">pull_request.opened</span>  <span class="tref">#128</span></p>
       <p class="tl l7"><span class="tlab tdim">[agent]</span><span class="tg">✓</span> review posted · 2 inline comments <span class="tdim">(2.1s)</span></p>
-      <p class="tl l8 gap"><span class="tlab tbl">[telegram]</span><span class="tdim">▸</span> <span class="tbl">message</span>  <span class="tt">@ops-room</span> <span class="tdim">“order #9231?”</span></p>
+      <p class="tl l8 gap"><span class="tlab tch-telegram">[telegram]</span><span class="tdim">▸</span> <span class="tch-telegram">message</span>  <span class="tref">@ops-room</span> <span class="tdim">“order #9231?”</span></p>
       <p class="tl l9"><span class="tlab tdim">[agent]</span><span class="tg">✓</span> replied · refund approved <span class="tdim">(1.4s)</span></p>
-      <p class="tl l10 gap"><span class="tlab tg2">[http]</span><span class="tdim">▸</span> <span class="tg2">POST /invoke</span>  <span class="tt">session=s_42</span></p>
+      <p class="tl l10 gap"><span class="tlab tch-http">[http]</span><span class="tdim">▸</span> <span class="tch-http">POST /invoke</span>  <span class="tref">session=s_42</span></p>
       <p class="tl l11"><span class="tlab tdim">[agent]</span><span class="tg">✓</span> streamed 14 events <span class="tdim">(0.9s)</span></p>
       <p class="tl c3 gap"><span class="tcm"># ships anywhere</span></p>
       <p class="tl l12"><span class="tp">❯</span> <span class="tc">fastagent deploy fly --run</span></p>
-      <p class="tl l13"><span class="tg">✓</span> live at <span class="tg2">https://support-agent.fly.dev</span></p>
+      <p class="tl l13"><span class="tg">✓</span> live at <span class="tref">https://support-agent.fly.dev</span></p>
       <p class="tl caret-line"><span class="caret"></span></p>
     </div>
   </div>
@@ -71,6 +71,7 @@
     border-radius: 8px;
     overflow: hidden;
     background: var(--term-bg);
+    color-scheme: dark;
     box-shadow:
       0 1px 2px rgba(0, 0, 0, 0.4),
       0 18px 50px -18px rgba(0, 0, 0, 0.75);
@@ -88,10 +89,10 @@
   }
 
   .mock-dots { display: inline-flex; gap: 0.35rem; }
-  .mock-dots i { width: 9px; height: 9px; border-radius: 999px; background: #3a3f3d; }
-  .mock-dots i:nth-child(1) { background: #e0604f; }
-  .mock-dots i:nth-child(2) { background: #dfa943; }
-  .mock-dots i:nth-child(3) { background: #4fb96a; }
+  .mock-dots i { width: 9px; height: 9px; border-radius: 999px; background: var(--term-border); }
+  .mock-dots i:nth-child(1) { background: var(--term-red); }
+  .mock-dots i:nth-child(2) { background: var(--term-yellow); }
+  .mock-dots i:nth-child(3) { background: var(--term-green); }
 
   .mock-title { flex: 1; text-align: center; letter-spacing: 0.02em; }
 
@@ -115,21 +116,19 @@
   .tl { margin: 0; white-space: nowrap; }
   .tl.gap { margin-top: 0.85em; }
 
-  /* .tp/.tdim/.tstr/.tg/.tpu/.ft-dir/.ft-accent come from the global terminal
-     tokens in custom.css — only mock-local roles are defined here. */
+  /* The shared terminal roles — prompt, channel identity, referenced entity,
+     comment — live in site.css, because the page's panes use them too.
+     What stays here is what only the mock has: its layout, its choreography,
+     and .tc, the command the fake shell types. */
   .tlab { display: inline-block; min-width: 12ch; }
   .tc  { color: var(--term-text); font-weight: 600; }
-  .tt  { color: var(--term-text); }
-  .tg2 { color: var(--term-green); }
-  .tbl { color: var(--term-blue); }
-  .tcm { color: var(--term-muted); font-style: italic; }
 
   .caret {
     display: inline-block;
     width: 0.6em;
     height: 1.1em;
     vertical-align: text-bottom;
-    background: var(--term-accent);
+    background: var(--term-cursor);
     animation: caret-blink 1.1s steps(1) infinite;
   }
 
@@ -137,6 +136,8 @@
 
   /* ── surface cards ───────────────────────────────────────────────── */
   .mock-card {
+    /* floats over the terminal, so it is pinned dark too */
+    color-scheme: dark;
     position: absolute;
     padding: 0.8rem 0.95rem;
     border: 1px solid var(--line-strong);
@@ -184,10 +185,10 @@
     top: 36%;
     right: max(-1.25rem, -2vw);
     width: min(17.5rem, 62%);
-    border-top: 2px solid var(--purple);
+    border-top: 2px solid var(--sapphire);
   }
 
-  .mock-gh footer { color: var(--purple); }
+  .mock-gh footer { color: var(--sapphire); }
 
   .mock-tg {
     top: 47%;
@@ -206,7 +207,14 @@
     text-align: center;
   }
 
-  /* ── choreography (26s loop, shared fade at 92%) ─────────────────── */
+  /* ── choreography (26s loop, shared fade at 92%) ───────────────────
+     One keyframe per cue looks like duplication and is not: the lines enter at
+     different times but leave together, and `animation-delay` only offsets the
+     first pass of an infinite animation (a negative delay would drag the exit
+     along with the entrance). Percentages cannot read a custom property, so
+     the entrance time has to be baked into each keyframe.
+     A line whose class has no rule here would silently never appear —
+     scripts/check-site.mjs fails when the two lists drift apart. */
   .tl:not(.caret-line),
   .mock-card {
     opacity: 0;

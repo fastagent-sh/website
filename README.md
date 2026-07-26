@@ -13,6 +13,8 @@ npm install
 npm run dev
 ```
 
+Node 22.18 or newer — the build scripts import TypeScript directly.
+
 Before opening a pull request:
 
 ```bash
