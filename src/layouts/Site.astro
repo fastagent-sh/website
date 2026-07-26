@@ -4,7 +4,10 @@
 import BrandIcon from "../components/BrandIcon.astro";
 import fastagent from "../generated/fastagent.json";
 import { OG_IMAGE, SITE } from "../site";
-import "../styles/custom.css";
+import { themeColor } from "../theme";
+import "../styles/tokens.css";
+import "../styles/base.css";
+import "../styles/site.css";
 
 interface Props {
   title: string;
@@ -19,13 +22,18 @@ const canonical = `${SITE}${path}`;
 ---
 
 <!doctype html>
-<html lang="en" data-theme="fastagent">
+{/* data-theme is pinned to dark, and is not this page's mode: it is the switch
+    Expressive Code keys its palette on, and blog fences belong to the terminal
+    theater, which stays dark in both modes. The reader's mode is data-mode,
+    set by the pre-paint script below. Nothing else reads data-theme here —
+    Starlight's own stylesheets, which do, never load on these pages. */}
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#0a0c0b" />
-    <script is:inline>
+    <meta name="theme-color" content={themeColor.dark} />
+    <script is:inline define:vars={{ themeColor }}>
       /* Pre-paint theme pick — shares the "starlight-theme" key with the docs,
          so toggling on either surface follows you to the other. */
       document.documentElement.dataset.mode = (() => {
@@ -38,8 +46,9 @@ const canonical = `${SITE}${path}`;
         if (stored === "light" || stored === "dark") return stored;
         return matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
       })();
-      if (document.documentElement.dataset.mode === "light")
-        document.querySelector('meta[name="theme-color"]').setAttribute("content", "#f4f7f5");
+      document
+        .querySelector('meta[name="theme-color"]')
+        ?.setAttribute("content", themeColor[document.documentElement.dataset.mode]);
     </script>
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.png" />
@@ -59,11 +68,12 @@ const canonical = `${SITE}${path}`;
     <title>{title}</title>
     <script>
       import "../scripts/plausible";
+      import { themeColor } from "../theme";
 
       document.querySelector(".theme-toggle")?.addEventListener("click", () => {
         const next = document.documentElement.dataset.mode === "light" ? "dark" : "light";
         document.documentElement.dataset.mode = next;
-        document.querySelector('meta[name="theme-color"]')?.setAttribute("content", next === "light" ? "#f4f7f5" : "#0a0c0b");
+        document.querySelector('meta[name="theme-color"]')?.setAttribute("content", themeColor[next]);
         try {
           localStorage.setItem("starlight-theme", next);
         } catch {

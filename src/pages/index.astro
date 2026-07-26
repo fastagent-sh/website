@@ -1,7 +1,7 @@
 ---
 import { Code } from "astro:components";
 import BrandIcon from "../components/BrandIcon.astro";
-import { fastagentCode } from "../code-theme";
+import { CODE_THEME_DARK } from "../theme";
 import CopyPrompt from "../components/CopyPrompt.astro";
 import HeroMock from "../components/HeroMock.astro";
 import Site from "../layouts/Site.astro";
@@ -43,7 +43,10 @@ const npmInstall = "npm i -g @fastagent-sh/fastagent";
 const npmEmbed = "npm i @fastagent-sh/fastagent";
 
 /* One list drives both the section-04 tabs and the ecosystem strip's
-   "embed in" group ("Your code" appears only as a tab). */
+   "embed in" group ("Your code" appears only as a tab).
+   The tabs are CSS-only, and the selectors that wire input N to label N are
+   written out by hand — TAB_LIMIT in scripts/check-site.mjs is the number
+   they cover, and `npm run check` fails if this list outgrows it. */
 const embedFrameworks = [
   {
     id: "code",
@@ -462,21 +465,21 @@ const concepts = [
             </div>
             <div class="demo-body code-pane">
               <p><span class="tkw">const</span> {'{'} agent {'}'} = <span class="tkw">await</span> <span class="ct-fn">createPiAgentFromDefinition</span>(<span class="tstr">"./agent"</span>, {'{'}</p>
-              <p>  model: <span class="tstr">"anthropic/claude-sonnet-4"</span>,              <span class="tdim">// any provider</span></p>
-              <p>  sessions: <span class="ct-fn">jsonlSessionStore</span>({'{'} dir: <span class="tstr">".state"</span> {'}'}),  <span class="tdim">// or your own store</span></p>
-              <p>  providers: [myGateway],                          <span class="tdim">// or your model gateway</span></p>
+              <p>  model: <span class="tstr">"anthropic/claude-sonnet-4"</span>,              <span class="tcm">// any provider</span></p>
+              <p>  sessions: <span class="ct-fn">jsonlSessionStore</span>({'{'} dir: <span class="tstr">".state"</span> {'}'}),  <span class="tcm">// or your own store</span></p>
+              <p>  providers: [myGateway],                          <span class="tcm">// or your model gateway</span></p>
               <p>{'}'});</p>
               <footer class="demo-foot">▸ assembly is code — swap any module, the rest keeps working</footer>
             </div>
           </div>
 
-          <div class="demo-win tint-amber">
+          <div class="demo-win tint-yellow">
             <div class="demo-bar">
               <span class="demo-glyph">+</span>
               <span>extend · tools/lookup-order.ts</span>
             </div>
             <div class="demo-body code-pane">
-              <p><span class="tdim">// the filename becomes the tool name</span></p>
+              <p><span class="tcm">// the filename becomes the tool name</span></p>
               <p><span class="tkw">export default</span> <span class="ct-fn">defineTool</span>({'{'}</p>
               <p>  description: <span class="tstr">"Look up an order by id."</span>,</p>
               <p>  input: z.object({'{'} orderId: z.string() {'}'}),</p>
@@ -504,18 +507,18 @@ const concepts = [
 
         <div class="shape-grid">
           <pre class="term-block filetree" aria-label="Example FastAgent directory"><code><span class="ft-dir">agent/</span>
-├─ persona.md            <span class="ft-note"># identity + standing instructions</span>
-├─ AGENTS.md             <span class="ft-note"># project context — yours, or a host repo's</span>
-├─ <span class="ft-dir">skills/</span>               <span class="ft-note"># reusable markdown expertise</span>
-├─ <span class="ft-dir">tools/</span>                <span class="ft-note"># code tools · the filename is the name</span>
+├─ persona.md            <span class="tcm"># identity + standing instructions</span>
+├─ AGENTS.md             <span class="tcm"># project context — yours, or a host repo's</span>
+├─ <span class="ft-dir">skills/</span>               <span class="tcm"># reusable markdown expertise</span>
+├─ <span class="ft-dir">tools/</span>                <span class="tcm"># code tools · the filename is the name</span>
 │   ├─ lookup-order.ts
 │   └─ post-review.ts
-├─ <span class="ft-dir ft-accent">channels/</span>             <span class="ft-note ft-accent"># a file IS a channel</span>
+├─ <span class="ft-dir ft-accent">channels/</span>             <span class="tcm-accent"># a file IS a channel</span>
 │   ├─ github.ts
 │   └─ telegram.ts
-├─ <span class="ft-dir">schedules/</span>            <span class="ft-note"># cron time triggers</span>
-├─ reference.md          <span class="ft-note"># any markdown becomes context</span>
-└─ fastagent.config.mjs  <span class="ft-note"># deployment choices</span></code></pre>
+├─ <span class="ft-dir">schedules/</span>            <span class="tcm"># cron time triggers</span>
+├─ reference.md          <span class="tcm"># any markdown becomes context</span>
+└─ fastagent.config.mjs  <span class="tcm"># deployment choices</span></code></pre>
 
           <ul class="shape-notes">
             <li><strong>Bring your existing definition.</strong> An <code>AGENTS.md</code> plus <code>skills/</code> your coding agent already vibed is enough.</li>
@@ -553,7 +556,7 @@ const concepts = [
             ))}
           </div>
           {embedFrameworks.map((fw) => (
-            <Code code={fw.code} lang="ts" theme={fastagentCode} class="tab-panel" data-panel={fw.id} />
+            <Code code={fw.code} lang="ts" theme={CODE_THEME_DARK} class="tab-panel" data-panel={fw.id} />
           ))}
         </div>
 
@@ -582,13 +585,13 @@ const concepts = [
 
         <div class="demo-grid">
           <!-- GitHub -->
-          <a class="demo-win tint-purple" href="/docs/github/">
+          <a class="demo-win tint-sapphire" href="/docs/github/">
             <div class="demo-bar">
               <BrandIcon name="github" size={13} />
               <span>github · pull_request.opened</span>
               <span class="demo-go" aria-hidden="true">→</span>
             </div>
-            <div class="demo-body gh-thread">
+            <div class="demo-body">
               <div class="gh-comment">
                 <header><strong>support-agent</strong><span class="bot-tag">bot</span> reviewed <b>#128</b></header>
                 <span class="gh-file">src/fetch.ts · line 42</span>
@@ -629,7 +632,7 @@ const concepts = [
           </a>
 
           <!-- Custom -->
-          <a class="demo-win tint-amber" href="/docs/channel-development/">
+          <a class="demo-win tint-yellow" href="/docs/channel-development/">
             <div class="demo-bar">
               <BrandIcon name="discord" size={13} />
               <span>channels/discord.ts · yours</span>
@@ -637,7 +640,7 @@ const concepts = [
             </div>
             <div class="demo-body code-pane">
               <p><span class="tkw">const</span> channel: <span class="tty">ChannelModule</span> = ({'{'} agent {'}'}) =&gt; ({'{'}</p>
-              <p>  <span class="tstr">"POST /discord"</span>: <span class="tkw">async</span> (req) =&gt; {'{'} <span class="tdim">/* verify, map, invoke */</span> {'}'},</p>
+              <p>  <span class="tstr">"POST /discord"</span>: <span class="tkw">async</span> (req) =&gt; {'{'} <span class="tcm">/* verify, map, invoke */</span> {'}'},</p>
               <p>{'}'});</p>
               <p><span class="tkw">export default</span> channel;</p>
               <footer class="demo-foot">▸ a file in channels/ is the channel — Discord, queues, your trigger</footer>
@@ -652,8 +655,8 @@ const concepts = [
               <span class="demo-go" aria-hidden="true">→</span>
             </div>
             <div class="demo-body http-term">
-              <p><span class="tp">❯</span> fastagent fire daily-digest  <span class="tdim"># test a schedule without touching cron state</span></p>
-              <p><span class="tg">[schedule]</span> <span class="tdim">▸ daily-digest fired · prompt → agent ·</span> telegram-send <span class="tg">✓ delivered</span></p>
+              <p><span class="tp">❯</span> fastagent fire daily-digest  <span class="tcm"># test a schedule without touching cron state</span></p>
+              <p><span class="tch-schedule">[schedule]</span> <span class="tdim">▸ daily-digest fired · prompt → agent ·</span> telegram-send <span class="tg">✓ delivered</span></p>
               <footer class="demo-foot">▸ fires while serving · the agent can wake itself · every run is logged</footer>
             </div>
           </a>
@@ -672,9 +675,9 @@ const concepts = [
           </p>
         </header>
 
-        <pre class="term-block deploy-term" aria-label="Deploy command and generated files"><code><span class="tp">❯</span> fastagent deploy fly
-<span class="tg">✓</span> wrote fly.toml         <span class="tdim"># microVM · scale-to-zero · fast resume</span>
-<span class="tg">✓</span> wrote Dockerfile       <span class="tdim"># portable — the agent isn't tied to a host</span>
+        <pre class="term-block" aria-label="Deploy command and generated files"><code><span class="tp">❯</span> fastagent deploy fly
+<span class="tg">✓</span> wrote fly.toml         <span class="tcm"># microVM · scale-to-zero · fast resume</span>
+<span class="tg">✓</span> wrote Dockerfile       <span class="tcm"># portable — the agent isn't tied to a host</span>
 <span class="tg">✓</span> wrote .dockerignore
 <span class="tdim">▸</span> runbook printed <span class="tdim">· or --run drives the deploy to completion</span></code></pre>
 

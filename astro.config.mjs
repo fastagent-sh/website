@@ -4,7 +4,7 @@ import { defineConfig } from "astro/config";
 import starlightLinksValidator from "starlight-links-validator";
 import starlightLlmsTxt from "starlight-llms-txt";
 
-import { fastagentCode } from "./src/code-theme.ts";
+import { CODE_THEME_DARK, CODE_THEME_LIGHT, codeFrameBg } from "./src/theme.ts";
 import { DESCRIPTION as description, OG_IMAGE, SITE as site } from "./src/site.ts";
 
 
@@ -17,9 +17,22 @@ export default defineConfig({
       title: "FastAgent",
       description,
       expressiveCode: {
-        themes: ["github-dark", "github-light", fastagentCode],
-        themeCssSelector: (theme) =>
-          theme.name === "fastagent-dark" ? "[data-theme='fastagent']" : `[data-theme='${theme.type}']`,
+        // Docs follow the docs shell (Starlight toggles data-theme); the
+        // landing and blog pin <html data-theme="dark"> so their code panes
+        // stay dark in both modes, like the rest of the terminal theater.
+        themes: [CODE_THEME_DARK, CODE_THEME_LIGHT],
+        // Starlight derives this same selector, but only while exactly one
+        // dark and one light theme are registered — a third theme, or one
+        // dropped, and it falls back to keying on theme.name. Blog fences
+        // depend on [data-theme='dark'] matching the pin in Site.astro, so the
+        // rule is stated here instead of inherited from that condition.
+        themeCssSelector: (theme) => `[data-theme='${theme.type}']`,
+        styleOverrides: {
+          frames: {
+            editorBackground: ({ theme }) => codeFrameBg[theme.type],
+            terminalBackground: ({ theme }) => codeFrameBg[theme.type],
+          },
+        },
       },
       favicon: "/favicon.png",
       logo: {
@@ -31,7 +44,7 @@ export default defineConfig({
       components: {
         Head: "./src/components/StarlightHead.astro",
       },
-      customCss: ["./src/styles/custom.css"],
+      customCss: ["./src/styles/tokens.css", "./src/styles/base.css"],
       head: [
         { tag: "link", attrs: { rel: "preload", href: "/fonts/plex-mono-400.woff2", as: "font", type: "font/woff2", crossorigin: "anonymous" } },
         { tag: "link", attrs: { rel: "preload", href: "/fonts/plex-mono-600.woff2", as: "font", type: "font/woff2", crossorigin: "anonymous" } },

@@ -1,118 +1,12 @@
-/* ────────────────────────────────────────────────────────────────────────
-   FastAgent design system — dark hacker edition
-   Near-black green-cast base, teal accent, mono headlines, shell-comment
-   eyebrows. Serif italic (the logo's F) reserved for the brand phrase.
-   Every claim gets an artifact: a pane, a table, a chip — not prose.
-   ──────────────────────────────────────────────────────────────────────── */
-
-@font-face {
-  font-family: "IBM Plex Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/plex-mono-400.woff2") format("woff2");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-  font-family: "IBM Plex Mono";
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/plex-mono-400-italic.woff2") format("woff2");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-  font-family: "IBM Plex Mono";
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("/fonts/plex-mono-600.woff2") format("woff2");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-:root {
-  color-scheme: light dark;
-
-  /* dark hacker base */
-  --bg: #0a0c0b;
-  --bg-elevated: #101413;
-  --panel: #0d1110;
-  --line: #1e2522;
-  --line-strong: #2c3630;
-  --text: #e4eae6;
-  --text-soft: #c3ccc7;
-  --muted: #8d9992;
-  --muted-2: #6b7770;
-
-  /* brand + state */
-  --accent: #2dd4bf;
-  --accent-dim: #14b8a6;
-  --accent-ink: #04211d;
-  --green: #7ecf8a;
-  --amber: #e0bd68;
-  --red: #ff6b5e;
-  --purple: #b795f5;
-  --blue: #6aa5f8;
-
-  /* terminal panes (slightly deeper than page) */
-  --term-bg: #080a09;
-  --term-bar: #101413;
-  --term-border: #1e2522;
-  --term-text: #d5dcd9;
-  --term-muted: #5f6c68;
-  --term-accent: #2dd4bf;
-  --term-green: #7ecf8a;
-  --term-purple: #b795f5;
-  --term-blue: #6aa5f8;
-  --term-amber: #e0bd68;
-
-  --radius-lg: 8px;
-  --radius-md: 6px;
-  --radius-sm: 4px;
-  --max: 74rem;
-
-  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --body: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif;
-  --serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
-
-  /* Starlight docs theme */
-  --sl-color-accent-low: #d8efec;
-  --sl-color-accent: #0d7d70;
-  --sl-color-accent-high: #0a4e46;
-  --sl-font: var(--body);
-  --sl-font-mono: var(--mono);
-}
-
-:root[data-theme="dark"] {
-  --sl-color-accent-low: #0b3733;
-  --sl-color-accent: #2dd4bf;
-  --sl-color-accent-high: #b8f0e7;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --sl-color-accent-low: #0b3733;
-    --sl-color-accent: #2dd4bf;
-    --sl-color-accent-high: #b8f0e7;
-  }
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
+/* The custom shell: landing, blog list, blog posts. Loaded by
+   src/layouts/Site.astro, its only importer — docs pages get tokens.css and
+   base.css, and none of this. */
 
 /* ────────────────────────────────────────────────────────────────────────
    Landing base
    ──────────────────────────────────────────────────────────────────────── */
 
 body.site {
-  color-scheme: dark;
   overflow-x: hidden;
   margin: 0;
   background: var(--bg);
@@ -124,9 +18,9 @@ body.site {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Style guide: selection is Overlay 2 at 20–30%, text keeps its own color. */
 .site ::selection {
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: color-mix(in srgb, var(--selection) 28%, transparent);
 }
 
 .site a {
@@ -144,7 +38,9 @@ body.site {
   border-radius: var(--radius-sm);
 }
 
-.site code {
+/* Inline code only. A bare `code` selector also tints the <code> inside every
+   <pre>, washing Expressive Code's own background with 8% accent. */
+.site :not(pre) > code {
   font: 0.88em/1.5 var(--mono);
   color: var(--text-soft);
   background: color-mix(in srgb, var(--accent) 8%, transparent);
@@ -187,17 +83,36 @@ body.site {
   font-weight: 600;
 }
 
-/* shared terminal-ish syntax tokens */
-.tp   { color: var(--term-accent); font-weight: 600; }
-.tdim { color: var(--term-muted); }
-.tstr { color: var(--term-amber); }
-.tkw  { color: var(--term-purple); }
-.tty  { color: var(--term-blue); }
+/* Code inside the panes, on Catppuccin's language defaults:
+   string Green · keyword Mauve · type Yellow · comment Overlay 2. */
+.tstr { color: var(--term-green); }
+.tkw  { color: var(--term-keyword); }
+.tty  { color: var(--term-yellow); }
+.tcm  { color: var(--term-comment); font-style: italic; }
+/* The one comment that marks the point of the tree, rather than annotating it. */
+.tcm-accent { color: var(--term-teal); font-style: italic; }
+
+/* Terminal roles, which the guide does not cover. The prompt and a served
+   result take Green (the shell's own convention, and the site accent);
+   directories Blue; dimmed output Overlay 1; the highlighted path Teal.
+   Hues repeat across roles that never share a line — .ft-dir and
+   .tch-telegram are both Blue but live in different panes. What has to stay
+   distinct is the channel set below, which is read side by side. */
+.tp   { color: var(--term-green); font-weight: 600; }
 .tg   { color: var(--term-green); }
-.tpu  { color: var(--term-purple); }
+.tdim { color: var(--term-muted); }
 .ft-dir { color: var(--term-blue); font-weight: 600; }
-.ft-accent { color: var(--term-accent); }
-.ft-note { color: var(--term-muted); }
+.ft-accent { color: var(--term-teal); }
+
+/* Which channel a log line came from. These four appear in the same pane, a
+   few lines apart, so each needs its own hue. */
+.tch-github   { color: var(--term-sapphire); }
+.tch-telegram { color: var(--term-blue); }
+.tch-http     { color: var(--term-peach); }
+.tch-schedule { color: var(--term-yellow); }
+
+/* An entity a line refers to: a PR number, a room, a session id, a URL. */
+.tref { color: var(--term-teal); }
 
 /* ────────────────────────────────────────────────────────────────────────
    Header
@@ -304,7 +219,7 @@ body.site {
   min-width: 0;
 }
 
-/* dotted grid + teal glow behind the mock */
+/* dotted grid + accent glow behind the mock */
 .hero-right::before {
   content: "";
   position: absolute;
@@ -672,6 +587,7 @@ body.site {
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-lg);
   background: var(--term-bg);
+  color-scheme: dark;
   color: var(--term-text);
   font: 400 0.88rem/1.85 var(--mono);
   overflow-x: auto;
@@ -744,6 +660,8 @@ body.site {
   opacity: 0.75;
 }
 
+/* The style guide paints an active pane border Lavender; this one follows the
+   accent instead, for the same no-purple reason as --accent above. */
 .core-center {
   display: grid;
   gap: 0.45rem;
@@ -752,6 +670,7 @@ body.site {
   border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--line-strong));
   border-radius: var(--radius-lg);
   background: var(--term-bg);
+  color-scheme: dark;
   text-align: center;
   box-shadow: 0 0 50px -18px color-mix(in srgb, var(--accent) 45%, transparent);
 }
@@ -860,6 +779,7 @@ body.site {
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-lg);
   background: var(--term-bg);
+  color-scheme: dark;
   overflow: hidden;
   transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -870,10 +790,11 @@ body.site {
   box-shadow: 0 16px 40px -18px color-mix(in srgb, var(--tint, var(--accent)) 45%, transparent);
 }
 
-.tint-purple { --tint: var(--purple); }
+.tint-sapphire { --tint: var(--sapphire); }
 .tint-blue   { --tint: var(--blue); }
-.tint-teal   { --tint: var(--accent); }
-.tint-amber  { --tint: var(--amber); }
+.tint-teal   { --tint: var(--teal); }
+.tint-green  { --tint: var(--accent); }
+.tint-yellow  { --tint: var(--yellow); }
 
 .demo-bar {
   display: flex;
@@ -940,7 +861,7 @@ body.site {
 }
 
 .gh-comment header strong { color: var(--text); }
-.gh-comment header b { color: var(--purple); }
+.gh-comment header b { color: var(--teal); }
 
 .gh-file {
   display: inline-block;
@@ -1033,6 +954,7 @@ body.site {
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-lg);
   background: var(--term-bg);
+  color-scheme: dark;
   overflow: hidden;
 }
 
@@ -1067,6 +989,12 @@ body.site {
   display: none;
   margin: 0;
   padding: 1.4rem 1.6rem;
+  /* shiki writes the theme background inline on the <pre>, which would paint
+     Mocha base inside this crust pane; only !important outranks an inline
+     style. The markdown fences solve the same problem through Expressive
+     Code's styleOverrides (see astro.config.mjs) — these tabs render with
+     <Code>, which is plain shiki and never reaches that config. */
+  background: none !important;
   color: var(--term-text);
   font: 400 0.85rem/1.75 var(--mono);
   overflow-x: auto;
@@ -1081,8 +1009,11 @@ body.site {
 }
 
 /* Tab N (DOM order of the radio inputs) drives label N and panel N — no ids to
-   keep in sync with the embedFrameworks data. Supports up to 10 tabs; extend the
-   lists if more are ever added. */
+   keep in sync with the embedFrameworks data. CSS cannot compare an input's
+   index to a panel's attribute, so the pairs are written out; the three lists
+   below cover ten tabs, which is what embedFrameworks holds today. Adding an
+   eleventh fails `npm run check` (TAB_LIMIT) rather than silently doing
+   nothing — extend all three lists, or move the tabs to JS. */
 .tabs > input:nth-of-type(1):checked ~ .tabs-labels label:nth-of-type(1),
 .tabs > input:nth-of-type(2):checked ~ .tabs-labels label:nth-of-type(2),
 .tabs > input:nth-of-type(3):checked ~ .tabs-labels label:nth-of-type(3),
@@ -1132,8 +1063,8 @@ body.site {
    event flow + concepts (inside 01 · the core)
    ──────────────────────────────────────────────────────────────────────── */
 
-.ct-fn  { color: var(--term-accent); font-weight: 600; }
-.ct-arg { color: var(--term-purple); }
+.ct-fn  { color: var(--term-fn); font-weight: 600; }
+.ct-arg { color: var(--term-maroon); }
 
 .event-flow {
   display: flex;
@@ -1160,8 +1091,8 @@ body.site {
 }
 
 .ev-text { border-color: color-mix(in srgb, var(--blue) 45%, transparent); color: var(--blue); }
-.ev-tool { border-color: color-mix(in srgb, var(--purple) 45%, transparent); color: var(--purple); }
-.ev-done { border-color: var(--green); color: var(--green); }
+.ev-tool { border-color: color-mix(in srgb, var(--sapphire) 45%, transparent); color: var(--sapphire); }
+.ev-done { border-color: var(--accent); color: var(--accent); }
 .ev-fail { border-color: color-mix(in srgb, var(--red) 55%, transparent); color: var(--red); }
 
 .ev-sep, .ev-or {
@@ -1698,73 +1629,24 @@ a.tag-link:hover {
 }
 
 /* ────────────────────────────────────────────────────────────────────────
-   Docs (Starlight) — token overrides above; minor polish here
+   Light mode — custom pages only (landing, blog); docs are Starlight's.
+   The tokens themselves flip in tokens.css via light-dark(); what is left
+   here is the handful of assets that cannot be expressed as a token.
+   html[data-mode] is set pre-paint from the shared "starlight-theme"
+   localStorage key (docs and site follow each other), falling back to
+   prefers-color-scheme.
    ──────────────────────────────────────────────────────────────────────── */
 
-.sl-markdown-content a:not(:where(.not-content *)) {
-  text-underline-offset: 0.18em;
-}
-
-.site-title img {
-  max-height: 2.25rem;
-  width: auto;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* ────────────────────────────────────────────────────────────────────────
-   Light mode — custom pages only (landing, blog). Docs are themed by
-   Starlight. The page shell flips via the page-level tokens below; the
-   terminal theater (hero mock, demo panes, term blocks, tabs, code) stays
-   dark by design — it reads from the pinned --term-* palette.
-   Selection: html[data-mode] is set pre-paint from the shared
-   "starlight-theme" localStorage key (docs and site follow each other),
-   falling back to prefers-color-scheme.
-   ──────────────────────────────────────────────────────────────────────── */
-html[data-mode="light"] {
-  color-scheme: light;
-
-  --bg: #f4f7f5;
-  --bg-elevated: #e8ede9;
-  --panel: #fcfdfc;
-  --line: #d8e0da;
-  --line-strong: #bccac2;
-  --text: #17211c;
-  --text-soft: #2f3d36;
-  --muted: #5a6961;
-  --muted-2: #78857d;
-
-  --accent: #0c8577;
-  --accent-dim: #0a6e63;
-  --green: #23713e;
-  --amber: #8a6a17;
-  --red: #bd3527;
-  --purple: #6a4ec2;
-  --blue: #1d5ec4;
-}
-
-/* body.site declares its own color-scheme: dark, which beats the inherited
-   light value — form controls and scrollbars must follow the mode too. */
-html[data-mode="light"] body.site {
-  color-scheme: light;
-}
-
-/* Brand icons drawn white (or Bun's cream) for the dark strip would vanish
-   on the light shell; CSS fill wins over the presentation attribute. */
-html[data-mode="light"] :is(.eco-list, .host-chips) path[fill="#ffffff"] { fill: #28322c; }
-html[data-mode="light"] :is(.eco-list, .host-chips) path[fill="#fbf0df"] { fill: #7c6a45; }
+/* Brand marks keep the vendor's own color, and they are decorative — every one
+   of them sits next to its name in text. The exception is a mark that would
+   *vanish* on the light page: those are remapped to the nearest palette hue so
+   the row does not read as a missing icon. scripts/check-site.mjs holds the
+   threshold and fails when a new brand lands under it without a rule here. */
+html[data-mode="light"] :is(.eco-list, .host-chips) path[fill="#ffffff"] { fill: var(--text-soft); }
+html[data-mode="light"] :is(.eco-list, .host-chips) path[fill="#fbf0df"] { fill: var(--yellow); }
+html[data-mode="light"] :is(.eco-list, .host-chips) path[fill="#ffd21e"] { fill: var(--yellow); }
+html[data-mode="light"] :is(.eco-list, .host-chips) path[fill="#46e3b7"] { fill: var(--teal); }
+html[data-mode="light"] :is(.eco-list, .host-chips) path[fill="#00dc82"] { fill: var(--accent); }
 
 /* Wordmark swaps to the light asset; the near-white footer mark inverts. */
 .brand .logo-light { display: none; }
