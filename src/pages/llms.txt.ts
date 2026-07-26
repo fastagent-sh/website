@@ -2,6 +2,8 @@
 import { getIndexedTopLevel } from "@cloudflare/nimbus-docs";
 import { config } from "virtual:nimbus/config";
 
+import { DETAILS, SECTIONS } from "../site";
+
 export const prerender = true;
 
 export async function GET() {
@@ -11,6 +13,8 @@ export async function GET() {
     `# ${config.title}`,
     "",
     config.description ?? "Documentation index for AI agents.",
+    "",
+    DETAILS,
     "",
     `Full corpus (all pages, one document): ${new URL("/llms-full.txt", config.site).href}`,
     "",
@@ -35,12 +39,32 @@ export async function GET() {
     if (group.kind === "version") continue;
     rows.push({
       key: `/${group.slug}`,
-      line: `- [${group.label}](${new URL(`/${group.slug}/llms.txt`, config.site).href})`,
+      line: `- [${SECTIONS[group.slug]?.label ?? group.label}](${new URL(`/${group.slug}/llms.txt`, config.site).href})${SECTIONS[group.slug] ? ` — ${SECTIONS[group.slug].description}` : ""}`,
     });
   }
 
-  rows.sort((a, b) => a.key.localeCompare(b.key));
+  /* Alphabetical, except the primary section leads: read top-down, an agent
+     should meet the documentation before the blog. */
+  rows.sort((a, b) => (a.key === "/docs" ? "" : a.key).localeCompare(b.key === "/docs" ? "" : b.key));
   for (const row of rows) lines.push(row.line);
+
+  /* Everything above is one hop from its page. These are the three pages the
+     reading order actually starts with, named here so the first useful page
+     is one hop away rather than two — the promotion the old index carried.
+     Titles come from the entries themselves, so a renamed page renames here. */
+  const members = new Map(groups.flatMap((g) => g.members.map((m) => [m.entry.id, m])));
+  const start = ["docs/quickstart", "docs/overview", "docs/configuration"].map((id) => {
+    const item = members.get(id);
+    // Renamed upstream: fail the build rather than quietly drop the promotion.
+    if (!item) throw new Error(`llms.txt promotes "${id}", which is not a page`);
+    return item;
+  });
+  lines.push(
+    "",
+    "## Start here",
+    "",
+    ...start.map((item) => `- [${item.title}](${new URL(item.markdownUrl, config.site).href})`),
+  );
 
   /* The pages above are the site; these are the two doors into it that are
      not pages. start.md is the runbook a coding agent is pointed at from the

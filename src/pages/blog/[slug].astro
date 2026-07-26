@@ -17,8 +17,9 @@ const dateLabel = date.toLocaleDateString("en-US", { year: "numeric", month: "lo
 
 /* The markdown twin src/pages/[...slug]/index.md.ts emits for this post, and
    /blog/llms.txt advertises. The docs shell offers it on the page as well as
-   in the index; a post is a page an agent reads too, so it does the same. */
-const markdownUrl = `${SITE}/blog/${post.id}/index.md`;
+   in the index; a post is a page an agent reads too, so it does the same.
+   Same rule as there: the twin sits at this page's own URL + index.md. */
+const markdownUrl = `${SITE}${Astro.url.pathname}index.md`;
 
 const structuredData = {
   "@context": "https://schema.org",

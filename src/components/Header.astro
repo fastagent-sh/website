@@ -22,16 +22,11 @@ interface Props {
 
 const { showSidebar = true } = Astro.props;
 
-/* This header also flies on /404, which is neither section. */
-const section = Astro.url.pathname.startsWith("/docs")
-  ? "docs"
-  : Astro.url.pathname.startsWith("/blog")
-    ? "blog"
-    : null;
-const tab = (name: string) =>
-  name === section
-    ? "text-foreground bg-accent"
-    : "text-muted-foreground transition-colors hover:text-foreground hover:bg-accent/60";
+/* This chrome is the docs shell's — /blog/* runs Site.astro and its own
+   header — so the only tab that can be current here is Docs, and only when
+   the page is one: /404 renders this header too. */
+const inDocs = Astro.url.pathname.startsWith("/docs");
+const IDLE = "text-muted-foreground transition-colors hover:text-foreground hover:bg-accent/60";
 ---
 
 <header class="sticky top-0 z-30 border-b border-border bg-card/80 backdrop-blur-lg">
@@ -50,8 +45,8 @@ const tab = (name: string) =>
 
     <div class="flex items-center gap-2">
       <nav aria-label="Site" class="hidden md:flex items-center gap-1 mr-1">
-        <a href="/docs/" aria-current={section === "docs" ? "page" : undefined} class:list={["rounded-md px-2 py-1 text-[0.8125rem] font-medium no-underline", tab("docs")]}>Docs</a>
-        <a href="/blog/" aria-current={section === "blog" ? "page" : undefined} class:list={["rounded-md px-2 py-1 text-[0.8125rem] font-medium no-underline", tab("blog")]}>Blog</a>
+        <a href="/docs/" aria-current={inDocs ? "page" : undefined} class:list={["rounded-md px-2 py-1 text-[0.8125rem] font-medium no-underline", inDocs ? "text-foreground bg-accent" : IDLE]}>Docs</a>
+        <a href="/blog/" class:list={["rounded-md px-2 py-1 text-[0.8125rem] font-medium no-underline", IDLE]}>Blog</a>
       </nav>
       {config.search !== false && <SearchTrigger />}
       {config.github && (

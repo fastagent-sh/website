@@ -42,7 +42,11 @@ const lastUpdated = entry.data.lastUpdated ?? await getLastUpdated(entry);
 // ever sees its options object (or undefined), never `false`.
 const tocConfig = entry.data.tableOfContents;
 const toc = tocOn && tocConfig !== false ? getTOC(headings, tocConfig) : false;
-const markdownPath = `/${entry.id}/index.md`;
+/* The twin route emits at each page's own URL + index.md, so read that URL
+   here rather than rebuilding it from the entry id: the two agree by
+   construction, and an id that doesn't slugify to its own route (SPEC.md →
+   /docs/spec/) can't drift the link away from the file. */
+const markdownPath = `${Astro.url.pathname}index.md`;
 const markdownUrl = Astro.site ? new URL(markdownPath, Astro.site).href : markdownPath;
 /* One card for the whole site (public/social-preview.png, npm run og), so no
    per-page OG route: NimbusHead falls back to config.socialImage. */

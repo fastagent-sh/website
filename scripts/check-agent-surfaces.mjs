@@ -50,7 +50,7 @@ const indexed = new Set(
     .flatMap((f) => [...readFileSync(new URL(f, dist), "utf8").matchAll(new RegExp(`${SITE}(/[^)\\s>"']*)`, "g"))])
     .map(([, path]) => clean(path).replace(/^\//, "")),
 );
-const orphans = files.filter((f) => f.endsWith("/index.md") && !indexed.has(f));
+const orphans = files.filter((f) => /(^|\/)index\.md$/.test(f) && !indexed.has(f));
 if (orphans.length) problems.push(`markdown pages no llms.txt names: ${orphans.join(", ")}`);
 
 if (problems.length) {

@@ -19,6 +19,8 @@
 import { getIndexedTopLevel, type IndexedEntry } from "@cloudflare/nimbus-docs";
 import { config } from "virtual:nimbus/config";
 
+import { SECTIONS } from "../../site";
+
 export const prerender = true;
 
 interface SectionProps {
@@ -45,9 +47,14 @@ export async function getStaticPaths() {
 }
 
 export async function GET({ props }: { props: SectionProps }) {
-  const { label, members } = props;
+  const { slug, label, members } = props;
 
-  const lines = [`# ${label}`, "", "## Pages", ""];
+  /* The framework labels a section with its slug — a path segment where a
+     name belongs. src/site.ts holds the names. */
+  const section = SECTIONS[slug];
+  const lines = [`# ${section?.label ?? label}`, ""];
+  if (section) lines.push(section.description, "");
+  lines.push("## Pages", "");
 
   for (const item of members) {
     const description = item.description ? ` — ${item.description}` : "";
