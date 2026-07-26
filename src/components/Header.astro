@@ -12,10 +12,6 @@ import { config } from "virtual:nimbus/config";
 import fastagent from "../generated/fastagent.json";
 
 interface Props {
-  /** Astro collection id for the current page, forwarded from DocsLayout. */
-  collection?: string;
-  /** Astro entry id for the current page, forwarded from DocsLayout. */
-  entryId?: string;
   /**
    * Whether the page has a sidebar to open. When `false`, the mobile
    * menu button is hidden — pages that opted out via `sidebar: false`

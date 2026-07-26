@@ -40,10 +40,13 @@ for (const surface of surfaces) {
 
 /* And the other way: a page the site serves but no index names is a page an
    agent has to guess at. Only the .md twins are checked — the HTML pages have
-   the sitemap, which @astrojs/sitemap builds from the same routes. */
+   the sitemap, which @astrojs/sitemap builds from the same routes.
+   llms-full.txt is not an index: it is generated from the same entry list the
+   twins are, so it names every twin by construction and would answer this
+   question before it was asked. The indexes are the files that can drift. */
 const indexed = new Set(
   surfaces
-    .filter((f) => f.endsWith(".txt"))
+    .filter((f) => f === "llms.txt" || f.endsWith("/llms.txt"))
     .flatMap((f) => [...readFileSync(new URL(f, dist), "utf8").matchAll(new RegExp(`${SITE}(/[^)\\s>"']*)`, "g"))])
     .map(([, path]) => clean(path).replace(/^\//, "")),
 );

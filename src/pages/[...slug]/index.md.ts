@@ -66,9 +66,10 @@ export async function GET({ props }: { props: SlugProps }) {
     `# ${title}`,
     "",
     markdown,
-    "",
     // The file this page was rendered from, in the repository that owns it.
-    `Source: ${typeof data.editUrl === "string" ? data.editUrl : new URL(item.url, config.site).href}`,
+    // Only the docs carry one (the sync script writes it); a blog post is
+    // authored here, and citing its own URL back at the reader says nothing.
+    ...(typeof data.editUrl === "string" ? ["", `Source: ${data.editUrl}`] : []),
     "",
   ].join("\n");
 
