@@ -102,8 +102,16 @@ export function initSearch(config: SearchConfig): SearchInstance {
       await provider.init?.();
       initialized = true;
       return true;
-    } catch {
-      emptyState.textContent = "Search is available after a production build.";
+    } catch (error) {
+      /* In dev there is no Pagefind bundle and this is the expected path; in
+         production it means the bundle 404'd, or a policy blocked its import.
+         The starter reported the dev cause in both cases and dropped the
+         error, which is the one thing that makes the production case
+         undiagnosable. */
+      console.error("[search] initialization failed", error);
+      emptyState.textContent = import.meta.env.DEV
+        ? "Search is available after a production build."
+        : "Search is temporarily unavailable.";
       return false;
     }
   }
@@ -135,8 +143,9 @@ export function initSearch(config: SearchConfig): SearchInstance {
       emptyState.style.display = "none";
       input.setAttribute("aria-expanded", "true");
       for (const result of results) resultsContainer.appendChild(buildResult(result));
-    } catch {
+    } catch (error) {
       if (signal.aborted) return;
+      console.error("[search] query failed", error);
       clearResults();
       emptyState.style.display = "";
       emptyState.textContent = "Search is temporarily unavailable.";

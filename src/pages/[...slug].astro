@@ -11,7 +11,6 @@ import {
   getLastUpdated,
   getTOC,
 } from "@cloudflare/nimbus-docs";
-import { components } from "../components";
 
 export const prerender = true;
 export const getStaticPaths = getDocsStaticPaths;
@@ -67,9 +66,8 @@ const socialImage = entry.data.socialImage;
   lastUpdated={lastUpdated}
   editUrl={editUrl}
   draft={entry.data.draft}
-  audience={entry.data.audience}
   collection={entry.collection}
   entryId={entry.id}
 >
-  <Content components={components} />
+  <Content />
 </DocsLayout>

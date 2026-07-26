@@ -139,7 +139,6 @@ export const nimbus = {
   "primary-foreground": roles["accent-ink"],
   border: roles.line,
   "border-strong": roles["line-strong"],
-  selected: roles["line-strong"],
   info: roles.blue,
   success: roles.accent,
   warning: roles.yellow,

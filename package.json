@@ -12,6 +12,7 @@
     "check": "node scripts/check-site.mjs && astro check",
     "prebuild": "npm run sync:docs && npm run tokens",
     "build": "astro build",
+    "postbuild": "node scripts/check-agent-surfaces.mjs",
     "preview": "astro preview",
     "deploy": "npm run build && wrangler deploy",
     "deploy:www": "wrangler deploy --config wrangler.www.jsonc",

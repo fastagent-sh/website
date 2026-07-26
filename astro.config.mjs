@@ -73,11 +73,15 @@ export default defineConfig({
   },
   integrations: [
     icon(),
-    /* No `rules`: nimbus-docs lint walks .mdx, and these pages are .md —
+    /* Nothing here is MDX. The pages are .md copies of vendor/fastagent —
        upstream prose is full of angle brackets and braces that MDX would read
-       as JSX. What the link rule would have caught is checked instead by
-       scripts/check-site.mjs, over the same .md files. */
+       as JSX — so there is no component registry to validate, `:::` asides and
+       the component globals don't apply, and nimbus-docs lint (which walks
+       .mdx) never sees this content. What its link rule would have caught is
+       checked instead by scripts/check-site.mjs, over the same .md files.
+       `nimbus-docs add` restores any component the day a .mdx page lands. */
     nimbus(nimbusConfig, {
+      validateMdx: false,
       markdown: { hastPlugins: [tableScroll()] },
     }),
   ],

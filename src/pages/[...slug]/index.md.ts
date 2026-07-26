@@ -2,11 +2,12 @@
  * Per-page `/<slug>/index.md` — the clean-markdown alternate for every
  * indexable entry of the primary `docs` collection.
  *
- * Non-primary collections (`api`, `blog`, …) mount under their own
- * URL namespace by convention; their `.md` alternates live at the
- * sibling route `pages/<collection>/[...slug]/index.md.ts`. This route
- * filters to the primary collection so multi-collection sites don't
- * generate conflicting `[...slug]` paths at root.
+ * The starter filters this route to the primary collection and expects a
+ * sibling route per collection. This site has two — `docs` and `blog` — and
+ * `/llms.txt` indexes both, so one route serves both instead: the slug comes
+ * from each entry's own canonical URL, which already carries the collection's
+ * mount prefix, and a copy of this file per collection would only be a place
+ * for the two to drift.
  *
  * The starter's `.mdx` twin (the authored source, JSX intact) is not
  * installed here: these pages are `.md` copies of vendor/fastagent, so the
@@ -19,26 +20,21 @@ import { config } from "virtual:nimbus/config";
 
 export const prerender = true;
 
-const PRIMARY_COLLECTION = "docs";
-
 interface SlugProps {
   item: IndexedEntry;
 }
 
 export async function getStaticPaths() {
   const indexed = await getIndexedEntries();
-  return indexed
-    .filter((item) => item.collection === PRIMARY_COLLECTION)
-    .map((item) => ({
-      // Root index (`entry.id === "index"`) emits at `/index.md`; Astro's
-      // rest-segment treats `undefined` as "no segment" so the URL is
-      // `/index.md` rather than `/index/index.md`. Every other entry emits
-      // at `/<entry.id>/index.md` — the convention `<page>/index.md`.
-      params: {
-        slug: item.entry.id === "index" ? undefined : item.entry.id,
-      },
-      props: { item } as SlugProps,
-    }));
+  return indexed.map((item) => ({
+    // The home page (`item.url === "/"`) emits at `/index.md`; Astro's
+    // rest-segment treats `undefined` as "no segment", so the URL is
+    // `/index.md` rather than `/index/index.md`. Every other page emits at
+    // `<its own URL>/index.md` — the convention `<page>/index.md`, and the
+    // URL `/llms.txt` advertises for it.
+    params: { slug: item.url.replace(/^\/|\/$/g, "") || undefined },
+    props: { item } as SlugProps,
+  }));
 }
 
 export async function GET({ props }: { props: SlugProps }) {

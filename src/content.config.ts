@@ -11,14 +11,7 @@ export const collections = {
          frontmatter carries — `status`, mostly. Declaring editUrl types it for
          the route; strictFrontmatter lets the rest through untouched, so the
          sync stays a copy rather than a rewrite. */
-      schemaFields: {
-        editUrl: z.string().optional(),
-        /* Nimbus' provenance flag, and the reason the default is inverted:
-           these pages are written for agents as much as for people, so
-           `audience: human` is the one worth marking. DocsLayout draws the
-           "For humans" rule from it. */
-        audience: z.literal("human").optional(),
-      },
+      schemaFields: { editUrl: z.string().optional() },
       strictFrontmatter: false,
     }),
   ),
