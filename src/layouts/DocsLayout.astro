@@ -112,7 +112,6 @@ const hasPagination = Astro.slots.has("pagination");
           {showSidebar && (
           <script is:inline aria-hidden="true">
           (function () {
-            try {
               if (!matchMedia("(min-width: 64rem)").matches) return;
               const sidebar = document.getElementById("desktop-sidebar");
               if (!sidebar) return;
@@ -131,10 +130,14 @@ const hasPagination = Astro.slots.has("pagination");
                 if (panel) panel.setAttribute("data-nb-state", state);
               }
 
-              const raw = sessionStorage.getItem("sidebar-state");
+              /* Only the parse is guarded. A corrupted key should cost the
+                 reader their stored open/scroll state, not the active page's
+                 group being left collapsed with no explanation. */
+              let raw = null;
+              try { raw = sessionStorage.getItem("sidebar-state"); } catch (_) {}
               let state;
               if (raw) {
-                state = JSON.parse(raw);
+                try { state = JSON.parse(raw); } catch (_) { state = undefined; }
                 if (state && content.dataset.nbSidebarHash === state.hash) {
                   const groups = content.querySelectorAll("[data-nb-sidebar-group]");
                   for (let i = 0; i < groups.length; i++) {
@@ -163,7 +166,6 @@ const hasPagination = Astro.slots.has("pagination");
                 const ar = active.getBoundingClientRect();
                 sidebar.scrollTop += ar.top - sr.top - sr.height / 2 + ar.height / 2;
               }
-            } catch (_) {}
           })();
           </script>
           )}

@@ -28,6 +28,9 @@ const clean = (path) => path.replace(/[.,;:!?]+$/, "");
 const target = (path) => (/\.[a-z0-9]+$/i.test(path) ? path : `${path.replace(/\/$/, "")}/index.html`);
 
 const isIndex = (f) => f === "llms.txt" || f.endsWith("/llms.txt");
+/* `.` and `/` in the origin would otherwise be pattern syntax; over-matching
+   is the wrong way for a link check to fail. */
+const ORIGIN = SITE.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const problems = [];
 let links = 0;
 for (const surface of surfaces) {
@@ -39,7 +42,7 @@ for (const surface of surfaces) {
      would be checking someone else's invariant. */
   if (!isIndex(surface)) continue;
   let named = 0;
-  for (const [, path] of body.matchAll(new RegExp(`${SITE}(/[^)\\s>"']*)`, "g"))) {
+  for (const [, path] of body.matchAll(new RegExp(`${ORIGIN}(/[^)\\s>"']*)`, "g"))) {
     links += 1;
     named += 1;
     const file = target(clean(path)).replace(/^\//, "");
@@ -106,7 +109,7 @@ if (!directives) problems.push("no page carries an agent directive: the directiv
 const namedByIndex = new Set(
   surfaces
     .filter(isIndex)
-    .flatMap((f) => [...readFileSync(new URL(f, dist), "utf8").matchAll(new RegExp(`${SITE}(/[^)\\s>"']*)`, "g"))])
+    .flatMap((f) => [...readFileSync(new URL(f, dist), "utf8").matchAll(new RegExp(`${ORIGIN}(/[^)\\s>"']*)`, "g"))])
     .map(([, path]) => clean(path).replace(/^\//, "")),
 );
 const orphans = [

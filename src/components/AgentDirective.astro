@@ -9,7 +9,11 @@ interface Props {
 const { markdownUrl, llmsUrl } = Astro.props;
 ---
 
-<aside class="sr-only" data-ai-agent-directive>
+{/* Off-screen and out of the accessibility tree: the audience is a machine
+    reading the DOM. A person gets the same offer from the visible "View as
+    Markdown" action and from <link rel="alternate"> in the head, so reading
+    two raw URLs aloud would only spend a screen reader's attention. */}
+<aside class="sr-only" aria-hidden="true" data-ai-agent-directive>
   This page is available in Markdown format. Markdown is recommended for AI
   consumption. See <a href={markdownUrl}>{markdownUrl}</a> for this page, or
   <a href={llmsUrl}>{llmsUrl}</a> for the full documentation index.
