@@ -14,7 +14,9 @@ declare global {
 
 function initThemeToggle(button: HTMLElement): () => void {
   function handleClick() {
-    const isDark = document.documentElement.getAttribute("data-mode") === "dark";
+    // Absent means dark: that is what base.css paints when no pre-paint
+    // script ran, so `=== "dark"` would make the first click a no-op.
+    const isDark = document.documentElement.getAttribute("data-mode") !== "light";
     try {
       localStorage.setItem("ui-mode", isDark ? "light" : "dark");
     } catch {

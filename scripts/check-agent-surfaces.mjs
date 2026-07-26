@@ -27,17 +27,24 @@ if (!surfaces.some((f) => f === "llms.txt")) {
 const clean = (path) => path.replace(/[.,;:!?]+$/, "");
 const target = (path) => (/\.[a-z0-9]+$/i.test(path) ? path : `${path.replace(/\/$/, "")}/index.html`);
 
+const isIndex = (f) => f === "llms.txt" || f.endsWith("/llms.txt");
 const problems = [];
 let links = 0;
 for (const surface of surfaces) {
   const body = readFileSync(new URL(surface, dist), "utf8");
   if (!body.trim()) problems.push(`${surface} is empty`);
+  let named = 0;
   for (const [, path] of body.matchAll(new RegExp(`${SITE}(/[^)\\s>"']*)`, "g"))) {
     links += 1;
+    named += 1;
     const file = target(clean(path)).replace(/^\//, "");
-    if (!file || existsSync(new URL(file, dist))) continue;
+    if (existsSync(new URL(file, dist))) continue;
     problems.push(`${surface} points at ${path}, which the build does not emit`);
   }
+  /* Per file, not just in total: an index that lists nothing is the drift
+     this script was written for, and the totals below would hide it behind
+     the indexes that still work. */
+  if (isIndex(surface) && !named) problems.push(`${surface} names no pages`);
 }
 /* A scan that matches nothing passes silently, which is the failure this
    whole script exists to prevent: relative links, or a moved origin, and
@@ -69,14 +76,16 @@ if (!advertised) problems.push("no page advertises a markdown alternate: the hea
    list of URLs to follow. What can drift is the twin route's own path list
    against the indexes — the route filtered itself to one collection once
    while /blog/llms.txt kept advertising the twins it no longer emitted, and
-   this is the direction that catches that. A per-section index nothing links
-   to is the same failure one level up, so those are checked as well — with
-   one future exception: a versioned docs set emits `/v<n>/llms.txt` that the
-   root index deliberately does not link (a version is reached by URL, not by
-   discovery). Exempt it here on the day the first version lands. */
+   this is the direction that catches that. A per-section index nothing points
+   at is the same failure one level up, so those are checked too — and "points
+   at" includes the pages: every page's head names its own index, which is how
+   a per-version index (deliberately absent from the root index, since a
+   version is reached by URL) still counts as reachable. */
 const indexed = new Set(
-  surfaces
-    .filter((f) => f === "llms.txt" || f.endsWith("/llms.txt"))
+  [
+    ...surfaces.filter(isIndex),
+    ...files.filter((f) => f.endsWith(".html")),
+  ]
     .flatMap((f) => [...readFileSync(new URL(f, dist), "utf8").matchAll(new RegExp(`${SITE}(/[^)\\s>"']*)`, "g"))])
     .map(([, path]) => clean(path).replace(/^\//, "")),
 );

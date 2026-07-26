@@ -11,6 +11,12 @@ export const OG_IMAGE = {
 };
 export const BLOG_DESCRIPTION = "Releases, design writeups, and what's shipping next — from the FastAgent team.";
 
+/** Where a page's markdown twin lives — the rule, in one place.
+ *  `src/pages/[...slug]/index.md.ts` emits the file at each entry's canonical
+ *  URL; a page that offers the twin passes its own pathname here, and the two
+ *  agree by construction. `npm run build` cross-checks them anyway. */
+export const markdownTwin = (pathname: string) => `${SITE}${pathname}index.md`;
+
 /* What a reader has to know before the first page makes sense — the framing
    sentence of the agent index, and the one thing the description leaves out. */
 export const DETAILS =
