@@ -6,4 +6,4 @@
 /docs/*
   Link: </docs/llms.txt>; rel="llms-txt", </llms.txt>; rel="index", </.well-known/agent-skills/index.json>; rel="agent-skills"
 /blog/*
-  Link: </blog/llms.txt>; rel="llms-txt", </llms.txt>; rel="index"
+  Link: </blog/llms.txt>; rel="llms-txt", </llms.txt>; rel="index", </.well-known/agent-skills/index.json>; rel="agent-skills"

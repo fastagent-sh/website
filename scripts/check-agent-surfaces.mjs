@@ -28,15 +28,21 @@ const clean = (path) => path.replace(/[.,;:!?]+$/, "");
 const target = (path) => (/\.[a-z0-9]+$/i.test(path) ? path : `${path.replace(/\/$/, "")}/index.html`);
 
 const problems = [];
+let links = 0;
 for (const surface of surfaces) {
   const body = readFileSync(new URL(surface, dist), "utf8");
   if (!body.trim()) problems.push(`${surface} is empty`);
   for (const [, path] of body.matchAll(new RegExp(`${SITE}(/[^)\\s>"']*)`, "g"))) {
+    links += 1;
     const file = target(clean(path)).replace(/^\//, "");
     if (!file || existsSync(new URL(file, dist))) continue;
     problems.push(`${surface} points at ${path}, which the build does not emit`);
   }
 }
+/* A scan that matches nothing passes silently, which is the failure this
+   whole script exists to prevent: relative links, or a moved origin, and
+   "every link resolves" would be a statement about an empty set. */
+if (!links) problems.push("no site URLs found in the agent surfaces: the link scan is broken");
 
 /* The pages advertise their own twin too — `rel="alternate" type="text/markdown"`
    in the head, and the visible "View as Markdown" / "view as markdown" link.
@@ -64,7 +70,10 @@ if (!advertised) problems.push("no page advertises a markdown alternate: the hea
    against the indexes — the route filtered itself to one collection once
    while /blog/llms.txt kept advertising the twins it no longer emitted, and
    this is the direction that catches that. A per-section index nothing links
-   to is the same failure one level up, so those are checked as well. */
+   to is the same failure one level up, so those are checked as well — with
+   one future exception: a versioned docs set emits `/v<n>/llms.txt` that the
+   root index deliberately does not link (a version is reached by URL, not by
+   discovery). Exempt it here on the day the first version lands. */
 const indexed = new Set(
   surfaces
     .filter((f) => f === "llms.txt" || f.endsWith("/llms.txt"))
@@ -82,6 +91,6 @@ if (problems.length) {
 }
 const bytes = surfaces.reduce((sum, f) => sum + statSync(new URL(f, dist)).size, 0);
 console.log(
-  `agent surfaces: ${surfaces.length} files, ${(bytes / 1024).toFixed(0)} kB,` +
+  `agent surfaces: ${surfaces.length} files, ${(bytes / 1024).toFixed(0)} kB, ${links} links,` +
     ` ${advertised} pages offer their twin, every link resolves`,
 );

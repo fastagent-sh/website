@@ -32,11 +32,13 @@ const canonical = `${SITE}${path}`;
     <script is:inline define:vars={{ themeColor }}>
       /* Pre-paint theme pick — shares the "ui-mode" key with the docs shell
          (BaseLayout.astro), so toggling on either surface follows you to the
-         other. */
+         other. "starlight-theme" is where that choice lived until the docs
+         moved off Starlight; it is read once so a returning reader keeps the
+         mode they picked, and can go once the tail of those visits has. */
       document.documentElement.dataset.mode = (() => {
         let stored = null;
         try {
-          stored = localStorage.getItem("ui-mode");
+          stored = localStorage.getItem("ui-mode") ?? localStorage.getItem("starlight-theme");
         } catch {
           /* storage blocked (private mode) — fall through to the system pick */
         }

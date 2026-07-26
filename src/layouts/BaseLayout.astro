@@ -55,11 +55,14 @@ const llmsUrl = Astro.site
     <script is:inline define:vars={{ themeColor }}>
       (() => {
         const KEY = "ui-mode";
+        const LEGACY_KEY = "starlight-theme";
         const media = window.matchMedia("(prefers-color-scheme: dark)");
 
         const readPref = () => {
           try {
-            const v = localStorage.getItem(KEY);
+            // LEGACY_KEY is where this choice lived while the docs ran on
+            // Starlight; read once so a returning reader keeps their mode.
+            const v = localStorage.getItem(KEY) ?? localStorage.getItem(LEGACY_KEY);
             return v === "dark" || v === "light" ? v : null;
           } catch {
             return null;
