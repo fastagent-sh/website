@@ -65,8 +65,13 @@ const llmsUrl = Astro.site
             // readers return rather than having to stay forever.
             let v = localStorage.getItem(KEY);
             if (v === null) {
-              v = localStorage.getItem(LEGACY_KEY);
-              if (v !== null) localStorage.setItem(KEY, v);
+              // Only a legal value is promoted; anything else under the old
+              // key would become a permanent illegal value under the new one.
+              const legacy = localStorage.getItem(LEGACY_KEY);
+              if (legacy === "dark" || legacy === "light") {
+                v = legacy;
+                localStorage.setItem(KEY, legacy);
+              }
             }
             return v === "dark" || v === "light" ? v : null;
           } catch {
