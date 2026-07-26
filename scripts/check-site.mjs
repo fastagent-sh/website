@@ -174,14 +174,16 @@ if (docSlugs.size < 10) throw new Error("docs collection looks empty: run npm ru
 const routeSlug = (href) => href.replace(/^\//, "").replace(/\/$/, "").toLowerCase();
 const deadLinks = new Set();
 /* Everything that links into the docs, not just the docs themselves: the
-   landing page carries a dozen of these hrefs and a blog post a couple more,
-   and an upstream rename breaks those exactly as easily. Markdown link and
-   HTML href, which between them is how every one of them is written. */
+   landing page carries a dozen of these hrefs, the header and the footer a
+   few, a blog post a couple more, and an upstream rename breaks all of them
+   exactly as easily. Every .astro file this repo holds, plus the blog, plus
+   the docs — markdown link and HTML href, which between them is how every one
+   of these links is written. */
 const linkSources = [
   ...readdirSync(docsDir, { recursive: true })
     .filter((f) => f.endsWith(".md"))
     .map((f) => [`docs/${f}`, readFileSync(new URL(f, docsDir), "utf8")]),
-  ...styled.filter(([f]) => f.startsWith("pages/")),
+  ...styled.filter(([f]) => f.endsWith(".astro")),
   ...readdirSync(new URL("content/blog/", srcDir), { recursive: true })
     .filter((f) => f.endsWith(".md"))
     .map((f) => [`blog/${f}`, readFileSync(new URL(`content/blog/${f}`, srcDir), "utf8")]),
