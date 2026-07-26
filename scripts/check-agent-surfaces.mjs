@@ -62,17 +62,33 @@ if (!links) problems.push("no site URLs found in the agent surfaces: the link sc
    by a route from the entry's; nothing above reads HTML, so this is where the
    two are held to the same answer. */
 let advertised = 0;
+let directives = 0;
+/* Which index each page hands to an agent — used further down, where an index
+   counts as reachable if a page points at it. */
+const namedByPage = new Set();
 for (const page of files.filter((f) => f.endsWith(".html"))) {
   const html = readFileSync(new URL(page, dist), "utf8");
-  for (const [, href] of html.matchAll(/<link rel="alternate" type="text\/markdown" href="([^"]+)"/g)) {
-    advertised += 1;
-    const path = href.startsWith(SITE) ? href.slice(SITE.length) : href;
-    if (!existsSync(new URL(path.replace(/^\//, ""), dist))) {
-      problems.push(`${page} advertises ${href}, which the build does not emit`);
+  const offers = [
+    ...[...html.matchAll(/<link rel="alternate" type="text\/markdown" href="([^"]+)"/g)].map(
+      ([, href]) => ["twin", href],
+    ),
+    // The screen-reader directive names this page's twin *and* its index.
+    ...[...html.matchAll(/data-ai-agent-directive[^>]*>([\s\S]*?)<\/aside>/g)].flatMap(([, block]) =>
+      [...block.matchAll(/href="([^"]+)"/g)].map(([, href]) => ["directive", href]),
+    ),
+  ];
+  for (const [kind, href] of offers) {
+    if (kind === "twin") advertised += 1;
+    else directives += 1;
+    const path = clean(href.startsWith(SITE) ? href.slice(SITE.length) : href).replace(/^\//, "");
+    namedByPage.add(path);
+    if (!existsSync(new URL(path, dist))) {
+      problems.push(`${page} offers ${href}, which the build does not emit`);
     }
   }
 }
 if (!advertised) problems.push("no page advertises a markdown alternate: the head scan is broken");
+if (!directives) problems.push("no page carries an agent directive: the directive scan is broken");
 
 /* And the other way: a page the site serves but no index names is a page an
    agent has to guess at. Only the .md twins are checked — the HTML pages have
@@ -81,23 +97,23 @@ if (!advertised) problems.push("no page advertises a markdown alternate: the hea
    list of URLs to follow. What can drift is the twin route's own path list
    against the indexes — the route filtered itself to one collection once
    while /blog/llms.txt kept advertising the twins it no longer emitted, and
-   this is the direction that catches that. A per-section index nothing points
-   at is the same failure one level up, so those are checked too — and "points
-   at" includes the pages: every page's head names its own index, which is how
-   a per-version index (deliberately absent from the root index, since a
-   version is reached by URL) still counts as reachable. */
-const indexed = new Set(
-  [
-    ...surfaces.filter(isIndex),
-    ...files.filter((f) => f.endsWith(".html")),
-  ]
+   this is the direction that catches that.
+   A twin has to be named by an index — the pages don't count here, because
+   every page links its own twin and the question would answer itself. An
+   index has the weaker test: named by another index, or pointed at by a page,
+   which is how a per-version index (deliberately absent from the root index,
+   since a version is reached by URL rather than by discovery) stays legal. */
+const namedByIndex = new Set(
+  surfaces
+    .filter(isIndex)
     .flatMap((f) => [...readFileSync(new URL(f, dist), "utf8").matchAll(new RegExp(`${SITE}(/[^)\\s>"']*)`, "g"))])
     .map(([, path]) => clean(path).replace(/^\//, "")),
 );
-const orphans = files.filter(
-  (f) => (/(^|\/)index\.md$/.test(f) || /\/llms\.txt$/.test(f)) && !indexed.has(f),
-);
-if (orphans.length) problems.push(`agent files no llms.txt names: ${orphans.join(", ")}`);
+const orphans = [
+  ...files.filter((f) => /(^|\/)index\.md$/.test(f) && !namedByIndex.has(f)),
+  ...files.filter((f) => /\/llms\.txt$/.test(f) && !namedByIndex.has(f) && !namedByPage.has(f)),
+];
+if (orphans.length) problems.push(`agent files nothing points at: ${orphans.join(", ")}`);
 
 if (problems.length) {
   for (const line of problems) console.error(line);
@@ -106,5 +122,5 @@ if (problems.length) {
 const bytes = surfaces.reduce((sum, f) => sum + statSync(new URL(f, dist)).size, 0);
 console.log(
   `agent surfaces: ${surfaces.length} files, ${(bytes / 1024).toFixed(0)} kB, ${links} links,` +
-    ` ${advertised} pages offer their twin, every link resolves`,
+    ` ${advertised} twins and ${directives} directive links offered, every one resolves`,
 );

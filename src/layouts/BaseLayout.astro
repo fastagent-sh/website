@@ -61,8 +61,13 @@ const llmsUrl = Astro.site
         const readPref = () => {
           try {
             // LEGACY_KEY is where this choice lived while the docs ran on
-            // Starlight; read once so a returning reader keeps their mode.
-            const v = localStorage.getItem(KEY) ?? localStorage.getItem(LEGACY_KEY);
+            // Starlight. Migrate on read, so the fallback decays as those
+            // readers return rather than having to stay forever.
+            let v = localStorage.getItem(KEY);
+            if (v === null) {
+              v = localStorage.getItem(LEGACY_KEY);
+              if (v !== null) localStorage.setItem(KEY, v);
+            }
             return v === "dark" || v === "light" ? v : null;
           } catch {
             return null;

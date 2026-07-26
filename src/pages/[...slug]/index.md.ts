@@ -12,7 +12,7 @@
  * The starter's `.mdx` twin (the authored source, JSX intact) is not
  * installed here: these pages are `.md` copies of vendor/fastagent, so the
  * markdown below *is* the source and a second URL claiming otherwise would
- * be a lie. `Source:` points upstream instead.
+ * be a lie. `Upstream:` names the file it was copied from instead.
  */
 
 import { getIndexedEntries, renderEntryAsMarkdown, type IndexedEntry } from "@cloudflare/nimbus-docs";
