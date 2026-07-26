@@ -18,7 +18,7 @@ export async function GET() {
     "",
     `Full corpus (all pages, one document): ${new URL("/llms-full.txt", config.site).href}`,
     "",
-    "## Pages",
+    "## Sections",
     "",
   ];
 
@@ -48,12 +48,14 @@ export async function GET() {
   rows.sort((a, b) => (a.key === "/docs" ? "" : a.key).localeCompare(b.key === "/docs" ? "" : b.key));
   for (const row of rows) lines.push(row.line);
 
-  /* Everything above is one hop from its page. These are the three pages the
-     reading order actually starts with, named here so the first useful page
-     is one hop away rather than two — the promotion the old index carried.
-     Titles come from the entries themselves, so a renamed page renames here. */
+  /* Everything above is one hop from its page. These are the pages the reading
+     order actually starts with, named here so the first useful one is one hop
+     away rather than two — the promotion the old index carried, same set:
+     the docs landing, the two human starts, and ai-start, which is the page
+     written for the reader of this file. Titles come from the entries, so a
+     renamed page renames here. */
   const members = new Map(groups.flatMap((g) => g.members.map((m) => [m.entry.id, m])));
-  const start = ["docs/quickstart", "docs/overview", "docs/configuration"].map((id) => {
+  const start = ["docs", "docs/quickstart", "docs/ai-start", "docs/overview", "docs/configuration"].map((id) => {
     const item = members.get(id);
     // Renamed upstream: fail the build rather than quietly drop the promotion.
     if (!item) throw new Error(`llms.txt promotes "${id}", which is not a page`);

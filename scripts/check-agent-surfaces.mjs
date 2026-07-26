@@ -41,9 +41,11 @@ for (const surface of surfaces) {
 /* And the other way: a page the site serves but no index names is a page an
    agent has to guess at. Only the .md twins are checked — the HTML pages have
    the sitemap, which @astrojs/sitemap builds from the same routes.
-   llms-full.txt is not an index: it is generated from the same entry list the
-   twins are, so it names every twin by construction and would answer this
-   question before it was asked. The indexes are the files that can drift. */
+   llms-full.txt is not an index and is skipped: it is one document, not a
+   list of URLs to follow. What can drift is the twin route's own path list
+   against the indexes — the route filtered itself to one collection once
+   while /blog/llms.txt kept advertising the twins it no longer emitted, and
+   this is the direction that catches that. */
 const indexed = new Set(
   surfaces
     .filter((f) => f === "llms.txt" || f.endsWith("/llms.txt"))
