@@ -7,7 +7,7 @@ export const OG_IMAGE = {
   url: `${SITE}/social-preview.png`,
   width: "1200",
   height: "630",
-  alt: "FastAgent — Vibe first. Then FastAgent.",
+  alt: "FastAgent — an agent is just a directory; FastAgent serves it as a live service on any channel.",
 };
 export const BLOG_DESCRIPTION = "Releases, design writeups, and what's shipping next — from the FastAgent team.";
 /** The agent-facing install prompt — the hero card and the closing CTA both copy it. */
