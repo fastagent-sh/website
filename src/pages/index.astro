@@ -332,7 +332,13 @@ const concepts = [
             </div>
           </div>
 
-          <p class="hero-note">MIT · Node ≥ 22.19 / Bun · harness-neutral · no account, no telemetry</p>
+          {/* The pi credit rides the trust strip — the mark spells the name,
+              so it stands alone, with the <title> carrying it for readers. */}
+          <p class="hero-note">
+            MIT · Node ≥ 22.19 / Bun · built on{" "}
+            <a class="pi-credit" href="https://pi.dev"><BrandIcon name="pi" size={14} title="pi" /></a> · model and
+            platform neutral · no account, no telemetry
+          </p>
           <script>
             import { track } from "@plausible-analytics/tracker";
             import "../scripts/copy";
@@ -400,7 +406,7 @@ const concepts = [
             <span class="core-center-label">agent handler · the contract</span>
             <pre class="core-sig"><code><span class="ct-fn">invoke</span>(<span class="ct-arg">scope</span>, <span class="ct-arg">prompt</span>)
   =&gt; <span class="tg">AsyncIterable</span>&lt;<span class="tty">AgentEvent</span>&gt;</code></pre>
-            <span class="core-center-sub">powered by <a href="https://pi.dev">pi</a> — the built-in agent harness</span>
+            <span class="core-center-sub">powered by <a class="pi-credit" href="https://pi.dev"><BrandIcon name="pi" size={15} title="pi" /></a> — the built-in agent harness</span>
             <span class="core-center-sub core-yours-inline">+ or bring your own harness</span>
           </div>
           <span class="core-arrow" aria-hidden="true">→</span>

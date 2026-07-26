@@ -78,6 +78,22 @@ body.site {
   text-underline-offset: 0.2em;
 }
 
+/* The pi credit, wherever it appears (hero note, core diagram, footer): pi's
+   own mark, which already spells the name — so it stands alone, no "pi" set
+   beside it. Inline-flex to center it on the line of running text it sits in.
+   The color only lifts it off the dim lines that host it in the hero note and
+   the footer; inside the core diagram `.core-center-sub a` outranks this and
+   keeps the mark on the accent, where its neighbours already are. The padding
+   is a tap target for a link with no text to hit — the negative margin keeps
+   it from moving the line. */
+.pi-credit {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem;
+  margin: -0.35rem;
+  color: var(--text-soft);
+}
+
 .hash {
   color: var(--accent);
   font-weight: 600;
