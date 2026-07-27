@@ -1,0 +1,80 @@
+---
+/* The docs header. Nimbus scaffolds this file and hands it over; what it
+   carries here is the landing page's chrome — same wordmark, same version
+   pill, same links — so crossing from / into /docs/ doesn't change shells.
+   The section-tab strip the starter renders is gone: there is one section. */
+import { Icon } from "astro-icon/components";
+import { Button } from "./ui/button";
+import { LinkButton } from "./ui/link-button";
+import { ThemeToggle } from "./ui/theme-toggle";
+import { SearchTrigger } from "./ui/search";
+import { config } from "virtual:nimbus/config";
+import fastagent from "../generated/fastagent.json";
+
+interface Props {
+  /**
+   * Whether the page has a sidebar to open. When `false`, the mobile
+   * menu button is hidden — pages that opted out via `sidebar: false`
+   * shouldn't show a button that opens an empty dialog. Default `true`.
+   */
+  showSidebar?: boolean;
+}
+
+const { showSidebar = true } = Astro.props;
+
+/* This chrome is the docs shell's — /blog/* runs Site.astro and its own
+   header — so the only tab that can be current here is Docs, and only when
+   the page is one: /404 renders this header too. */
+const inDocs = Astro.url.pathname.startsWith("/docs");
+const IDLE = "text-muted-foreground transition-colors hover:text-foreground hover:bg-accent/60";
+---
+
+<header class="sticky top-0 z-30 border-b border-border bg-card/80 backdrop-blur-lg">
+  <div class="mx-auto flex items-center justify-between h-14 px-4 lg:px-6">
+    <div class="flex items-center gap-3">
+      <a href="/" class="shrink-0" aria-label="FastAgent home">
+        <img class="logo-dark h-5 w-auto" src="/logo.png" alt="FastAgent" width="940" height="312" />
+        <img class="logo-light h-5 w-auto" src="/logo-light.png" alt="FastAgent" width="940" height="312" />
+      </a>
+      <a
+        href="https://github.com/fastagent-sh/fastagent/releases"
+        title="Release notes"
+        class="hidden sm:inline-block rounded-md border border-border px-1.5 py-0.5 font-mono text-[0.6875rem] text-muted-foreground no-underline transition-colors hover:text-foreground"
+      >v{fastagent.version}</a>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <nav aria-label="Site" class="hidden md:flex items-center gap-1 mr-1">
+        <a href="/docs/" aria-current={inDocs ? "page" : undefined} class:list={["rounded-md px-2 py-1 text-[0.8125rem] font-medium no-underline", inDocs ? "text-primary bg-primary/10" : IDLE]}>Docs</a>
+        <a href="/blog/" class:list={["rounded-md px-2 py-1 text-[0.8125rem] font-medium no-underline", IDLE]}>Blog</a>
+      </nav>
+      {config.search !== false && <SearchTrigger />}
+      {config.github && (
+        <LinkButton
+          href={config.github}
+          variant="minimal"
+          shape="square"
+          size="sm"
+          aria-label="GitHub"
+          target="_blank"
+          rel="noopener"
+          class="text-muted-foreground"
+        >
+          <Icon name="ph:github-logo" class="w-4 h-4" />
+        </LinkButton>
+      )}
+      <ThemeToggle />
+      {showSidebar && (
+        <Button
+          variant="ghost"
+          shape="square"
+          size="sm"
+          icon="ph:list"
+          aria-label="Open navigation"
+          data-menu-btn
+          class="lg:hidden text-muted-foreground"
+        />
+      )}
+    </div>
+  </div>
+</header>

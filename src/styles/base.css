@@ -1,6 +1,6 @@
-/* Loaded by both shells: the custom pages and the Starlight docs.
-   Colors are in tokens.css (generated from src/theme.ts); this holds the
-   non-color tokens, the mode wiring, the resets, and the few docs rules.
+/* Loaded by both shells: Site.astro directly, and the docs through
+   globals.css. Colors are in tokens.css (generated from src/theme.ts); this
+   holds the faces, the non-color tokens, the mode wiring, and the resets.
    Everything the landing and blog need is in site.css. */
 
 @font-face {
@@ -40,9 +40,6 @@
   --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --body: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif;
   --serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
-
-  --sl-font: var(--body);
-  --sl-font-mono: var(--mono);
 }
 
 /* The reader's choice reaches the tokens as color-scheme, which is what
@@ -50,16 +47,14 @@
    declared on `html` itself, not on an attribute: with JavaScript off no
    pre-paint script runs, and a document with no attribute still has to
    resolve to the site's own theme rather than to light.
-   Both shells state their light signal here, because both have to outrank
-   this default: the custom pages set data-mode, Starlight sets data-theme,
-   and Starlight's own rule for it lives in @layer starlight.base — which an
-   unlayered declaration like this one beats no matter how specific it is. */
+   Both shells write the same signal: data-mode on <html>, set pre-paint from
+   the shared "ui-mode" key. Tailwind's preflight is layered and this rule is
+   not, so it wins on the docs side without having to be more specific. */
 html {
   color-scheme: dark;
 }
 
-html[data-mode="light"],
-html[data-theme="light"] {
+html[data-mode="light"] {
   color-scheme: light;
 }
 
@@ -69,19 +64,6 @@ html[data-theme="light"] {
 
 html {
   scroll-behavior: smooth;
-}
-
-/* ────────────────────────────────────────────────────────────────────────
-   Docs (Starlight) — the shell is Starlight's; these are the only overrides
-   ──────────────────────────────────────────────────────────────────────── */
-
-.sl-markdown-content a:not(:where(.not-content *)) {
-  text-underline-offset: 0.18em;
-}
-
-.site-title img {
-  max-height: 2.25rem;
-  width: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {

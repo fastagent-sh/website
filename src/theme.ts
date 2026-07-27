@@ -32,10 +32,6 @@ export const mocha = {
   peach: "#fab387",
   yellow: "#f9e2af",
   green: "#a6e3a1",
-  /* Starlight's accent-low: the deep green it writes pill text in, and tints
-     hero fills with. The landing's own on-accent text is Base, as the guide
-     asks — these are two surfaces, not one role. */
-  greenLow: "#163a24",
 } as const;
 
 /* Latte's accents are tuned for large type; this site sets small mono labels
@@ -63,8 +59,6 @@ export const latte = {
   red: "#cd0e37",    // Latte red, a shade down: it labels a failed turn as text
   yellow: "#8a6a17",
   greenInk: "#2c6f1b", // the accent itself, 5.1:1 on the page
-  greenLink: "#1f5714", // one step darker, for docs link text
-  greenPale: "#d7e8d1", // green over the page, for accent fills
 } as const;
 
 /* Page roles: [light, dark].
@@ -123,32 +117,38 @@ export const term = {
   cursor: mocha.rosewater,
 } as const;
 
-/* Starlight's own tokens, [light, dark]. Not dead code: the docs shell reads
-   every one of these, and nothing in this repo does. Dark link text is
-   --sl-color-text-accent, which Starlight aliases to accent-high; accent-low
-   is the text it draws *on* that green, so it has to be a deep green. */
-export const starlight = {
-  "color-white": [latte.textStrong, mocha.text],
-  "color-gray-1": [latte.text, mocha.subtext1],
-  "color-gray-2": [latte.subtext1, mocha.subtext0],
-  "color-gray-3": [latte.subtext0, mocha.overlay2],
-  "color-gray-4": [latte.overlay0, mocha.overlay0],
-  "color-gray-5": [latte.surface2, mocha.surface1],
-  "color-gray-6": [latte.surface0, mocha.surface0],
-  "color-gray-7": [latte.crust, mocha.mantle],
-  "color-black": [latte.mantle, mocha.base],
-  "color-accent-low": [latte.greenPale, mocha.greenLow],
-  "color-accent": [latte.greenInk, mocha.green],
-  "color-accent-high": [latte.greenLink, mocha.green],
-} as const;
+/* The docs shell's tokens, [light, dark]. Nimbus paints every surface from
+   a --nb-* property; this is where each one is told which role it is. Not
+   dead code: the docs read all of it, and nothing else in this repo does.
 
-/* Catppuccin's editor background is at or above the docs page itself, so a
-   markdown fence would read as an outline with no pane behind it. Expressive
-   Code frames drop to crust instead — the terminal step of the ladder. */
-export const codeFrameBg = { light: latte.crust, dark: mocha.crust } as const;
+   Two names are false friends. Nimbus' `accent` is a hover *surface*, not the
+   brand — the brand is `primary`, which is where the green goes. And Nimbus'
+   `muted` is a surface too; the de-emphasised ink is `muted-foreground`.
+
+   The tokens left out are derived rather than picked: the *-foreground pairs
+   alias their surface's ink, and the hover/ring/tint steps are color-mix()es
+   of the values here. Both live in src/styles/globals.css. */
+export const nimbus = {
+  background: roles.bg,
+  foreground: roles.text,
+  card: roles.panel,
+  muted: roles["bg-elevated"],
+  "muted-foreground": roles.muted,
+  accent: roles["bg-elevated"],
+  primary: roles.accent,
+  "primary-foreground": roles["accent-ink"],
+  border: roles.line,
+  "border-strong": roles["line-strong"],
+  info: roles.blue,
+  success: roles.accent,
+  warning: roles.yellow,
+  danger: roles.red,
+} as const;
 
 /* The colour a browser paints its chrome with, per mode. */
 export const themeColor = { light: latte.mantle, dark: mocha.base } as const;
 
+/* Shiki themes, for both shells: the docs fences go through Nimbus, the blog's
+   through Astro's own markdown pipeline, and astro.config hands them this. */
 export const CODE_THEME_DARK = "catppuccin-mocha";
 export const CODE_THEME_LIGHT = "catppuccin-latte";

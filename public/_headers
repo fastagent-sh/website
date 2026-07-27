@@ -1,6 +1,14 @@
 # Agent discovery (RFC 8288): point agents at the markdown corpus, the
 # skills index, and the docs from the pages they actually land on.
+#
+# llms-txt names the index for the page's own collection, and so does the
+# page's HTML — check-agent-surfaces.mjs holds the two to each other. For a
+# docs page that index is the root one: the framework treats the primary
+# collection's index as the site index, and /llms.txt links /docs/llms.txt
+# anyway. The blog is a section, so its pages name /blog/llms.txt.
 /
   Link: </llms.txt>; rel="llms-txt", </.well-known/agent-skills/index.json>; rel="agent-skills", </docs/>; rel="service-doc"
 /docs/*
   Link: </llms.txt>; rel="llms-txt", </.well-known/agent-skills/index.json>; rel="agent-skills"
+/blog/*
+  Link: </blog/llms.txt>; rel="llms-txt", </llms.txt>; rel="index", </.well-known/agent-skills/index.json>; rel="agent-skills"

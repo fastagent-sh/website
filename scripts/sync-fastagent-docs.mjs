@@ -51,7 +51,12 @@ await writeFile(new URL("start.md", publicDir), start);
 const descLine = start.match(/^description: (.+)$/m)?.[1];
 if (!descLine) throw new Error("ai-start.md has no frontmatter description");
 const skillMd = start.replace(/^---\n[\s\S]*?\n---\n/, `---\nname: fastagent\ndescription: ${descLine}\n---\n`);
-const skillDir = new URL(".well-known/agent-skills/fastagent/", publicDir);
+/* Cleared like the docs tree above, and for the same reason: the skill's path
+   carries its name, so a rename would otherwise leave the old SKILL.md in
+   public/ — deployed, still fetchable, and no longer listed in index.json. */
+const skillsDir = new URL(".well-known/agent-skills/", publicDir);
+await rm(skillsDir, { recursive: true, force: true });
+const skillDir = new URL("fastagent/", skillsDir);
 await mkdir(skillDir, { recursive: true });
 await writeFile(new URL("SKILL.md", skillDir), skillMd);
 const index = {
@@ -66,7 +71,7 @@ const index = {
     },
   ],
 };
-await writeFile(new URL(".well-known/agent-skills/index.json", publicDir), `${JSON.stringify(index, null, 2)}\n`);
+await writeFile(new URL("index.json", skillsDir), `${JSON.stringify(index, null, 2)}\n`);
 
 const commit = execFileSync("git", ["-C", new URL(source).pathname, "rev-parse", "HEAD"], {
   encoding: "utf8",

@@ -1,7 +1,7 @@
 ---
 title: "You already vibed an agent. Now what?"
 date: 2026-07-27
-excerpt: Getting an agent directory out of the terminal usually means adopting a framework or moving into a platform. There is a third shape — a serving layer — and this is what it looks like end to end.
+description: Getting an agent directory out of the terminal usually means adopting a framework or moving into a platform. There is a third shape — a serving layer — and this is what it looks like end to end.
 tags:
   - serving
   - embedding
