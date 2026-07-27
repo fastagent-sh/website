@@ -676,6 +676,20 @@ body.site {
   opacity: 0.75;
 }
 
+/* Every arrow points at the contract, because this is not a pipeline: the three
+   axes plug into the one seam, and infra hosts the handler rather than sitting
+   downstream of it. Models is the harness's own axis, so it shares the centre
+   column — a stack, not a hand-assigned grid row, which keeps the DOM order and
+   the visual order the same one. */
+.core-stack {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.core-arrow-models {
+  justify-self: center;
+}
+
 /* The style guide paints an active pane border Lavender; this one follows the
    accent instead, for the same no-purple reason as --accent above. */
 .core-center {
@@ -1614,9 +1628,16 @@ a.tag-link:hover {
     gap: 0.7rem;
   }
 
+  /* one column — the side arrows turn a quarter to keep pointing at the
+     contract: → becomes ↓ above it, ← becomes ↑ below it. The stack is already
+     vertical, so the models arrow keeps its glyph. */
   .core-arrow {
     justify-self: center;
     transform: rotate(90deg);
+  }
+
+  .core-arrow-models {
+    transform: none;
   }
 
 }

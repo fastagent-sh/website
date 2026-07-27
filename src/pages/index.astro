@@ -261,12 +261,12 @@ const ecosystem = [
       { icon: "anthropic", label: "Anthropic", color: "#d97757" },
       { icon: "openai", label: "OpenAI", color: "#ffffff" },
       { icon: "googlegemini", label: "Gemini", color: "#8e75b2" },
-      { icon: "deepseek", label: "DeepSeek", color: "#4d6bfe", soon: true },
-      { icon: "qwen", label: "Qwen", color: "#615ced", soon: true },
+      { icon: "deepseek", label: "DeepSeek", color: "#4d6bfe" },
+      { icon: "qwen", label: "Qwen", color: "#615ced" },
       { icon: "moonshotai", label: "Kimi", color: "#ffffff" },
-      { icon: "meta", label: "Llama", color: "#0467df", soon: true },
-      { icon: "ollama", label: "Ollama", color: "#ffffff" },
-      { icon: "huggingface", label: "Hugging Face", color: "#ffd21e" },
+      { icon: "grok", label: "Grok", color: "#ffffff" },
+      { icon: "chatglm", label: "GLM", color: "#4268fa" },
+      { icon: "meta", label: "Llama", color: "#0467df" },
     ],
     more: "+ more",
   },
@@ -339,6 +339,7 @@ const concepts = [
             <a class="pi-credit" href="https://pi.dev"><BrandIcon name="pi" size={14} title="pi" /></a> · model and
             platform neutral · no account, no telemetry
           </p>
+          <p class="hero-note">☁ <strong>FastAgent Cloud</strong> — managed hosting, coming soon · self-hosting stays free forever · <a class="text-link" href="https://tally.so/r/44DVMB">join the waitlist →</a></p>
           <script>
             import { track } from "@plausible-analytics/tracker";
             import "../scripts/copy";
@@ -402,14 +403,26 @@ const concepts = [
             </ul>
           </div>
           <span class="core-arrow" aria-hidden="true">→</span>
-          <div class="core-center">
-            <span class="core-center-label">agent handler · the contract</span>
-            <pre class="core-sig"><code><span class="ct-fn">invoke</span>(<span class="ct-arg">scope</span>, <span class="ct-arg">prompt</span>)
+          <div class="core-stack">
+            <div class="core-col core-models">
+              <span class="core-col-label">models</span>
+              <span class="core-col-sub">the harness's own axis — a runtime option, not an architecture decision</span>
+              <ul>
+                <li>Anthropic Claude · OpenAI GPT · Gemini</li>
+                <li>Kimi · Grok · DeepSeek · GLM</li>
+                <li class="core-yours">+ yours · register a provider</li>
+              </ul>
+            </div>
+            <span class="core-arrow core-arrow-models" aria-hidden="true">↓</span>
+            <div class="core-center">
+              <span class="core-center-label">agent handler · the contract</span>
+              <pre class="core-sig"><code><span class="ct-fn">invoke</span>(<span class="ct-arg">scope</span>, <span class="ct-arg">prompt</span>)
   =&gt; <span class="tg">AsyncIterable</span>&lt;<span class="tty">AgentEvent</span>&gt;</code></pre>
-            <span class="core-center-sub">powered by <a class="pi-credit" href="https://pi.dev"><BrandIcon name="pi" size={15} title="pi" /></a> — the built-in agent harness</span>
-            <span class="core-center-sub core-yours-inline">+ or bring your own harness</span>
+              <span class="core-center-sub">powered by <a class="pi-credit" href="https://pi.dev"><BrandIcon name="pi" size={15} title="pi" /></a> — the built-in agent harness</span>
+              <span class="core-center-sub core-yours-inline">+ or bring your own harness</span>
+            </div>
           </div>
-          <span class="core-arrow" aria-hidden="true">→</span>
+          <span class="core-arrow" aria-hidden="true">←</span>
           <div class="core-col">
             <span class="core-col-label">infra</span>
             <span class="core-col-sub">yours — owns auth, storage, deployment</span>
@@ -422,7 +435,7 @@ const concepts = [
           </div>
         </div>
 
-        <p class="design-center"><span class="hash">#</span> one contract collapses the channels × harnesses × infra matrix</p>
+        <p class="design-center"><span class="hash">#</span> one contract collapses the channels × models/harnesses × infra matrix — swap one axis, the other two don't move</p>
 
         <div class="event-flow" aria-label="AgentEvent stream">
           <span class="ev-label">each turn streams</span>
@@ -447,6 +460,8 @@ const concepts = [
             ))}
           </dl>
         </div>
+
+        <p class="design-center"><span class="hash">#</span> deliberately not a workflow engine — for deterministic orchestration, call invoke() from your own queue</p>
 
         <p class="section-follow"><a class="text-link" href="/docs/spec/">Read the Agent Handler SPEC →</a> · <a class="text-link" href="/docs/principles/">Design principles →</a></p>
       </section>
@@ -583,10 +598,17 @@ const concepts = [
           <span class="section-index"><span class="hash">#</span> 05 · run it as a live service</span>
           <h2 id="channels-title">Leave the terminal.<br /><em>Become a live service.</em></h2>
           <p class="section-lede">
-            In the terminal, your agent runs only while you're watching. As a live service,
-            it works around the clock — reviewing pull requests, replying in the group chat,
-            answering API calls, waking on a schedule — whether you're online or not.
+            In the terminal, your agent runs only while you're watching. The stretch between
+            there and production is where teams either rewrite into a framework or quietly
+            drop the project. FastAgent is that stretch — and it doesn't ask for the rewrite.
           </p>
+          <ul class="keep-list" aria-label="What FastAgent covers">
+            <li>verified webhooks</li>
+            <li>streaming responses</li>
+            <li>session state</li>
+            <li>cron triggers</li>
+            <li>deployment</li>
+          </ul>
         </header>
 
         <div class="demo-grid">
@@ -710,9 +732,44 @@ const concepts = [
         <p class="section-follow"><a class="text-link" href="/docs/deploy/">Deployment guide →</a></p>
       </section>
 
-      <!-- 07 START ──────────────────────────────────────────────────── -->
+      <!-- 07 FOR THE ORG ─────────────────────────────────────────────── -->
+      <section class="section shell" aria-labelledby="org-title">
+        <header class="section-head">
+          <span class="section-index"><span class="hash">#</span> 07 · for the org</span>
+          <h2 id="org-title">What you're <em>not</em> signing up for.</h2>
+          <p class="section-lede">
+            Adopting a library is not the same decision as starting a migration.
+            Four things this doesn't ask of you.
+          </p>
+        </header>
+
+        <dl class="concept-list">
+          <div class="concept">
+            <dt>No platform to migrate to</dt>
+            <dd>No console, no runtime to deploy into. MIT, no account, no telemetry.</dd>
+          </div>
+          <div class="concept">
+            <dt>Infrastructure stays yours</dt>
+            <dd>Auth, database, routing, deployment, policy stay in your app. A security review asks what leaves the boundary — here it can be nothing.</dd>
+          </div>
+          <div class="concept">
+            <dt>The artifact is a git directory</dt>
+            <dd>Reviewed in a PR, diffed, rolled back, owned by a team. Not a prompt buried in a SaaS console.</dd>
+          </div>
+          <div class="concept">
+            <dt>Delivered where people already are</dt>
+            <dd>Nobody changes their habits for a new tool. They do reply in the group chat.</dd>
+          </div>
+        </dl>
+
+        <p class="design-center"><span class="hash">#</span> the contract is one function — stop using it and you lose a few adapter files, not your app</p>
+
+        <p class="section-follow"><a class="text-link" href="/docs/overview/">What FastAgent does and doesn't do →</a></p>
+      </section>
+
+      <!-- 08 START ──────────────────────────────────────────────────── -->
       <section id="copy" class="section shell cta" aria-labelledby="cta-title">
-        <span class="section-index"><span class="hash">#</span> 07 · start the vibe</span>
+        <span class="section-index"><span class="hash">#</span> 08 · start the vibe</span>
         <h2 id="cta-title">Keep vibing. <em>FastAgent will follow.</em></h2>
         <p class="section-lede">
           Paste this into Claude Code, Codex, Cursor, or any agent that reads the web.
