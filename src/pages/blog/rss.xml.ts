@@ -14,7 +14,7 @@ export async function GET() {
       <link>${site}/blog/${p.id}/</link>
       <guid>${site}/blog/${p.id}/</guid>
       <pubDate>${p.data.date.toUTCString()}</pubDate>
-      <description>${escape(p.data.excerpt)}</description>
+      <description>${escape(p.data.description)}</description>
 ${p.data.tags.map((t) => `      <category>${escape(t)}</category>`).join("\n")}
     </item>`,
     )

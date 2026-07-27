@@ -64,6 +64,23 @@ if (!links) problems.push("no site URLs found in the agent surfaces: the link sc
    Those hrefs are built by the page from its own URL, while the file is built
    by a route from the entry's; nothing above reads HTML, so this is where the
    two are held to the same answer. */
+/* The Link headers are the third place a page names its agent index — the
+   other two are in its own HTML. They are served by the host rather than
+   built by a route, so nothing else here can see them drift apart. */
+const headerIndex = [
+  ...readFileSync(new URL("_headers", dist), "utf8").matchAll(/^(\/\S*)[\s\S]*?\n\s+Link:(.+)$/gm),
+]
+  .map(([, path, value]) => [path.replace(/\*$/, ""), value.match(/<([^>]+)>;\s*rel="llms-txt"/)?.[1]])
+  .filter(([, index]) => index);
+if (!headerIndex.length) problems.push("no llms-txt Link header found: _headers changed shape");
+/* Longest prefix wins, the way the host resolves overlapping rules. */
+const headerIndexFor = (url) =>
+  headerIndex
+    .filter(([prefix]) => url.startsWith(prefix))
+    .sort((a, b) => b[0].length - a[0].length)[0]?.[1];
+
+const sitePath = (href) => clean(href.startsWith(SITE) ? href.slice(SITE.length) : href);
+
 let advertised = 0;
 let directives = 0;
 /* Which index each page hands to an agent — used further down, where an index
@@ -87,6 +104,28 @@ for (const page of files.filter((f) => f.endsWith(".html"))) {
     namedByPage.add(path);
     if (!existsSync(new URL(path, dist))) {
       problems.push(`${page} offers ${href}, which the build does not emit`);
+    }
+  }
+
+  /* One page, one answer. A page that carries the directive names its index
+     three times — head, directive, Link header — and an agent may read any
+     one of them; two of them disagreeing is a page pointing at two corpora. */
+  const directiveLinks = [...html.matchAll(/data-ai-agent-directive[^>]*>([\s\S]*?)<\/aside>/g)].flatMap(
+    ([, block]) => [...block.matchAll(/href="([^"]+)"/g)].map(([, href]) => href),
+  );
+  if (directiveLinks.length) {
+    const url = `/${page.replace(/index\.html$/, "")}`;
+    const named = new Set(
+      [
+        html.match(/<link rel="alternate" type="text\/plain" href="([^"]+)"/)?.[1],
+        directiveLinks.at(-1),
+      ]
+        .filter(Boolean)
+        .map(sitePath)
+        .concat(headerIndexFor(url) ?? []),
+    );
+    if (named.size > 1) {
+      problems.push(`${page} names more than one agent index: ${[...named].sort().join(", ")}`);
     }
   }
 }

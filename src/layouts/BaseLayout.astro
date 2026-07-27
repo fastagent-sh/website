@@ -77,9 +77,6 @@ const llmsUrl = Astro.site
              shadowed that rule and left it untested. */
           root.setAttribute("data-mode", mode);
           document.querySelector('meta[name="theme-color"]')?.setAttribute("content", themeColor[mode]);
-          document.querySelectorAll("[data-nb-theme-toggle]").forEach((b) => {
-            b.setAttribute("data-nb-state", mode);
-          });
         };
 
         applyTheme();

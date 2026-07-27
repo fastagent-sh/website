@@ -21,10 +21,14 @@ const { class: className, ...attrs } = Astro.props;
   )}
   {...attrs}
   aria-label="Toggle dark mode"
-  data-nb-state="light"
 >
-  <Icon name="ph:sun" class="w-[1.125rem] h-[1.125rem] hidden group-data-[nb-state=dark]:block" />
-  <Icon name="ph:moon" class="w-[1.125rem] h-[1.125rem] group-data-[nb-state=dark]:hidden" />
+  {/* Which glyph shows is decided in globals.css from <html data-mode> — the
+      same pre-paint signal the page is painted from. The starter kept a
+      second copy of the mode on this button and had JS keep the two in step;
+      that JS runs after the button is parsed, so the first paint was the one
+      state it could never fix, and without JS it never got fixed at all. */}
+  <Icon name="ph:sun" data-glyph="sun" class="w-[1.125rem] h-[1.125rem]" />
+  <Icon name="ph:moon" data-glyph="moon" class="w-[1.125rem] h-[1.125rem]" />
 </button>
 
 <script>

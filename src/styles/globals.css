@@ -420,6 +420,18 @@ body:not(:has([data-mobile-sidebar])) [data-menu-btn] {
 .logo-light {
 	display: none;
 }
+/* The toggle shows the mode you would switch *to*: a sun on the dark page, a
+   moon on the light one. Keyed on the same attribute as the paint, so it is
+   right at first paint and right with JS off. */
+[data-nb-theme-toggle] [data-glyph="moon"],
+[data-mode="light"] [data-nb-theme-toggle] [data-glyph="sun"] {
+	display: none;
+}
+
+[data-mode="light"] [data-nb-theme-toggle] [data-glyph="moon"] {
+	display: block;
+}
+
 [data-mode="light"] .logo-dark {
 	display: none;
 }

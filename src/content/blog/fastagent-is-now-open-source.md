@@ -1,7 +1,7 @@
 ---
 title: FastAgent is now open source
 date: 2026-07-10
-excerpt: FastAgent turns an existing agent directory into a live service without asking you to rewrite it into a new framework.
+description: FastAgent turns an existing agent directory into a live service without asking you to rewrite it into a new framework.
 tags:
   - announcement
   - release

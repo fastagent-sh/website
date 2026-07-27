@@ -61,6 +61,8 @@ export default defineConfig({
   site,
   output: "static",
   vite: { plugins: [tailwindcss()] },
+  /* Every internal link, on hover — both shells, not just the docs. The pages
+     are static and small, so the speculative cost is a few kB. */
   prefetch: { prefetchAll: true, defaultStrategy: "hover" },
   markdown: {
     /* Catppuccin in both shells: Nimbus renders the docs fences and Astro
