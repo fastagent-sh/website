@@ -20,8 +20,12 @@ const { label, href, isCurrent, badge, class: className, ...attrs } = Astro.prop
   data-nb-sidebar-link
   class={cn(
     "flex min-h-[2rem] items-center gap-2 rounded-lg px-3 py-1 text-[0.8125rem] font-medium no-underline focus-visible:outline-offset-[-2px]",
+    /* The current page carries the brand green — the same phosphor the landing
+       page and the TOC rail use — and hover stays a neutral surface. Nimbus
+       spends bg-accent on both, and our palette aliases accent and muted to one
+       colour, so the two states would otherwise read identically. */
     isCurrent
-      ? "bg-accent font-semibold text-foreground"
+      ? "bg-primary/10 font-semibold text-primary"
       : "text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-foreground",
     className,
   )}

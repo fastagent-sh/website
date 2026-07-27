@@ -45,7 +45,7 @@ const IDLE = "text-muted-foreground transition-colors hover:text-foreground hove
 
     <div class="flex items-center gap-2">
       <nav aria-label="Site" class="hidden md:flex items-center gap-1 mr-1">
-        <a href="/docs/" aria-current={inDocs ? "page" : undefined} class:list={["rounded-md px-2 py-1 text-[0.8125rem] font-medium no-underline", inDocs ? "text-foreground bg-accent" : IDLE]}>Docs</a>
+        <a href="/docs/" aria-current={inDocs ? "page" : undefined} class:list={["rounded-md px-2 py-1 text-[0.8125rem] font-medium no-underline", inDocs ? "text-primary bg-primary/10" : IDLE]}>Docs</a>
         <a href="/blog/" class:list={["rounded-md px-2 py-1 text-[0.8125rem] font-medium no-underline", IDLE]}>Blog</a>
       </nav>
       {config.search !== false && <SearchTrigger />}
