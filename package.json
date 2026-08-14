@@ -19,10 +19,10 @@
     "tokens": "node scripts/build-tokens.mjs"
   },
   "dependencies": {
-    "@cloudflare/nimbus-docs": "^0.8.2",
+    "@cloudflare/nimbus-docs": "^0.9.0",
     "@iconify-json/ph": "^1.2.2",
-    "@plausible-analytics/tracker": "^0.4.5",
-    "astro": "^7.1.4",
+    "@plausible-analytics/tracker": "^0.4.6",
+    "astro": "^7.2.0",
     "astro-icon": "^1.1.5",
     "clsx": "^2.1.1",
     "sharp": "^0.35.3",
@@ -34,7 +34,7 @@
     "pagefind": "^1.5.2",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
-    "wrangler": "^4.114.0"
+    "wrangler": "^4.120.1"
   },
   "engines": {
     "node": ">=22.18.0"
