@@ -19,9 +19,9 @@
     "tokens": "node scripts/build-tokens.mjs"
   },
   "dependencies": {
-    "@cloudflare/nimbus-docs": "^0.8.2",
+    "@cloudflare/nimbus-docs": "^0.10.0",
     "@iconify-json/ph": "^1.2.2",
-    "@plausible-analytics/tracker": "^0.4.5",
+    "@plausible-analytics/tracker": "^0.4.6",
     "astro": "^7.1.4",
     "astro-icon": "^1.1.5",
     "clsx": "^2.1.1",
