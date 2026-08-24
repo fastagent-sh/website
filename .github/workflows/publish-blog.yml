@@ -49,8 +49,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ steps.plan.outputs.pr }}
         run: |
-          gh pr checks "$PR" --repo "$GITHUB_REPOSITORY" --required
-
           # shellcheck disable=SC2016 # GraphQL variables, not shell variables
           unresolved=$(gh api graphql \
             -f owner="${GITHUB_REPOSITORY%/*}" \
@@ -60,10 +58,30 @@ jobs:
             --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)] | length')
           test "$unresolved" = 0 || { echo "PR #$PR has $unresolved unresolved review thread(s)."; exit 1; }
 
-          read -r state draft merge_state < <(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" \
-            --json state,isDraft,mergeStateStatus --jq '[.state, .isDraft, .mergeStateStatus] | @tsv')
+          read -r state draft merge_state head < <(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" \
+            --json state,isDraft,mergeStateStatus,headRefOid \
+            --jq '[.state, .isDraft, .mergeStateStatus, .headRefOid] | @tsv')
           test "$state" = OPEN || { echo "PR #$PR is $state, not OPEN."; exit 1; }
           test "$draft" = false || { echo "PR #$PR is a draft."; exit 1; }
+
+          for attempt in 1 2 3 4 5 6; do
+            [ "$merge_state" = UNKNOWN ] || break
+            sleep $((attempt * 2))
+            merge_state=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" \
+              --json mergeStateStatus --jq .mergeStateStatus)
+          done
+          if [ "$merge_state" = BEHIND ]; then
+            gh api --method PUT "repos/$GITHUB_REPOSITORY/pulls/$PR/update-branch" \
+              -f expected_head_sha="$head"
+          fi
+          gh pr checks "$PR" --repo "$GITHUB_REPOSITORY" --required --watch --interval 10
+
+          for attempt in 1 2 3 4 5 6; do
+            merge_state=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" \
+              --json mergeStateStatus --jq .mergeStateStatus)
+            [ "$merge_state" = UNKNOWN ] || break
+            sleep $((attempt * 2))
+          done
           test "$merge_state" = CLEAN || { echo "PR #$PR is not ready to merge: $merge_state."; exit 1; }
 
           gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
