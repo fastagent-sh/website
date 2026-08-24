@@ -1,0 +1,77 @@
+name: Publish scheduled blog post
+
+on:
+  schedule:
+    - cron: '17 9 * * *'
+  workflow_dispatch:
+    inputs:
+      publish_date:
+        description: UTC publication date (YYYY-MM-DD); defaults to today
+        required: false
+        type: string
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: scheduled-blog-publishing
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Select scheduled pull request
+        id: plan
+        env:
+          REQUESTED_DATE: ${{ inputs.publish_date }}
+        run: |
+          publish_date="${REQUESTED_DATE:-$(date -u +%F)}"
+          case "$publish_date" in
+            2026-08-28) pr=68 ;;
+            2026-08-31) pr=69 ;;
+            2026-09-03) pr=70 ;;
+            2026-09-06) pr=71 ;;
+            2026-09-09) pr=72 ;;
+            *)
+              echo "No blog post scheduled for $publish_date." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+              ;;
+          esac
+          echo "pr=$pr" >> "$GITHUB_OUTPUT"
+          echo "Publishing PR #$pr for $publish_date." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Validate and merge
+        if: steps.plan.outputs.pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ steps.plan.outputs.pr }}
+        run: |
+          gh pr checks "$PR" --repo "$GITHUB_REPOSITORY" --required
+
+          # shellcheck disable=SC2016 # GraphQL variables, not shell variables
+          unresolved=$(gh api graphql \
+            -f owner="${GITHUB_REPOSITORY%/*}" \
+            -f name="${GITHUB_REPOSITORY#*/}" \
+            -F number="$PR" \
+            -f query='query($owner:String!,$name:String!,$number:Int!){repository(owner:$owner,name:$name){pullRequest(number:$number){reviewThreads(first:100){nodes{isResolved}}}}}' \
+            --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)] | length')
+          test "$unresolved" = 0 || { echo "PR #$PR has $unresolved unresolved review thread(s)."; exit 1; }
+
+          read -r state draft merge_state < <(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" \
+            --json state,isDraft,mergeStateStatus --jq '[.state, .isDraft, .mergeStateStatus] | @tsv')
+          test "$state" = OPEN || { echo "PR #$PR is $state, not OPEN."; exit 1; }
+          test "$draft" = false || { echo "PR #$PR is a draft."; exit 1; }
+          test "$merge_state" = CLEAN || { echo "PR #$PR is not ready to merge: $merge_state."; exit 1; }
+
+          gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
+
+      - name: Run deployment and main-branch analysis
+        if: steps.plan.outputs.pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref main
+          gh workflow run codeql.yml --repo "$GITHUB_REPOSITORY" --ref main
