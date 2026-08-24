@@ -147,7 +147,7 @@ export async function POST(request: Request): Promise<Response> {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
-      session: `support:${userId}`,
+      session: `support:${encodeURIComponent(userId)}`,
       text,
     }),
     signal: request.signal,
@@ -168,7 +168,7 @@ FastAgent treats `scope.session` as an opaque string. Reuse a string to continue
 A single support conversation per user can use:
 
 ```ts
-session: `support:${userId}`
+session: `support:${encodeURIComponent(userId)}`
 ```
 
 If users can open several conversations, address the conversation in the application database and verify ownership before invoking:
@@ -182,7 +182,7 @@ if (!conversation) {
   return Response.json({ error: "not found" }, { status: 404 });
 }
 
-const fastagentSession = `support:${userId}:${conversation.id}`;
+const fastagentSession = `support:${encodeURIComponent(userId)}:${conversation.id}`;
 ```
 
 This is an application decision. FastAgent supplies conversation continuity and a one-writer lease; it does not create user, tenant, or membership concepts.
@@ -203,9 +203,19 @@ export default defineTool({
   input: z.object({
     orderNumber: z.string().min(1),
   }),
-  async execute({ orderNumber }) {
-    const order = await db.order.findUnique({
-      where: { orderNumber },
+  async execute({ orderNumber }, { sessionManager }) {
+    const session = sessionManager?.getSessionId();
+    const encodedUserId = session?.split(":")[1];
+
+    if (!session?.startsWith("support:") || !encodedUserId) {
+      throw new Error("lookup-order requires an authenticated support session");
+    }
+
+    const order = await db.order.findFirst({
+      where: {
+        orderNumber,
+        userId: decodeURIComponent(encodedUserId),
+      },
       select: {
         orderNumber: true,
         status: true,
@@ -230,7 +240,7 @@ Never claim an order changed unless a tool result says it changed.
 Do not expose fields that the tool did not return.
 ```
 
-The example deliberately returns a narrow projection. An author-written tool is trusted server code and can import anything the process can access, so the tool itself must enforce data minimization and authorization. For stronger isolation, pass the authenticated account context through an application-owned tool boundary rather than exposing a general database client.
+The example deliberately returns a narrow projection and scopes the query to the authenticated user encoded by the server-owned session. `sessionManager` reads invocation context; the model cannot supply or change it. An author-written tool is trusted server code and can import anything the process can access, so the tool itself must enforce data minimization and authorization rather than exposing a general database client.
 
 ## Stream the response
 
