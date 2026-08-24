@@ -1,0 +1,110 @@
+name: Publish scheduled blog post
+
+on:
+  schedule:
+    - cron: '17 9 * * *'
+  workflow_dispatch:
+    inputs:
+      publish_date:
+        description: UTC publication date (YYYY-MM-DD); defaults to today
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scheduled-blog-publishing
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Select scheduled pull request
+        id: plan
+        env:
+          REQUESTED_DATE: ${{ inputs.publish_date }}
+        run: |
+          publish_date="${REQUESTED_DATE:-$(date -u +%F)}"
+          case "$publish_date" in
+            2026-08-28) pr=68 ;;
+            2026-08-31) pr=69 ;;
+            2026-09-03) pr=70 ;;
+            2026-09-06) pr=71 ;;
+            2026-09-09) pr=72 ;;
+            *)
+              echo "No blog post scheduled for $publish_date." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+              ;;
+          esac
+          echo "pr=$pr" >> "$GITHUB_OUTPUT"
+          echo "Publishing PR #$pr for $publish_date." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Validate and merge
+        id: release
+        if: steps.plan.outputs.pr
+        env:
+          GH_TOKEN: ${{ secrets.BLOG_PUBLISH_TOKEN }}
+          PR: ${{ steps.plan.outputs.pr }}
+        run: |
+          test -n "$GH_TOKEN" || { echo "BLOG_PUBLISH_TOKEN is not configured."; exit 1; }
+          # shellcheck disable=SC2016 # GraphQL variables, not shell variables
+          unresolved=$(gh api graphql \
+            -f owner="${GITHUB_REPOSITORY%/*}" \
+            -f name="${GITHUB_REPOSITORY#*/}" \
+            -F number="$PR" \
+            -f query='query($owner:String!,$name:String!,$number:Int!){repository(owner:$owner,name:$name){pullRequest(number:$number){reviewThreads(first:100){nodes{isResolved}}}}}' \
+            --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)] | length')
+          test "$unresolved" = 0 || { echo "PR #$PR has $unresolved unresolved review thread(s)."; exit 1; }
+
+          read -r state draft merge_state head < <(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" \
+            --json state,isDraft,mergeStateStatus,headRefOid \
+            --jq '[.state, .isDraft, .mergeStateStatus, .headRefOid] | @tsv')
+          test "$state" = OPEN || { echo "PR #$PR is $state, not OPEN."; exit 1; }
+          test "$draft" = false || { echo "PR #$PR is a draft."; exit 1; }
+
+          for attempt in 1 2 3 4 5 6; do
+            [ "$merge_state" = UNKNOWN ] || break
+            sleep $((attempt * 2))
+            merge_state=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" \
+              --json mergeStateStatus --jq .mergeStateStatus)
+          done
+          if [ "$merge_state" = BEHIND ]; then
+            gh api --method PUT "repos/$GITHUB_REPOSITORY/pulls/$PR/update-branch" \
+              -f expected_head_sha="$head"
+            sleep 10
+          fi
+          gh pr checks "$PR" --repo "$GITHUB_REPOSITORY" --required --watch --interval 10
+
+          for attempt in 1 2 3 4 5 6; do
+            merge_state=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" \
+              --json mergeStateStatus --jq .mergeStateStatus)
+            [ "$merge_state" = UNKNOWN ] || break
+            sleep $((attempt * 2))
+          done
+          test "$merge_state" = CLEAN || { echo "PR #$PR is not ready to merge: $merge_state."; exit 1; }
+
+          gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
+          merge_sha=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" \
+            --json mergeCommit --jq .mergeCommit.oid)
+          echo "merge_sha=$merge_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for deployment and main-branch analysis
+        if: steps.plan.outputs.pr
+        env:
+          GH_TOKEN: ${{ secrets.BLOG_PUBLISH_TOKEN }}
+          MERGE_SHA: ${{ steps.release.outputs.merge_sha }}
+        run: |
+          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            ci_run=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml \
+              --event push --commit "$MERGE_SHA" --json databaseId --jq '.[0].databaseId // empty')
+            codeql_run=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow codeql.yml \
+              --event push --commit "$MERGE_SHA" --json databaseId --jq '.[0].databaseId // empty')
+            [ -z "$ci_run" ] || [ -z "$codeql_run" ] || break
+            sleep $((attempt * 2))
+          done
+          test -n "$ci_run" || { echo "Deployment workflow did not start."; exit 1; }
+          test -n "$codeql_run" || { echo "CodeQL workflow did not start."; exit 1; }
+          gh run watch "$ci_run" --repo "$GITHUB_REPOSITORY" --exit-status
+          gh run watch "$codeql_run" --repo "$GITHUB_REPOSITORY" --exit-status
