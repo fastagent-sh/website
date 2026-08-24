@@ -15,7 +15,7 @@ This guide builds a self-hosted reviewer with FastAgent v0.17.1. It will:
 
 - accept only GitHub webhook deliveries with a valid HMAC signature;
 - route `opened`, `reopened`, and `synchronize` pull request events;
-- fetch the current diff through a typed tool;
+- fetch the verified event’s immutable base-to-head diff through a typed tool;
 - post one advisory issue comment through a second tool;
 - run as an ordinary file-defined agent behind `POST /webhook`.
 
@@ -36,7 +36,7 @@ The repository becomes the workspace and the agent lands under `fastagent/`. Put
 You review pull requests for correctness and maintainability.
 
 For each requested review:
-1. Fetch the current pull request diff with github-pr-diff.
+1. Fetch the requested pull request diff with github-pr-diff.
 2. Inspect relevant repository files when the diff needs context.
 3. Report only concrete findings that can change the patch.
 4. For every finding, name the file and explain the failure scenario.
@@ -66,6 +66,7 @@ Replace the generated routing policy with a focused event filter:
 ```ts
 // fastagent/channels/github.ts
 import { githubChannel } from "@fastagent-sh/fastagent/github";
+import { createReviewSession } from "../review-target.ts";
 
 const reviewActions = new Set(["opened", "reopened", "synchronize"]);
 
@@ -85,13 +86,18 @@ export default githubChannel({
 
     return [
       {
-        // Each delivery reviews one immutable event snapshot and cannot collide
-        // with another delivery for the same pull request.
-        session: event.deliveryId,
+        // The signed session binds tools to this verified event snapshot.
+        session: createReviewSession({
+          repository: repository.full_name,
+          pullNumber: pull_request.number,
+          baseSha: pull_request.base.sha,
+          headSha: pull_request.head.sha,
+          deliveryId: event.deliveryId,
+        }),
         text: [
           `Review pull request #${pull_request.number} in ${repository.full_name}.`,
           `Head SHA: ${pull_request.head.sha}.`,
-          "Fetch the current diff, inspect repository context when needed,",
+          "Fetch the requested diff, inspect repository context when needed,",
           "then post one advisory review comment.",
         ].join(" "),
       },
@@ -102,7 +108,64 @@ export default githubChannel({
 
 `on(event)` is the only event policy. Return `[]` to acknowledge and ignore a delivery, one intent for one review, or several intents for deliberate fan-out.
 
-Using `deliveryId` as the session keeps overlapping updates independent. A stable `github:<repo>:pr:<number>` session would preserve review history, but two deliveries arriving together would contend for the same one-writer lease and one would receive `session_busy`. For a current-diff reviewer, independent delivery sessions are simpler.
+The signed session includes `deliveryId`, so overlapping updates remain independent. A stable `github:<repo>:pr:<number>` session would preserve review history, but two deliveries arriving together would contend for the same one-writer lease and one would receive `session_busy`. For an event-snapshot reviewer, independent delivery sessions are simpler.
+
+## Bind tools to the verified event
+
+The model must not choose which repository or pull request its token can modify. Sign the verified webhook target into the internal session with the existing webhook secret:
+
+```ts
+// fastagent/review-target.ts
+import { createHmac, timingSafeEqual } from "node:crypto";
+
+export type ReviewTarget = {
+  repository: string;
+  pullNumber: number;
+  baseSha: string;
+  headSha: string;
+  deliveryId: string;
+};
+
+function signature(payload: string): Buffer {
+  const secret = process.env.GITHUB_WEBHOOK_SECRET;
+  if (!secret) throw new Error("GITHUB_WEBHOOK_SECRET is required");
+  return createHmac("sha256", secret).update(`review-target:${payload}`).digest();
+}
+
+export function createReviewSession(target: ReviewTarget): string {
+  const payload = Buffer.from(JSON.stringify(target)).toString("base64url");
+  return `github:${payload}.${signature(payload).toString("base64url")}`;
+}
+
+export function getReviewTarget(
+  sessionManager: { getSessionId(): string } | undefined,
+): ReviewTarget {
+  const match = /^github:([^.]+)\.([^.]+)$/.exec(sessionManager?.getSessionId() ?? "");
+  if (!match) throw new Error("verified GitHub review context required");
+
+  const expected = signature(match[1]);
+  const actual = Buffer.from(match[2], "base64url");
+  if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) {
+    throw new Error("invalid GitHub review context");
+  }
+
+  const target = JSON.parse(Buffer.from(match[1], "base64url").toString()) as ReviewTarget;
+  if (
+    !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(target.repository) ||
+    !Number.isInteger(target.pullNumber) ||
+    target.pullNumber < 1 ||
+    !/^[0-9a-f]{40}$/.test(target.baseSha) ||
+    !/^[0-9a-f]{40}$/.test(target.headSha) ||
+    typeof target.deliveryId !== "string" ||
+    target.deliveryId === ""
+  ) {
+    throw new Error("invalid GitHub review target");
+  }
+  return target;
+}
+```
+
+The HMAC makes the session useful as trusted invocation context: a caller to another route cannot forge a repository or pull request merely by choosing a session string. The tools verify this context before using `GH_TOKEN`.
 
 ## Give the agent narrow GitHub tools
 
@@ -111,18 +174,15 @@ The webhook tells the agent which pull request changed, but it does not automati
 ```ts
 // fastagent/tools/github-pr-diff.ts
 import { defineTool, z } from "@fastagent-sh/fastagent";
-
-const repoName = z.string().regex(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/);
+import { getReviewTarget } from "../review-target.ts";
 
 export default defineTool({
-  description: "Fetch the current unified diff for a GitHub pull request.",
-  input: z.object({
-    repository: repoName,
-    pullNumber: z.number().int().positive(),
-  }),
-  async execute({ repository, pullNumber }) {
+  description: "Fetch the immutable diff for the verified GitHub review event.",
+  input: z.object({}),
+  async execute(_, { sessionManager }) {
+    const { repository, baseSha, headSha } = getReviewTarget(sessionManager);
     const response = await fetch(
-      `https://api.github.com/repos/${repository}/pulls/${pullNumber}`,
+      `https://api.github.com/repos/${repository}/compare/${baseSha}...${headSha}`,
       {
         headers: {
           accept: "application/vnd.github.v3.diff",
@@ -156,15 +216,15 @@ Then add one write tool:
 ```ts
 // fastagent/tools/github-comment.ts
 import { defineTool, z } from "@fastagent-sh/fastagent";
+import { getReviewTarget } from "../review-target.ts";
 
 export default defineTool({
-  description: "Post one advisory issue comment on a GitHub pull request.",
+  description: "Post one advisory comment on the verified GitHub pull request.",
   input: z.object({
-    repository: z.string().regex(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/),
-    pullNumber: z.number().int().positive(),
     body: z.string().min(1).max(20_000),
   }),
-  async execute({ repository, pullNumber, body }) {
+  async execute({ body }, { sessionManager }) {
+    const { repository, pullNumber } = getReviewTarget(sessionManager);
     const response = await fetch(
       `https://api.github.com/repos/${repository}/issues/${pullNumber}/comments`,
       {
@@ -192,7 +252,7 @@ export default defineTool({
 
 Use a token with the smallest repository scope that can read pull requests and write issue comments. Do not give this deployment organization administration, workflow modification, or merge authority. GitHub’s current fine-grained token and GitHub App permission models should be evaluated for the repository you operate.
 
-The tool schemas also prevent the model from choosing arbitrary API URLs. Repository names and pull numbers are values; the API host and endpoint are fixed in code.
+The fixed API endpoints prevent arbitrary URLs, while the signed invocation context prevents the model from redirecting either tool to another repository or pull request. The model controls only the review comment body.
 
 ## Configure GitHub
 
@@ -228,13 +288,14 @@ A reviewer should ignore most GitHub traffic. Exercise the pure routing cases se
 | `pull_request.synchronize` | One review intent for the new head SHA |
 | Invalid HMAC | Rejected before routing |
 
-Then test tool behavior with direct execution:
+Confirm that direct, sessionless tool execution fails closed:
 
 ```bash
-fastagent tool github-pr-diff '{"repository":"owner/repo","pullNumber":42}'
+fastagent tool github-pr-diff '{}'
+# Error: verified GitHub review context required
 ```
 
-Use a disposable pull request when testing `github-comment`; the tool has a real side effect.
+Use a signed webhook delivery against a disposable pull request for the positive integration test. `github-comment` has a real side effect.
 
 The reviewer also needs repository context. A deployment image is a snapshot of the workspace. If the agent must inspect files beyond the diff, make sure the relevant repository is present and current on the host. A policy that allows `git pull` needs explicit credentials and a clear branch rule; silently reviewing stale local files is worse than limiting the review to the fetched diff.
 
