@@ -4,6 +4,9 @@ on:
   pull_request:
   push:
     branches: [main]
+  # PRs created with GITHUB_TOKEN do not emit another pull_request event. The
+  # blog autopilot dispatches this workflow on its generated branch instead.
+  workflow_dispatch:
 
 permissions:
   contents: read

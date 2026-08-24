@@ -1,0 +1,274 @@
+{
+  "version": 1,
+  "cadenceDays": 14,
+  "publicationMode": "pull-request",
+  "language": "en",
+  "topics": [
+    {
+      "slug": "add-ai-agent-nextjs-streaming-auth-sessions",
+      "due": "2026-09-07",
+      "status": "planned",
+      "title": "How to add an AI agent to an existing Next.js app—with streaming, auth, and persistent sessions",
+      "description": "Embed a file-defined agent in an existing Next.js application while keeping the application's authentication, database, routes, and deployment boundaries.",
+      "tags": ["embedding", "nextjs", "serving", "tutorial"],
+      "audience": "TypeScript product developers adding an agent as one feature inside an existing Next.js application.",
+      "outcome": "A runnable support-agent route that authenticates the caller, maps the user to a stable session, streams SSE, and calls an existing typed database tool without introducing a second backend.",
+      "sourceFiles": [
+        "README.md",
+        "docs/embedding.md",
+        "docs/api-reference.md",
+        "docs/design/core.md",
+        "docs/deploy.md"
+      ],
+      "officialLinks": [
+        "https://nextjs.org/docs/app/building-your-application/routing/route-handlers",
+        "https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events"
+      ],
+      "requiredTerms": [
+        "createPiAgentFromDir",
+        "createInvokeHandler",
+        "session",
+        "Server-Sent Events"
+      ],
+      "requiredSections": [
+        "Start from the application boundary",
+        "Mount the agent behind a Route Handler",
+        "Keep authentication in the app",
+        "Map users to sessions",
+        "Use the existing database through a typed tool",
+        "Stream the response",
+        "Deploy with the right state model",
+        "When not to use this shape"
+      ],
+      "boundaries": [
+        "The application owns authentication and authorization; FastAgent does not infer either.",
+        "The default JSONL session store is a single-process tier.",
+        "Do not present Vercel's stateless function tier as an out-of-the-box durable FastAgent deployment.",
+        "Use Node.js 22.19 or newer and state storage appropriate to the host."
+      ],
+      "wordRange": [1900, 2700]
+    },
+    {
+      "slug": "self-hosted-github-pull-request-review-agent",
+      "due": "2026-09-21",
+      "status": "planned",
+      "title": "Build a self-hosted GitHub pull request review agent with FastAgent",
+      "description": "Turn verified GitHub webhook events into focused pull request reviews using a file-defined agent you can run and inspect yourself.",
+      "tags": ["github", "webhooks", "tutorial", "serving"],
+      "audience": "Developers who want a review agent attached to their own repository without adopting a hosted agent platform.",
+      "outcome": "A reproducible review agent that verifies webhook signatures, selects pull request events, posts a useful review, and states the post-ack durability boundary honestly.",
+      "sourceFiles": [
+        "README.md",
+        "docs/github.md",
+        "docs/channels.md",
+        "docs/design/core.md",
+        "docs/deploy.md"
+      ],
+      "officialLinks": [
+        "https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries",
+        "https://docs.github.com/en/webhooks/webhook-events-and-payloads"
+      ],
+      "requiredTerms": [
+        "fastagent add github",
+        "GITHUB_WEBHOOK_SECRET",
+        "HMAC",
+        "202"
+      ],
+      "requiredSections": [
+        "Define what the reviewer should do",
+        "Add the GitHub channel",
+        "Choose the events worth reviewing",
+        "Verify and test the webhook",
+        "Write the review policy",
+        "Deploy the reviewer",
+        "Understand the post-ack failure window",
+        "When not to use an agent reviewer"
+      ],
+      "boundaries": [
+        "GitHub webhook turns are acknowledged before background agent work finishes.",
+        "The shipped GitHub channel has no durable post-ack replay.",
+        "Do not claim exactly-once review execution.",
+        "A reviewer should be advisory and must not silently become a merge authority."
+      ],
+      "wordRange": [1800, 2600]
+    },
+    {
+      "slug": "ai-agent-cron-wake-self-scheduling",
+      "due": "2026-10-05",
+      "status": "planned",
+      "title": "Give an AI agent a clock: cron, wake, and self-scheduling without a workflow DSL",
+      "description": "Use static schedules for known jobs and persisted wake-ups for agent-chosen follow-ups, with clear delivery and retry semantics.",
+      "tags": ["schedules", "automation", "serving", "design"],
+      "audience": "Agent developers who need periodic work or delayed follow-ups but do not need a deterministic workflow engine.",
+      "outcome": "A practical explanation and working example of static cron, wake/unwake, schedule history, delivery tools, and host-specific clock behavior.",
+      "sourceFiles": [
+        "docs/quickstart.md",
+        "docs/api-reference.md",
+        "docs/cli.md",
+        "docs/design/core.md",
+        "docs/deploy.md"
+      ],
+      "officialLinks": [
+        "https://docs.aws.amazon.com/scheduler/latest/UserGuide/what-is-scheduler.html"
+      ],
+      "requiredTerms": [
+        "defineSchedule",
+        "selfSchedule",
+        "wake",
+        "unwake",
+        "schedule history"
+      ],
+      "requiredSections": [
+        "Two kinds of time",
+        "Create a static schedule",
+        "Deliver the result through a tool",
+        "Let the agent schedule its own follow-up",
+        "Inspect schedule history",
+        "How clocks map to deployment targets",
+        "Failure and retry semantics",
+        "When to use a workflow engine instead"
+      ],
+      "boundaries": [
+        "A schedule invokes the agent; delivery still belongs to an explicit tool.",
+        "Resident deployments need a running process for local cron and wake timers.",
+        "AgentCore maps supported clocks to EventBridge only for the shared ingress surface.",
+        "FastAgent is not a deterministic workflow engine."
+      ],
+      "wordRange": [1900, 2700]
+    },
+    {
+      "slug": "group-chat-agents-participants-not-endpoints",
+      "due": "2026-10-19",
+      "status": "planned",
+      "title": "Group-chat agents should behave like participants, not endpoints",
+      "description": "Derive when an agent should speak, where it should answer, and what it should remember from the social structure of the room.",
+      "tags": ["channels", "group-chat", "design", "serving"],
+      "audience": "Developers designing Slack, Feishu, Lark, or Telegram agents for real group conversations.",
+      "outcome": "A platform-neutral design argument backed by concrete Slack, Feishu/Lark, and Telegram behavior.",
+      "sourceFiles": [
+        "docs/design/participant-model.md",
+        "docs/channels.md",
+        "docs/slack.md",
+        "docs/feishu.md",
+        "docs/telegram.md"
+      ],
+      "officialLinks": [
+        "https://api.slack.com/apis/events-api",
+        "https://core.telegram.org/bots/api"
+      ],
+      "requiredTerms": [
+        "participant",
+        "Listening is not speaking",
+        "place",
+        "thread",
+        "mention"
+      ],
+      "requiredSections": [
+        "The participant axiom",
+        "Listening is not speaking",
+        "When to answer",
+        "Where to answer",
+        "What a room should remember",
+        "Why the place is the concurrency unit",
+        "How the rule maps to Slack, Feishu, and Telegram",
+        "The cost of weaker platform signals"
+      ],
+      "boundaries": [
+        "Do not claim complete knowledge of thread membership when the platform only provides observed events.",
+        "Do not describe one platform's placement rule as universal.",
+        "Group context permissions and least-privilege mention-only modes must both be stated.",
+        "Sessions follow conversation places, not individual users in a room."
+      ],
+      "wordRange": [1900, 2800]
+    },
+    {
+      "slug": "agent-directory-feishu-lark-teammate",
+      "due": "2026-11-02",
+      "status": "planned",
+      "title": "Turn an agent directory into a Feishu or Lark teammate",
+      "description": "Connect a file-defined agent to Feishu or Lark with explicit permissions, thread behavior, streaming cards, durable turn intent, and a deployable webhook path.",
+      "tags": ["feishu", "lark", "channels", "tutorial"],
+      "audience": "Teams that want an agent in Feishu or Lark and need a realistic setup path beyond a toy echo bot.",
+      "outcome": "An end-to-end onboarding and deployment tutorial that explains transport choice, permissions, publication steps, room memory, and operational limits.",
+      "sourceFiles": [
+        "docs/feishu.md",
+        "docs/channels.md",
+        "docs/quickstart.md",
+        "docs/design/participant-model.md",
+        "docs/deploy.md"
+      ],
+      "officialLinks": [
+        "https://open.feishu.cn/document/home/index",
+        "https://open.larksuite.com/document/home/index"
+      ],
+      "requiredTerms": [
+        "fastagent add feishu",
+        "fastagent add lark",
+        "webhook",
+        "WebSocket",
+        "streaming card"
+      ],
+      "requiredSections": [
+        "Choose Feishu or Lark",
+        "Choose webhook or WebSocket ingress",
+        "Run the onboarding flow",
+        "Review permissions before publishing",
+        "Test direct messages, rooms, and threads",
+        "Understand the streaming card",
+        "Deploy the channel",
+        "Failure and replay boundaries"
+      ],
+      "boundaries": [
+        "Onboarding includes human confirmation and application publication steps.",
+        "WebSocket is a long-connection channel and requires always-on compute.",
+        "Context-aware group behavior requests broader message visibility than mention-only mode.",
+        "Accepted turns replay at least once; exactly-once side effects are not guaranteed."
+      ],
+      "wordRange": [2000, 2900]
+    },
+    {
+      "slug": "reliable-agent-serving-acks-leases-replay",
+      "due": "2026-11-16",
+      "status": "planned",
+      "title": "What reliable agent serving actually means: ACKs, leases, replay, and failure windows",
+      "description": "A precise guide to the reliability guarantees that sit between an accepted webhook and a completed agent turn.",
+      "tags": ["reliability", "sessions", "channels", "design"],
+      "audience": "Senior developers evaluating whether an agent serving layer is ready for production workloads.",
+      "outcome": "A concrete reliability vocabulary and channel-by-channel matrix that separates acceptance, execution, delivery, and recovery.",
+      "sourceFiles": [
+        "docs/SPEC.md",
+        "docs/channels.md",
+        "docs/design/core.md",
+        "docs/design/session-control.md",
+        "docs/deploy.md"
+      ],
+      "officialLinks": [
+        "https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks"
+      ],
+      "requiredTerms": [
+        "acknowledgement",
+        "lease",
+        "at-least-once",
+        "session_busy",
+        "replay"
+      ],
+      "requiredSections": [
+        "Split the delivery path into stages",
+        "Acceptance is not completion",
+        "Why one session needs one writer",
+        "What at-least-once replay guarantees",
+        "Where side effects can duplicate",
+        "Compare the shipped channels",
+        "How deployment changes the failure window",
+        "When you need a workflow or queue above FastAgent"
+      ],
+      "boundaries": [
+        "Do not claim universal exactly-once execution.",
+        "GitHub post-ack work and replaying chat channels have different guarantees.",
+        "A repaired transcript does not make tool side effects exactly once.",
+        "Multi-instance durability requires external backends above the shipped file tier."
+      ],
+      "wordRange": [2100, 3000]
+    }
+  ]
+}

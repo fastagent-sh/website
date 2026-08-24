@@ -10,6 +10,9 @@ on:
     branches: [main]
   schedule:
     - cron: '31 4 * * 1'
+  # See ci.yml: generated PRs need an explicit branch dispatch because their
+  # creation uses the repository-scoped GITHUB_TOKEN.
+  workflow_dispatch:
 
 permissions:
   contents: read

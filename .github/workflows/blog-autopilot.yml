@@ -1,0 +1,231 @@
+name: Blog autopilot
+
+on:
+  # Run weekly; the plan's due dates enforce the two-week editorial cadence.
+  schedule:
+    - cron: '17 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: Optional planned topic slug (can run before its due date)
+        required: false
+        type: string
+      today:
+        description: Optional YYYY-MM-DD date override for testing selection
+        required: false
+        type: string
+      skip_review:
+        description: Skip the second model pass (manual diagnostics only)
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: blog-autopilot
+  cancel-in-progress: false
+
+# The job writes only an autopilot branch and PR. Publishing still happens through
+# the existing main-branch CI after the generated PR is reviewed and merged.
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate:
+    name: Generate next due post
+    if: github.repository == 'fastagent-sh/website'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      INPUT_TOPIC: ${{ inputs.topic || '' }}
+      INPUT_TODAY: ${{ inputs.today || '' }}
+      INPUT_SKIP_REVIEW: ${{ inputs.skip_review || 'false' }}
+    steps:
+      - name: Check out website
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          submodules: recursive
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Select the next due topic
+        id: select
+        shell: bash
+        run: |
+          args=(select --json)
+          if [[ -n "$INPUT_TOPIC" ]]; then args+=(--topic "$INPUT_TOPIC"); fi
+          if [[ -n "$INPUT_TODAY" ]]; then args+=(--today "$INPUT_TODAY"); fi
+          node scripts/blog-autopilot.mjs "${args[@]}" > "$RUNNER_TEMP/selected.json"
+          cat "$RUNNER_TEMP/selected.json"
+          slug=$(node -e 'const r=require(process.argv[1]); process.stdout.write(r.slug || "")' "$RUNNER_TEMP/selected.json")
+          if [[ -z "$slug" ]]; then
+            echo "due=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "due=true" >> "$GITHUB_OUTPUT"
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+          echo "branch=autopilot/blog-$slug" >> "$GITHUB_OUTPUT"
+
+      - name: Stop when that topic already has an open PR
+        if: steps.select.outputs.due == 'true'
+        id: existing
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ steps.select.outputs.branch }}
+        run: |
+          count=$(gh pr list --state open --head "$BRANCH" --json number --jq 'length')
+          if [[ "$count" != "0" ]]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "An open PR already owns $BRANCH; nothing to do."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check one-time model configuration
+        if: steps.select.outputs.due == 'true' && steps.existing.outputs.skip != 'true'
+        shell: bash
+        env:
+          BLOG_AUTOPILOT_PROVIDER: ${{ vars.BLOG_AUTOPILOT_PROVIDER }}
+          BLOG_AUTOPILOT_MODEL: ${{ vars.BLOG_AUTOPILOT_MODEL }}
+          BLOG_AUTOPILOT_API_KEY: ${{ secrets.BLOG_AUTOPILOT_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if [[ -z "$BLOG_AUTOPILOT_MODEL" ]]; then
+            echo '::error::Set the Actions variable BLOG_AUTOPILOT_MODEL before enabling the autopilot.'
+            exit 1
+          fi
+          if [[ -z "$BLOG_AUTOPILOT_PROVIDER" && -n "$BLOG_AUTOPILOT_API_KEY" && -z "$ANTHROPIC_API_KEY" && -z "$OPENAI_API_KEY" ]]; then
+            echo '::error::Set BLOG_AUTOPILOT_PROVIDER when using the generic BLOG_AUTOPILOT_API_KEY secret.'
+            exit 1
+          fi
+          if [[ -z "$BLOG_AUTOPILOT_API_KEY" && -z "$ANTHROPIC_API_KEY" && -z "$OPENAI_API_KEY" ]]; then
+            echo '::error::Add BLOG_AUTOPILOT_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY as an Actions secret.'
+            exit 1
+          fi
+
+      - name: Check out the latest released FastAgent source
+        if: steps.select.outputs.due == 'true' && steps.existing.outputs.skip != 'true'
+        id: product
+        shell: bash
+        run: |
+          version=$(npm view @fastagent-sh/fastagent version)
+          git clone --depth 1 --branch "v$version" https://github.com/fastagent-sh/fastagent.git "$RUNNER_TEMP/fastagent"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Draft and fact-check the post
+        if: steps.select.outputs.due == 'true' && steps.existing.outputs.skip != 'true'
+        id: generate
+        shell: bash
+        env:
+          SLUG: ${{ steps.select.outputs.slug }}
+          BLOG_AUTOPILOT_PROVIDER: ${{ vars.BLOG_AUTOPILOT_PROVIDER }}
+          BLOG_AUTOPILOT_MODEL: ${{ vars.BLOG_AUTOPILOT_MODEL }}
+          BLOG_AUTOPILOT_REVIEW_MODEL: ${{ vars.BLOG_AUTOPILOT_REVIEW_MODEL }}
+          BLOG_AUTOPILOT_BASE_URL: ${{ vars.BLOG_AUTOPILOT_BASE_URL }}
+          BLOG_AUTOPILOT_MAX_TOKENS: ${{ vars.BLOG_AUTOPILOT_MAX_TOKENS }}
+          BLOG_AUTOPILOT_API_KEY: ${{ secrets.BLOG_AUTOPILOT_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          args=(generate --product-dir "$RUNNER_TEMP/fastagent" --topic "$SLUG" --json)
+          if [[ -n "$INPUT_TODAY" ]]; then args+=(--today "$INPUT_TODAY"); fi
+          if [[ "$INPUT_SKIP_REVIEW" == "true" ]]; then args+=(--skip-review); fi
+          node scripts/blog-autopilot.mjs "${args[@]}" > "$RUNNER_TEMP/generated.json"
+          cat "$RUNNER_TEMP/generated.json"
+          article=$(node -e 'const r=require(process.argv[1]); process.stdout.write(r.articlePath)' "$RUNNER_TEMP/generated.json")
+          title=$(node -e 'const r=require(process.argv[1]); process.stdout.write(r.title)' "$RUNNER_TEMP/generated.json")
+          draft_model=$(node -e 'const r=require(process.argv[1]); process.stdout.write(r.draftModel)' "$RUNNER_TEMP/generated.json")
+          review_model=$(node -e 'const r=require(process.argv[1]); process.stdout.write(r.reviewModel || "skipped")' "$RUNNER_TEMP/generated.json")
+          words=$(node -e 'const r=require(process.argv[1]); process.stdout.write(String(r.wordCount))' "$RUNNER_TEMP/generated.json")
+          echo "article=$article" >> "$GITHUB_OUTPUT"
+          echo "title=$title" >> "$GITHUB_OUTPUT"
+          echo "draft_model=$draft_model" >> "$GITHUB_OUTPUT"
+          echo "review_model=$review_model" >> "$GITHUB_OUTPUT"
+          echo "words=$words" >> "$GITHUB_OUTPUT"
+
+      - name: Test the autopilot and validate the generated post
+        if: steps.select.outputs.due == 'true' && steps.existing.outputs.skip != 'true'
+        shell: bash
+        env:
+          ARTICLE: ${{ steps.generate.outputs.article }}
+          SLUG: ${{ steps.select.outputs.slug }}
+        run: |
+          node --test scripts/blog-autopilot.test.mjs
+          node scripts/blog-autopilot.mjs validate \
+            --file "$ARTICLE" \
+            --topic "$SLUG" \
+            --product-dir "$RUNNER_TEMP/fastagent"
+
+      - name: Run the complete website checks
+        if: steps.select.outputs.due == 'true' && steps.existing.outputs.skip != 'true'
+        run: npm run check && npm run build
+
+      - name: Commit the article on an autopilot branch
+        if: steps.select.outputs.due == 'true' && steps.existing.outputs.skip != 'true'
+        shell: bash
+        env:
+          BRANCH: ${{ steps.select.outputs.branch }}
+          ARTICLE: ${{ steps.generate.outputs.article }}
+          TITLE: ${{ steps.generate.outputs.title }}
+        run: |
+          git config user.name 'fastagent-blog[bot]'
+          git config user.email 'fastagent-blog[bot]@users.noreply.github.com'
+          git fetch origin "$BRANCH" || true
+          git switch -C "$BRANCH"
+          git add automation/blog-plan.json "$ARTICLE"
+          git commit -m "blog: $TITLE"
+          git push --force-with-lease --set-upstream origin "$BRANCH"
+
+      - name: Open the editorial PR and dispatch required checks
+        if: steps.select.outputs.due == 'true' && steps.existing.outputs.skip != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ steps.select.outputs.branch }}
+          TITLE: ${{ steps.generate.outputs.title }}
+          ARTICLE: ${{ steps.generate.outputs.article }}
+          PRODUCT_VERSION: ${{ steps.product.outputs.version }}
+          DRAFT_MODEL: ${{ steps.generate.outputs.draft_model }}
+          REVIEW_MODEL: ${{ steps.generate.outputs.review_model }}
+          WORDS: ${{ steps.generate.outputs.words }}
+        run: |
+          {
+            echo '## Generated post'
+            echo
+            printf -- '- Topic: %s\n' "$TITLE"
+            printf -- '- Article: %s\n' "$ARTICLE"
+            printf -- '- FastAgent release used as the factual source: v%s\n' "$PRODUCT_VERSION"
+            printf -- '- Draft model: %s\n' "$DRAFT_MODEL"
+            printf -- '- Review model: %s\n' "$REVIEW_MODEL"
+            printf -- '- Prose words: %s\n' "$WORDS"
+            echo
+            echo '## Automated gates'
+            echo
+            echo '- source bundle limited to the selected released FastAgent docs'
+            echo '- independent second model pass unless explicitly skipped in a manual diagnostic run'
+            echo '- deterministic claim, heading, link, command, length, and removed-API checks'
+            echo '- blog-autopilot unit tests'
+            echo '- full website check and production build'
+            echo
+            echo 'A maintainer still reviews and merges this PR. Merging advances the calendar and lets the existing main-branch workflow publish the post.'
+          } > "$RUNNER_TEMP/pr-body.md"
+          pr_url=$(gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "Blog: $TITLE" \
+            --body-file "$RUNNER_TEMP/pr-body.md")
+          echo "Opened $pr_url"
+          # A PR created with GITHUB_TOKEN does not emit a pull_request event. Explicit
+          # dispatches put the normal required checks on this branch's head commit.
+          gh workflow run ci.yml --ref "$BRANCH"
+          gh workflow run codeql.yml --ref "$BRANCH"

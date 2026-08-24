@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>FastAgent blog autopilot</title>
+  <style>body{font:16px/1.55 system-ui,sans-serif;max-width:900px;margin:40px auto;padding:0 20px;color:#20232a}code,pre{font-family:ui-monospace,monospace;background:#f3f4f6}code{padding:.12em .3em}pre{padding:16px;overflow:auto}h1,h2{line-height:1.2}table{border-collapse:collapse;width:100%}th,td{border:1px solid #d7dbe0;padding:8px;text-align:left;vertical-align:top}.note{border-left:4px solid #d97706;padding:8px 14px;background:#fff8e8}</style>
+</head>
+<body>
+  <h1>FastAgent blog autopilot</h1>
+  <p>The autopilot selects the next due topic, grounds two model passes in the latest released FastAgent source, validates the result, builds the complete website, and opens an editorial pull request. Merging that pull request advances the calendar and uses the existing main-branch workflow to publish to Cloudflare.</p>
+
+  <h2>One-time repository setup</h2>
+  <ol>
+    <li>Open <strong>Settings → Secrets and variables → Actions</strong>.</li>
+    <li>Add an Actions secret named <code>BLOG_AUTOPILOT_API_KEY</code>. Provider-specific <code>ANTHROPIC_API_KEY</code> and <code>OPENAI_API_KEY</code> are accepted too.</li>
+    <li>Add <code>BLOG_AUTOPILOT_PROVIDER</code> as an Actions variable: <code>anthropic</code>, <code>openai</code>, or <code>compatible</code>.</li>
+    <li>Add <code>BLOG_AUTOPILOT_MODEL</code> as an Actions variable using a model identifier available to that account.</li>
+    <li>For an OpenAI-compatible third-party endpoint, add its full chat-completions endpoint as <code>BLOG_AUTOPILOT_BASE_URL</code>. Leave it unset for the native Anthropic and OpenAI endpoints.</li>
+    <li>Confirm that repository workflow permissions allow GitHub Actions to create branches and pull requests.</li>
+  </ol>
+  <p>Optional variables: <code>BLOG_AUTOPILOT_REVIEW_MODEL</code> selects a separate fact-check model; <code>BLOG_AUTOPILOT_MAX_TOKENS</code> sets an output ceiling from 2,000 to 32,000.</p>
+
+  <h2>Schedule and state</h2>
+  <p><code>.github/workflows/blog-autopilot.yml</code> runs every Monday at 09:17 UTC. <code>automation/blog-plan.json</code> holds due dates, factual source files, official links, required sections, product boundaries, and status. A weekly run produces nothing until a planned topic is due.</p>
+  <table>
+    <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>planned</code></td><td>Eligible after its due date.</td></tr>
+      <tr><td><code>generated</code></td><td>The generated article and this state change were merged. Selection moves to the next topic.</td></tr>
+      <tr><td><code>skipped</code></td><td>Editorially removed from the queue.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Manual operation</h2>
+  <p>Use <strong>Actions → Blog autopilot → Run workflow</strong> to generate a future topic by slug. The optional date input tests due-date selection. “Skip review” is only for diagnostics; scheduled runs always use the second model pass.</p>
+  <pre><code>node scripts/blog-autopilot.mjs select --today 2026-09-07
+node scripts/blog-autopilot.mjs generate \
+  --product-dir /path/to/fastagent-release \
+  --topic add-ai-agent-nextjs-streaming-auth-sessions
+node scripts/blog-autopilot.mjs validate \
+  --file src/content/blog/add-ai-agent-nextjs-streaming-auth-sessions.md \
+  --product-dir /path/to/fastagent-release</code></pre>
+
+  <h2>Safety boundaries</h2>
+  <ul>
+    <li>The configured model provider receives only selected public files from the latest npm release tag, the topic brief, and existing post summaries. Review that provider's data-retention terms before enabling the workflow.</li>
+    <li>External pages are linked from an approved list but are not fetched into the model context.</li>
+    <li>A second model pass checks the draft against the same release sources.</li>
+    <li>Deterministic validation rejects removed APIs, unsupported guarantees, missing official links, missing sections, unknown CLI commands, placeholders, and length violations.</li>
+    <li>The normal site check, production build, agent-surface check, CI, and CodeQL still run.</li>
+    <li>Model credentials exist only in the generation step's environment; install, build, test, git, and third-party action steps do not receive them.</li>
+    <li>The workflow never pushes directly to <code>main</code> and never merges its own article.</li>
+  </ul>
+  <p class="note"><strong>Why a review gate remains:</strong> no model-based fact checker can prove that public technical documentation is correct. The automation removes article-by-article writing work; a maintainer remains responsible for publication.</p>
+</body>
+</html>
