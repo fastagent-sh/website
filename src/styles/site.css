@@ -1615,6 +1615,10 @@ a.tag-link:hover {
   .hero-right {
     max-width: 40rem;
   }
+
+  .hero-right::before {
+    inset-inline: 0;
+  }
 }
 
 @media (max-width: 60rem) {

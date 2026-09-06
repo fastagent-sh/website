@@ -7,10 +7,12 @@
      · the CSS-only tabs still cover every embed framework
    Run it as `npm run check`: this reads the generated tokens.css, which
    `precheck` writes. */
+import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 
 import sharp from "sharp";
 
+import { SITE } from "../src/site.ts";
 import { nimbus, roles, term, themeColor } from "../src/theme.ts";
 import { CARD } from "./render-og.mjs";
 
@@ -180,6 +182,9 @@ const deadLinks = new Set();
    the docs — markdown link and HTML href, which between them is how every one
    of these links is written. */
 const linkSources = [
+  ...["start.md", ".well-known/agent-skills/fastagent/SKILL.md"].map((file) => [
+    `public/${file}`, read(`../public/${file}`).replaceAll(SITE, ""),
+  ]),
   ...readdirSync(docsDir, { recursive: true })
     .filter((f) => f.endsWith(".md"))
     .map((f) => [`docs/${f}`, readFileSync(new URL(f, docsDir), "utf8")]),
@@ -209,6 +214,17 @@ if (navMisses.length) problems.push(`sidebar entries with no page: ${navMisses.j
 /* And the other way: a page nothing links to is a page nobody finds. */
 const orphans = [...docSlugs].filter((slug) => !navSlugs.includes(slug));
 if (orphans.length) problems.push(`docs pages missing from the sidebar: ${orphans.join(", ")}`);
+
+/* The standalone guide and discoverable skill carry the same body and absolute links. */
+const start = read("../public/start.md");
+const skill = read("../public/.well-known/agent-skills/fastagent/SKILL.md");
+const skillIndex = JSON.parse(read("../public/.well-known/agent-skills/index.json"));
+const body = (markdown) => markdown.replace(/^---\n[\s\S]*?\n---\n/, "");
+if (body(start) !== body(skill)) problems.push("start.md and the discoverable skill disagree");
+if (/\]\((?!https?:|mailto:|#)[^)]+\)/.test(start)) problems.push("start.md carries a relative link");
+if (skillIndex.skills[0]?.digest !== `sha256:${createHash("sha256").update(skill).digest("hex")}`) {
+  problems.push("the discoverable skill's digest does not match SKILL.md");
+}
 
 /* ── brand marks that would vanish on the light page ───────────────────── */
 

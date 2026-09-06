@@ -24,7 +24,7 @@ fastagent deploy agentcore --run
 
 The useful part is understanding what that command builds, which state it makes durable, and where the boundary remains.
 
-> **Scope:** this article describes the container-based AgentCore microVM target shipped in FastAgent v0.17.1. AgentCore is evolving quickly; the linked AWS pages are the source of truth for current platform behavior, supported Regions, quotas, and pricing.
+> **Scope:** updated for FastAgent **v0.21.1** on September 6, 2026. This guide covers FastAgent's container-based AgentCore microVM target. The linked AWS pages remain the source of truth for platform behavior, supported Regions, quotas, and pricing.
 
 ## The result
 
@@ -109,7 +109,7 @@ docker buildx version
 Then create an agent:
 
 ```bash
-npm i -g @fastagent-sh/fastagent
+npm i -g @fastagent-sh/fastagent@0.21.1
 fastagent init agentcore-demo
 cd agentcore-demo
 fastagent info
@@ -131,7 +131,7 @@ agentcore-demo/                 # workspace and container build context
 Run it locally:
 
 ```bash
-fastagent dev
+fastagent dev --bind 127.0.0.1
 ```
 
 A fresh agent has no model preset. The first interactive run lets you choose a model and authenticate, then writes the selected model into `fastagent/fastagent.config.mjs`. This persistence is important: a local `--model` flag or `FASTAGENT_MODEL` override is builder-local and does not become a deployment default. `deploy --run` gates before creating infrastructure when the config has no model.
@@ -171,7 +171,7 @@ export default defineSchedule({
   tz: "America/New_York",
   prompt:
     "Fetch the current GitHub Status summary, reduce it to three bullets, " +
-    "and send it to Telegram chat <YOUR_CHAT_ID>.",
+    "and use telegram-send to send it to Telegram chat <YOUR_CHAT_ID>.",
 });
 ```
 
@@ -198,8 +198,9 @@ agentcore-demo/
 ├── .dockerignore
 └── fastagent/
     ├── Dockerfile
+    ├── Dockerfile.dockerignore
     ├── agentcore.template.yaml
-    └── lambda/index.js
+    └── lambda/forwarder.js
 ```
 
 The generated CloudFormation template uses the first-class [`AWS::BedrockAgentCore::Runtime`](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-bedrockagentcore-runtime.html) resource. It also declares only the topology implied by the definition: route channels add webhook ingress, schedules add EventBridge rules, and `selfSchedule` adds one-time wake-alarm wiring.
@@ -332,7 +333,7 @@ EventBridge Scheduler provides at-least-once delivery. FastAgent uses the schedu
 
 Cron dialects differ. FastAgent translates day-of-week numbering and EventBridge's day-of-month/day-of-week rules only when the result is unambiguous. An expression it cannot represent is refused during deployment with the schedule name and reason; it is never silently omitted.
 
-With `selfSchedule: true`, every pending ingress-side wake-up is mirrored into a self-deleting one-time EventBridge schedule. A wake created inside a separate direct `InvokeAgentRuntime` session is different: it lives in that direct session's isolated storage and has no shared alarm wiring, so it can fire only while that session remains awake.
+With `selfSchedule: true`, every pending ingress-side wake-up is mirrored into a self-deleting one-time EventBridge schedule. Startup reconciliation repairs pending alarms after a forwarder replacement. A wake created inside a separate direct `InvokeAgentRuntime` session is different: it lives in that direct session's isolated storage and has no shared alarm wiring, so it can fire only while that session remains awake.
 
 ## 8. Understand what “stateful” means here
 
@@ -424,7 +425,7 @@ Use AWS's current pricing page and your own traffic profile for estimates. Agent
 The FastAgent AgentCore target is deliberately narrower than everything AgentCore can host.
 
 - **Container microVM target only.** It does not currently generate AgentCore direct-code deployments or the newer Instances compute topology.
-- **FastAgent long-connection channel modules are unsupported.** Slack, Feishu/Lark, and similar integrations must use webhook mode. AgentCore's HTTP contract now supports an optional `/ws` endpoint; FastAgent v0.17.1 does not map its long-connection channel abstraction onto that endpoint.
+- **FastAgent long-connection channel modules are unsupported.** Slack, Feishu/Lark, and similar integrations must use webhook mode. AgentCore's HTTP contract now supports an optional `/ws` endpoint; FastAgent v0.21.1 does not map its long-connection channel abstraction onto that endpoint.
 - **Direct-session state does not cross Runtime versions.** Only the fixed webhook/schedule ingress state is copied to the FastAgent S3 snapshot.
 - **No universal exactly-once guarantee.** EventBridge is at least once; stateful chat channels replay accepted turns at least once; side-effecting tools must be idempotent where duplication matters.
 - **Webhook bodies are smaller here.** The Lambda Function URL envelope limits original bodies to about 4.4 MB.
@@ -460,4 +461,4 @@ fastagent deploy agentcore
 fastagent deploy agentcore --run
 ```
 
-Read the current [FastAgent AgentCore deployment reference](https://github.com/fastagent-sh/fastagent/blob/main/docs/deploy.md#aws-bedrock-agentcore), the [AgentCore Runtime service contract](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/runtime-service-contract.html), and the [FastAgent source](https://github.com/fastagent-sh/fastagent) before adapting the topology for production.
+Read the current [FastAgent AgentCore deployment reference](/docs/deploy/#aws-bedrock-agentcore), the [AgentCore Runtime service contract](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/runtime-service-contract.html), and the [FastAgent source](https://github.com/fastagent-sh/fastagent) before adapting the topology for production.

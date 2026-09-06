@@ -30,9 +30,6 @@ for (const relative of files) {
     .join(path.sep);
   const destination = new URL(output, generatedDocs);
   let markdown = await readFile(new URL(relative, sourceDocs), "utf8");
-  markdown = markdown
-    .replaceAll("README.md", "index.md")
-    .replaceAll("](../CONTRIBUTING.md)", "](https://github.com/fastagent-sh/fastagent/blob/main/CONTRIBUTING.md)");
   markdown = rewriteDocLinks(markdown, output);
   markdown = addFrontmatter(markdown, relative).replace(/^# .+\n+/m, "");
   await mkdir(new URL("./", destination), { recursive: true });
@@ -94,6 +91,9 @@ async function markdownFiles(directory, prefix = "") {
 }
 
 function rewriteDocLinks(markdown, currentFile) {
+  markdown = markdown
+    .replaceAll("README.md", "index.md")
+    .replaceAll("](../CONTRIBUTING.md)", "](https://github.com/fastagent-sh/fastagent/blob/main/CONTRIBUTING.md)");
   return markdown.replace(/\]\((?!https?:|mailto:|#|\/)([^)\s]+\.md)(#[^)]+)?\)/g, (_match, target, hash = "") => {
     const resolved = path.posix.normalize(path.posix.join(path.posix.dirname(currentFile), target));
     if (resolved.startsWith("../")) throw new Error(`doc link escapes docs: ${currentFile} -> ${target}`);

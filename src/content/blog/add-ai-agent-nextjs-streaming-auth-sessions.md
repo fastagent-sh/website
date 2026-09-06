@@ -19,7 +19,7 @@ This guide adds a file-defined FastAgent agent to a Next.js App Router project. 
 - calls an existing order database through a typed tool;
 - keeps the agent definition in ordinary files under `fastagent/`.
 
-The examples target FastAgent v0.17.1 and Node.js 22.19 or newer. The complete library surface is documented in the versioned [embedding guide](https://github.com/fastagent-sh/fastagent/blob/v0.17.1/docs/embedding.md).
+Updated for FastAgent **v0.21.1** on September 6, 2026. Requires Node.js 22.19 or newer. The complete library surface is documented in the [embedding guide](/docs/embedding/).
 
 ## Start from the application boundary
 
@@ -40,8 +40,8 @@ storefront/
 Install FastAgent and initialize an agent inside the same repository:
 
 ```bash
-npm install @fastagent-sh/fastagent
-npm install --global @fastagent-sh/fastagent
+npm install @fastagent-sh/fastagent@0.21.1
+npm install --global @fastagent-sh/fastagent@0.21.1
 fastagent init .
 ```
 
@@ -65,10 +65,12 @@ The outer repository is the workspace. The agent’s coding tools operate there,
 Run the agent before embedding it:
 
 ```bash
-fastagent dev
+fastagent dev --bind 127.0.0.1
 ```
 
-The first interactive run lets you choose a model and saves that selection to `fastagent/fastagent.config.mjs`. Test one local turn, then stop the development server. The Next.js route will assemble the same directory through the library API.
+The first interactive run lets you choose a model and saves that selection to `fastagent/fastagent.config.mjs`. Test one local turn, then stop the development server.
+
+The CLI mounts the full coding-tool set, including a shell. The customer-facing route below explicitly mounts only `lookup-order`. It uses the same persona but supplies its model and tool list through the library API. Set `FASTAGENT_MODEL` to your chosen `provider/modelId` in the Next.js environment. Supply provider keys through the application's environment or use the project login file; library embedding does not load the CLI's `.secrets/.env`.
 
 ## Mount the agent behind a Route Handler
 
@@ -78,16 +80,30 @@ Create one module that assembles the agent once for the application process:
 // src/support-agent.ts
 import {
   createInvokeHandler,
-  createPiAgentFromDir,
+  createPiAgentFromDefinition,
+  piSessionRecordStore,
 } from "@fastagent-sh/fastagent";
+import lookupOrder from "../fastagent/tools/lookup-order.ts";
 
-const runtime = await createPiAgentFromDir(".");
+const model = process.env.FASTAGENT_MODEL;
+if (!model) throw new Error("Set FASTAGENT_MODEL in the application environment");
+
+const runtime = await createPiAgentFromDefinition("./fastagent", {
+  model,
+  cwd: process.cwd(),
+  tools: [lookupOrder],
+  sessions: piSessionRecordStore({
+    dir: process.env.FASTAGENT_SESSIONS_DIR ?? "./fastagent/.state/sessions",
+  }),
+});
 
 export const supportAgent = runtime.agent;
 export const invokeSupportAgent = createInvokeHandler(runtime.agent);
 ```
 
-`createPiAgentFromDir(".")` resolves the `fastagent/` child while keeping the repository root as the workspace—the same placement `fastagent dev` uses when run from the project root. It then resolves the model, credentials, persona, skills, tools, and session paths. `createInvokeHandler` returns a Fetch-shaped function:
+`createPiAgentFromDefinition` reads the named definition and uses the explicitly supplied model, tools, and session store. `cwd` keeps the application root as the workspace. The `tools` option replaces the default coding tools, so this route offers no shell or filesystem tool. The definition's `AGENTS.md` and workspace ancestor context can still enter the prompt; keep that context suitable for every user of this agent. The application remains responsible for process isolation and every tool's authorization.
+
+`createInvokeHandler` returns a Fetch-shaped function:
 
 ```text
 Request → Promise<Response>
@@ -199,6 +215,7 @@ import { defineTool, z } from "@fastagent-sh/fastagent";
 import { db } from "../../src/db.ts";
 
 export default defineTool({
+  name: "lookup-order",
   description: "Look up an order by its public order number.",
   input: z.object({
     orderNumber: z.string().min(1),
@@ -229,7 +246,7 @@ export default defineTool({
 });
 ```
 
-The filename becomes the tool name: `lookup-order`. Use the `z` re-export from FastAgent so the schema and tool adapter share one Zod copy.
+The explicit `name` is required because the application imports this tool directly. The CLI's directory discovery also names it `lookup-order` from the filename. Use the `z` re-export from FastAgent so the schema and tool adapter share one Zod copy.
 
 Now make the policy explicit in `fastagent/persona.md`:
 
@@ -293,14 +310,16 @@ For an event whose `type` is `text`, render its `delta` as it arrives. Treat `to
 
 Embedding does not make deployment stateless. Sessions and the per-session lease still need a coherent home.
 
-The directory-aware assembly uses FastAgent’s project paths. On a long-running Node container, point mutable state and secrets at durable storage:
+This example supplies its session store explicitly. On a long-running Node container, set the variable that module reads and keep model credentials durable:
 
 ```bash
-FASTAGENT_STATE_DIR=/data/.state
+FASTAGENT_SESSIONS_DIR=/data/.state/sessions
 FASTAGENT_SECRETS_DIR=/data/.secrets
 ```
 
-The shipped JSONL store is a single-process tier. One process can serve many sessions, and different sessions can run concurrently, but scaling the application to several independent instances will split local state and leases. A multi-instance application needs implementations of the session-store and lease seams backed by shared infrastructure.
+Setting `FASTAGENT_STATE_DIR` alone does not move this explicitly constructed store. The higher-level `createPiAgentFromDir` and `createAgentService` resolve that state root automatically.
+
+The shipped JSONL store is a single-process tier. One process can serve many sessions, and different sessions can run concurrently, but scaling the application to several independent instances will split local state and leases. A multi-instance application needs implementations of `PiSessionRecordStore` and `Lease` backed by shared infrastructure.
 
 If you build a custom Next.js container, copy the `fastagent/` directory and every application module imported by its tools into the runtime image. A standalone Next.js bundle does not automatically prove that dynamically discovered agent files were included.
 
@@ -314,4 +333,6 @@ Use an opinionated agent platform when the agent is the whole product and you wa
 
 Use a workflow engine when the business process needs deterministic steps, retries, compensation, and audit semantics. FastAgent lets the agent choose its own steps; it can be invoked from a workflow, but it does not replace one.
 
-For the embedded case, the useful contract remains small: the app authenticates, chooses a session, and hands one prompt to an event stream. Read the [v0.17.1 embedding reference](https://github.com/fastagent-sh/fastagent/blob/v0.17.1/docs/embedding.md) and the [FastAgent source](https://github.com/fastagent-sh/fastagent) before adapting the example to your own auth and state backends.
+For the embedded case, the useful contract remains small: the app authenticates, chooses a session, and hands one prompt to an event stream. Read the [embedding reference](/docs/embedding/) and [public API](/docs/api-reference/) before adapting the example to your own auth and state backends.
+
+For a trusted agent that also needs native channels and scheduling, `createAgentService` mounts the whole directory and owns those lifetimes. Its optional session control API can list, observe, steer, fork, and delete conversations. Keep its deployment-wide bearer token server-side and authorize every session, including both ends of a fork, before exposing any control operation to a customer.

@@ -29,7 +29,7 @@ export const DETAILS =
 export const SECTIONS: Record<string, { label: string; description: string }> = {
   docs: {
     label: "Documentation",
-    description: "Guides and reference: quickstart, configuration, embedding, channels, deployment, and the Agent Handler SPEC.",
+    description: "Agent development, custom models, service embedding, channels, session control, Docker/Fly/Railway/AgentCore deployment, and the Agent Handler SPEC.",
   },
   blog: {
     label: "Blog",

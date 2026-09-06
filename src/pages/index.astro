@@ -8,6 +8,9 @@ import Site from "../layouts/Site.astro";
 import fastagent from "../generated/fastagent.json";
 import { DEFAULT_PROMPT, DESCRIPTION as description, SITE as site } from "../site";
 
+// Astro scans raw source for this export, including the route example below.
+export const prerender = true;
+
 const title = "FastAgent — Ship your AI agent as a live service";
 const structuredData = [
   {
@@ -52,9 +55,10 @@ const embedFrameworks = [
     id: "code",
     label: "Your code",
     icon: "typescript",
-    code: `// anywhere in your codebase — a job, a queue consumer, a test
-import { collect } from "@fastagent-sh/fastagent";
+    code: `// a job, a queue consumer, or a test
+import { collect, createPiAgentFromDir } from "@fastagent-sh/fastagent";
 
+const { agent } = await createPiAgentFromDir(".");
 const { text } = await collect(
   agent.invoke({ session: "job-42" }, { text: "summarize today's failures" })
 );`,
@@ -65,11 +69,9 @@ const { text } = await collect(
     icon: "nextdotjs",
     color: "#ffffff",
     code: `// app/api/invoke/route.ts
-import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
+import { createInvokeHandler, createPiAgentFromDir } from "@fastagent-sh/fastagent";
 
-const { agent } = await createPiAgentFromDefinition("./agent", {
-  model: "openai-codex/gpt-5.5",
-});
+const { agent } = await createPiAgentFromDir(".");
 
 export const POST = createInvokeHandler(agent);
 export const runtime = "nodejs";`,
@@ -81,14 +83,13 @@ export const runtime = "nodejs";`,
     color: "#e36002",
     code: `// app.ts
 import { Hono } from "hono";
-import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
+import { createInvokeHandler, createPiAgentFromDir } from "@fastagent-sh/fastagent";
 
-const { agent } = await createPiAgentFromDefinition("./agent", {
-  model: "anthropic/claude-sonnet-4",
-});
+const { agent } = await createPiAgentFromDir(".");
+const invoke = createInvokeHandler(agent);
 
 const app = new Hono();
-app.post("/invoke", createInvokeHandler(agent));
+app.post("/invoke", (c) => invoke(c.req.raw));
 
 export default app;`,
   },
@@ -99,14 +100,12 @@ export default app;`,
     color: "#ffffff",
     code: `// app.ts
 import express from "express";
-import { createInvokeHandler, createPiAgentFromDefinition, nodeListener } from "@fastagent-sh/fastagent";
+import { createInvokeHandler, createPiAgentFromDir, nodeListener } from "@fastagent-sh/fastagent";
 
-const { agent } = await createPiAgentFromDefinition("./agent", {
-  model: "anthropic/claude-sonnet-4",
-});
+const { agent } = await createPiAgentFromDir(".");
 
 const app = express();
-app.post("/invoke", nodeListener(createInvokeHandler(agent))); // no body parser on this route
+app.post("/invoke", nodeListener(createInvokeHandler(agent))); // before any body parser
 app.listen(8787);`,
   },
   {
@@ -114,63 +113,63 @@ app.listen(8787);`,
     label: "Astro",
     icon: "astro",
     color: "#bc52ee",
-    code: `// src/pages/api/invoke.ts
-import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
+    code: `// src/pages/api/invoke.ts (Node adapter)
+import type { APIRoute } from "astro";
+import { createInvokeHandler, createPiAgentFromDir } from "@fastagent-sh/fastagent";
 
-const { agent } = await createPiAgentFromDefinition("./agent", {
-  model: "openai-codex/gpt-5.5",
-});
+export const prerender = false;
+const { agent } = await createPiAgentFromDir(".");
+const invoke = createInvokeHandler(agent);
 
-export const POST = createInvokeHandler(agent);`,
+export const POST: APIRoute = ({ request }) => invoke(request);`,
   },
   {
     id: "nuxt",
     label: "Nuxt",
     icon: "nuxtdotjs",
     color: "#00dc82",
-    code: `// server/api/invoke.post.ts
-import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
+    code: `// server/api/invoke.post.ts (Node server)
+import { defineEventHandler, toWebRequest } from "h3";
+import { createInvokeHandler, createPiAgentFromDir } from "@fastagent-sh/fastagent";
 
-const { agent } = await createPiAgentFromDefinition("./agent", {
-  model: "openai-codex/gpt-5.5",
-});
-const handler = createInvokeHandler(agent);
+const { agent } = await createPiAgentFromDir(".");
+const invoke = createInvokeHandler(agent);
 
-export default defineEventHandler((event) => handler(toWebRequest(event)));`,
+export default defineEventHandler((event) => invoke(toWebRequest(event)));`,
   },
   {
     id: "svelte",
     label: "SvelteKit",
     icon: "svelte",
     color: "#ff3e00",
-    code: `// src/routes/invoke/+server.ts
-import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
+    code: `// src/routes/invoke/+server.ts (adapter-node)
+import type { RequestHandler } from "./$types";
+import { createInvokeHandler, createPiAgentFromDir } from "@fastagent-sh/fastagent";
 
-const { agent } = await createPiAgentFromDefinition("./agent", {
-  model: "anthropic/claude-sonnet-4",
-});
-const handler = createInvokeHandler(agent);
+const { agent } = await createPiAgentFromDir(".");
+const invoke = createInvokeHandler(agent);
 
-export const POST = ({ request }) => handler(request);`,
+export const POST: RequestHandler = ({ request }) => invoke(request);`,
   },
   {
     id: "fastify",
     label: "Fastify",
     icon: "fastify",
     color: "#ffffff",
-    code: `// server.ts — keep the body stream unread, hijack the reply
-import { createInvokeHandler, createPiAgentFromDefinition, nodeListener } from "@fastagent-sh/fastagent";
+    code: `// server.ts
+import Fastify from "fastify";
+import { createInvokeHandler, createPiAgentFromDir, nodeListener } from "@fastagent-sh/fastagent";
 
-const { agent } = await createPiAgentFromDefinition("./agent", {
-  model: "openai-codex/gpt-5.5",
-});
+const { agent } = await createPiAgentFromDir(".");
 const listener = nodeListener(createInvokeHandler(agent));
+const app = Fastify();
 
 app.register(async (scope) => {
   scope.removeAllContentTypeParsers();
   scope.addContentTypeParser("*", (_req, payload, done) => done(null, payload));
   scope.post("/invoke", (req, reply) => { reply.hijack(); listener(req.raw, reply.raw); });
-});`,
+});
+await app.listen({ port: 8787 });`,
   },
   {
     id: "bun",
@@ -178,19 +177,16 @@ app.register(async (scope) => {
     icon: "bun",
     color: "#fbf0df",
     code: `// server.ts
-import { createInvokeHandler, createPiAgentFromDefinition } from "@fastagent-sh/fastagent";
+import { createInvokeHandler, createPiAgentFromDir } from "@fastagent-sh/fastagent";
 
-const { agent } = await createPiAgentFromDefinition("./agent", {
-  model: "openai-codex/gpt-5.5",
-});
-
+const { agent } = await createPiAgentFromDir(".");
 const invoke = createInvokeHandler(agent);
 
 Bun.serve({
   port: 8787,
   fetch(req) {
     const url = new URL(req.url);
-    return url.pathname === "/invoke" ? invoke(req) : new Response("ok");
+    return url.pathname === "/invoke" ? invoke(req) : new Response("not found", { status: 404 });
   },
 });`,
   },
@@ -199,14 +195,14 @@ Bun.serve({
     label: "Node",
     icon: "nodedotjs",
     color: "#5fa04e",
-    code: `// server.ts
-import { createInvokeHandler, createPiAgentFromDefinition, router, serveNode } from "@fastagent-sh/fastagent";
+    code: `// server.ts — the whole service, including channels and schedules
+import { createAgentService, serveNode } from "@fastagent-sh/fastagent";
 
-const { agent } = await createPiAgentFromDefinition("./agent", {
-  model: "openai-codex/gpt-5.5",
-});
+const service = await createAgentService(".");
+const server = serveNode(service.handler, { port: 8787 });
+await Promise.all([service.ready, server.listening]);
 
-serveNode(router({ "POST /invoke": createInvokeHandler(agent) }), { port: 8787 });`,
+// On application shutdown, await service.close() and server.close().`,
   },
 ];
 
@@ -250,7 +246,7 @@ const ecosystem = [
       { icon: "cloudflare", label: "Cloudflare", color: "#f38020", soon: true },
       { icon: "vercel", label: "Vercel", color: "#ffffff", soon: true },
       { icon: "render", label: "Render", color: "#46e3b7", soon: true },
-      { icon: "amazonwebservices", label: "AWS", color: "#ff9900", soon: true },
+      { icon: "amazonwebservices", label: "AWS Bedrock AgentCore", color: "#ff9900" },
       { icon: "kubernetes", label: "Kubernetes", color: "#326ce5", soon: true },
       { icon: "googlecloud", label: "Google Cloud", color: "#4285f4", soon: true },
     ],
@@ -339,6 +335,7 @@ const concepts = [
             <a class="pi-credit" href="https://pi.dev"><BrandIcon name="pi" size={14} title="pi" /></a> · model and
             platform neutral · no account, no telemetry
           </p>
+          <p class="hero-note"><a class="text-link" href="/blog/fastagent-0-21/">Release highlights: services, session control, and AgentCore →</a></p>
           <p class="hero-note">☁ <strong>FastAgent Cloud</strong> — managed hosting, coming soon · self-hosting stays free forever · <a class="text-link" href="https://tally.so/r/44DVMB">join the waitlist →</a></p>
           <script>
             import { track } from "@plausible-analytics/tracker";
@@ -396,7 +393,7 @@ const concepts = [
             <span class="core-col-sub">turn external events into invocations</span>
             <ul>
               <li>GitHub webhooks</li>
-              <li>Telegram · Discord · Slack bots</li>
+              <li>Telegram · Slack · Feishu / Lark</li>
               <li>HTTP API · SSE streaming</li>
               <li>cron schedules</li>
               <li class="core-yours">+ yours · via the channel kit</li>
@@ -410,7 +407,7 @@ const concepts = [
               <ul>
                 <li>Anthropic Claude · OpenAI GPT · Gemini</li>
                 <li>Kimi · Grok · DeepSeek · GLM</li>
-                <li class="core-yours">+ yours · register a provider</li>
+                <li class="core-yours">+ yours · models.json or a provider</li>
               </ul>
             </div>
             <span class="core-arrow core-arrow-models" aria-hidden="true">↓</span>
@@ -429,7 +426,7 @@ const concepts = [
             <ul>
               <li>your app's route</li>
               <li>node · bun server</li>
-              <li>fly · railway · docker</li>
+              <li>fly · railway · docker · AgentCore</li>
               <li class="core-yours">+ yours · anything fetch-shaped</li>
             </ul>
           </div>
@@ -487,7 +484,7 @@ const concepts = [
             <div class="demo-body code-pane">
               <p><span class="tkw">const</span> {'{'} agent {'}'} = <span class="tkw">await</span> <span class="ct-fn">createPiAgentFromDefinition</span>(<span class="tstr">"./agent"</span>, {'{'}</p>
               <p>  model: <span class="tstr">"anthropic/claude-sonnet-4"</span>,              <span class="tcm">// any provider</span></p>
-              <p>  sessions: <span class="ct-fn">jsonlSessionStore</span>({'{'} dir: <span class="tstr">".state"</span> {'}'}),  <span class="tcm">// or your own store</span></p>
+              <p>  sessions: <span class="ct-fn">piSessionRecordStore</span>({'{'} dir: <span class="tstr">".state/sessions"</span> {'}'}),</p>
               <p>  providers: [myGateway],                          <span class="tcm">// or your model gateway</span></p>
               <p>{'}'});</p>
               <footer class="demo-foot">▸ assembly is code — swap any module, the rest keeps working</footer>
@@ -538,18 +535,22 @@ const concepts = [
 │   ├─ github.ts
 │   └─ telegram.ts
 ├─ <span class="ft-dir">schedules/</span>            <span class="tcm"># cron time triggers</span>
-├─ reference.md          <span class="tcm"># any markdown becomes context</span>
-└─ fastagent.config.mjs  <span class="tcm"># deployment choices</span></code></pre>
+├─ models.json           <span class="tcm"># optional custom model endpoints</span>
+├─ <span class="ft-dir">extensions/</span>           <span class="tcm"># optional pi extensions · chat only</span>
+├─ <span class="ft-dir">.state/</span>               <span class="tcm"># runtime sessions + channel state</span>
+├─ <span class="ft-dir">.secrets/</span>             <span class="tcm"># credentials · never committed</span>
+└─ fastagent.config.mjs  <span class="tcm"># identifies the agent directory</span></code></pre>
 
           <ul class="shape-notes">
-            <li><strong>Bring your existing definition.</strong> An <code>AGENTS.md</code> plus <code>skills/</code> your coding agent already vibed is enough.</li>
+            <li><strong>Keep your project.</strong> <code>fastagent init .</code> adds a <code>fastagent/</code> definition beside your existing files. Run from the project root to keep it as the workspace.</li>
             <li><strong>No registry, no boilerplate.</strong> A file in <code>channels/</code> is a channel. A file in <code>tools/</code> is a tool. Drop it in — it's live.</li>
-            <li><strong>Typed tools.</strong> Zod validates every input before it runs — nothing hidden between the model and your code.</li>
+            <li><strong>Typed tools.</strong> Zod validates authored tool inputs. Directory agents also have coding tools, including a shell; isolate the process when a security boundary is required.</li>
             <li><strong>No build step.</strong> <code>fastagent dev</code> runs the directory. Ship the directory. That's the artifact.</li>
           </ul>
         </div>
 
-        <p class="design-center"><span class="hash">#</span> every file is optional · point at a directory <span class="tp">→</span> get a live agent</p>
+        <p class="design-center"><span class="hash">#</span> fastagent.config.* identifies the agent · the directory you run from is its workspace</p>
+        <p class="section-follow"><a class="text-link" href="/docs/ai-start/">Agent development guide →</a> · <a class="text-link" href="/docs/configuration/#custom-model-endpoints">Custom models →</a></p>
       </section>
 
       <!-- 04 ADD IT TO YOUR APP ──────────────────────────────────────────────────── -->
@@ -563,6 +564,13 @@ const concepts = [
             FastAgent composes with your app, never owns it.
           </p>
         </header>
+
+        <p class="section-lede">
+          These examples open the workspace created by <code>fastagent init .</code>, using its configured model.
+          Supply credentials through your app's environment or the project login file.
+          Mount invoke behind authentication and session-ownership checks; directory agents include shell access.
+          Use a Node/Bun server with durable storage for file-backed sessions.
+        </p>
 
         <div class="tabs">
           {embedFrameworks.map((fw, i) => (
@@ -589,7 +597,12 @@ const concepts = [
           <li>your infra</li>
         </ul>
 
-        <p class="section-follow"><a class="text-link" href="/docs/embedding/">Embedding guide →</a></p>
+        <p class="section-lede">
+          Need the whole service? <code>createAgentService</code> includes declared channels, schedules, health,
+          and optional session control. Enable <code>sessionControl</code> to observe, steer, fork, or manage
+          conversations through an authenticated API; user and tenant authorization stay in your app.
+        </p>
+        <p class="section-follow"><a class="text-link" href="/docs/embedding/">Embedding guide →</a> · <a class="text-link" href="/docs/api-reference/#session-control-observation-plane">Session control →</a></p>
       </section>
 
       <!-- 05 RUN IT AS A LIVE SERVICE ───────────────────────────────────────────────── -->
@@ -639,7 +652,7 @@ const concepts = [
             <div class="demo-body tg-chat">
               <div class="tg-bubble tg-user"><header>maria · 14:02</header><p>status of order #9231?</p></div>
               <div class="tg-bubble tg-agent"><header>support-agent <span class="bot-tag">bot</span></header><p>Refund approved — receipt sent to the customer.</p><footer>seen ✓✓</footer></div>
-              <footer class="demo-foot">▸ group-aware · streams the reply as it thinks · no dropped messages</footer>
+              <footer class="demo-foot">▸ group-aware · streams replies · accepted turns replay at least once</footer>
             </div>
           </a>
 
@@ -651,9 +664,9 @@ const concepts = [
               <span class="demo-go" aria-hidden="true">→</span>
             </div>
             <div class="demo-body http-term">
-              <p><span class="tp">❯</span> curl -N localhost:8787/invoke -d <span class="tstr">'{'{'}"session":"s1","text":"hello"{'}'}'</span></p>
+              <p><span class="tp">❯</span> curl -N localhost:8787/invoke --json <span class="tstr">'{'{'}"session":"s1","text":"hello"{'}'}'</span></p>
               <p class="tdim">data: {'{'}"type":"text","delta":"Hi — checking that now."{'}'}</p>
-              <p class="tdim">data: {'{'}"type":"tool_started","name":"lookup-order"{'}'}</p>
+              <p class="tdim">data: {'{'}"type":"tool_started","id":"t1","name":"lookup-order","args":{'{'}"orderId":"9231"{'}'}{'}'}</p>
               <p class="tdim">data: {'{'}"type":"completed"{'}'}</p>
               <footer class="demo-foot">▸ POST /invoke · stream it or collect it · sessions built in</footer>
             </div>
@@ -676,7 +689,7 @@ const concepts = [
           </a>
 
           <!-- Schedules — time triggers -->
-          <a class="demo-win tint-green demo-wide" href="/docs/quickstart/">
+          <a class="demo-win tint-green demo-wide" href="/docs/api-reference/#schedule-authoring">
             <div class="demo-bar">
               <span class="demo-glyph">◷</span>
               <span>schedules/daily-digest.ts · 0 9 * * * · America/New_York</span>
@@ -685,10 +698,15 @@ const concepts = [
             <div class="demo-body http-term">
               <p><span class="tp">❯</span> fastagent fire daily-digest  <span class="tcm"># test a schedule without touching cron state</span></p>
               <p><span class="tch-schedule">[schedule]</span> <span class="tdim">▸ daily-digest fired · prompt → agent ·</span> telegram-send <span class="tg">✓ delivered</span></p>
-              <footer class="demo-foot">▸ fires while serving · the agent can wake itself · every run is logged</footer>
+              <footer class="demo-foot">▸ resident clock or AgentCore EventBridge · explicit recipients · serving-time audit</footer>
             </div>
           </a>
         </div>
+        <p class="section-lede">
+          Slack uses native threaded streams and two runtime secrets. Feishu/Lark threads inherit recent room context.
+          Scheduled turns deliver through send tools to an explicit recipient; chat channels already deliver normal replies.
+        </p>
+        <p class="section-follow"><a class="text-link" href="/docs/slack/">Slack →</a> · <a class="text-link" href="/docs/feishu/">Feishu / Lark →</a></p>
       </section>
 
       <!-- 06 DEPLOY ANYWHERE ─────────────────────────────────────────────────── -->
@@ -697,15 +715,16 @@ const concepts = [
           <span class="section-index"><span class="hash">#</span> 06 · the directory ships</span>
           <h2 id="deploy-title">Deploy <em>anywhere</em>.</h2>
           <p class="section-lede">
-            The harness is decoupled from the deployment: the agent runs anywhere Node runs —
-            your laptop, a microVM, Kubernetes, bare metal. Idle agents scale to zero — and
-            resume in hundreds of milliseconds when the next webhook lands.
+            Ship to Docker, Fly.io, Railway, or AWS Bedrock AgentCore.
+            Resident deployments use one active replica and durable storage.
+            Fly can suspend webhook-driven agents; clocks, GitHub, and long connections keep it running.
+            AgentCore uses EventBridge for clocks and an S3 snapshot for webhook/schedule state.
           </p>
         </header>
 
         <pre class="term-block" aria-label="Deploy command and generated files"><code><span class="tp">❯</span> fastagent deploy fly
-<span class="tg">✓</span> wrote fly.toml         <span class="tcm"># microVM · scale-to-zero · fast resume</span>
-<span class="tg">✓</span> wrote Dockerfile       <span class="tcm"># portable — the agent isn't tied to a host</span>
+<span class="tg">✓</span> wrote fastagent/fly.toml   <span class="tcm"># idle behavior follows the definition</span>
+<span class="tg">✓</span> wrote fastagent/Dockerfile <span class="tcm"># the workspace is the build context</span>
 <span class="tg">✓</span> wrote .dockerignore
 <span class="tdim">▸</span> runbook printed <span class="tdim">· or --run drives the deploy to completion</span></code></pre>
 
@@ -729,7 +748,7 @@ const concepts = [
           </div>
         </div>
 
-        <p class="section-follow"><a class="text-link" href="/docs/deploy/">Deployment guide →</a></p>
+        <p class="section-follow"><a class="text-link" href="/docs/deploy/">Deployment guide →</a> · <a class="text-link" href="/docs/deploy/#aws-bedrock-agentcore">AWS Bedrock AgentCore →</a></p>
       </section>
 
       <!-- 07 FOR THE ORG ─────────────────────────────────────────────── -->
