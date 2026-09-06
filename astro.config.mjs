@@ -36,7 +36,7 @@ const nimbusConfig = defineNimbusConfig({
     items: [
       {
         label: "Start here",
-        items: ["docs", "docs/overview", "docs/quickstart", { label: "Start with a coding agent", link: "/docs/ai-start/" }, "docs/principles"],
+        items: ["docs", { label: "Develop an agent", link: "/docs/ai-start/" }, "docs/quickstart", "docs/overview", "docs/principles"],
       },
       { label: "Build an agent", items: ["docs/configuration", "docs/embedding"] },
       {
@@ -51,7 +51,7 @@ const nimbusConfig = defineNimbusConfig({
       {
         label: "Maintainers",
         collapsed: true,
-        items: ["docs/design", "docs/design/core", "docs/design/session-control"],
+        items: ["docs/design", "docs/design/core", "docs/design/participant-model", "docs/design/session-control", "docs/design/conformance-levels"],
       },
     ],
   },

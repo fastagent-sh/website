@@ -9,7 +9,7 @@
     "predev": "npm run sync:docs && npm run tokens",
     "dev": "astro dev",
     "precheck": "npm run sync:docs && npm run tokens",
-    "check": "node scripts/check-site.mjs && astro check",
+    "check": "node scripts/check-site.mjs && node scripts/check-examples.mjs && astro check",
     "prebuild": "npm run sync:docs && npm run tokens",
     "build": "astro build",
     "postbuild": "node scripts/check-agent-surfaces.mjs",

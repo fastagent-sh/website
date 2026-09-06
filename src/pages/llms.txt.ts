@@ -2,6 +2,7 @@
 import { getIndexedTopLevel } from "@cloudflare/nimbus-docs";
 import { config } from "virtual:nimbus/config";
 
+import fastagent from "../generated/fastagent.json";
 import { DETAILS, SECTIONS } from "../site";
 
 export const prerender = true;
@@ -15,6 +16,8 @@ export async function GET() {
     config.description ?? "Documentation index for AI agents.",
     "",
     DETAILS,
+    "",
+    `Documentation for FastAgent v${fastagent.version} (source commit ${fastagent.commit}).`,
     "",
     `Full corpus (all pages, one document): ${new URL("/llms-full.txt", config.site).href}`,
     "",
@@ -50,14 +53,9 @@ export async function GET() {
   rows.sort((a, b) => (a.key === "/docs" ? "" : a.key).localeCompare(b.key === "/docs" ? "" : b.key));
   for (const row of rows) lines.push(row.line);
 
-  /* Everything above is one hop from its page. These are the pages the reading
-     order actually starts with, named here so the first useful one is one hop
-     away rather than two — the promotion the old index carried, same five:
-     the docs landing, the three pages a person is sent through first, and
-     ai-start, which is the page written for the reader of this file. Titles
-     come from the entries, so a renamed page renames here. */
+  /* Match the docs' starting path; titles follow the synced entries. */
   const members = new Map(groups.flatMap((g) => g.members.map((m) => [m.entry.id, m])));
-  const start = ["docs", "docs/quickstart", "docs/ai-start", "docs/overview", "docs/configuration"].map((id) => {
+  const start = ["docs", "docs/ai-start", "docs/quickstart", "docs/overview", "docs/configuration"].map((id) => {
     const item = members.get(id);
     // Renamed upstream: fail the build rather than quietly drop the promotion.
     if (!item) throw new Error(`llms.txt promotes "${id}", which is not a page`);
@@ -70,15 +68,12 @@ export async function GET() {
     ...start.map((item) => `- [${item.title}](${new URL(item.markdownUrl, config.site).href})`),
   );
 
-  /* The pages above are the site; these are the two doors into it that are
-     not pages. start.md is the runbook a coding agent is pointed at from the
-     landing, and the skill is the same text under the discovery well-known
-     path — an agent that found this file should not have to guess either. */
+  /* The authoring guide also ships outside the docs routes, as Markdown and a skill. */
   lines.push(
     "",
     "## For coding agents",
     "",
-    `- [Build an agent](${new URL("/start.md", config.site).href}) — the guided start: new project, existing files, or embedded in an app.`,
+    `- [Agent development guide](${new URL("/start.md", config.site).href}) — responsibilities, TypeScript tools, verification, channels, scheduling, and deployment.`,
     `- [Agent skill](${new URL("/.well-known/agent-skills/fastagent/SKILL.md", config.site).href}) — the same guide as an installable skill.`,
     `- [Source](https://github.com/fastagent-sh/fastagent) · [npm](https://www.npmjs.com/package/@fastagent-sh/fastagent)`,
   );

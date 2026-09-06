@@ -16,6 +16,8 @@ Real services receive webhooks. They live in the team chat. They review pull req
 
 This post is about that second job.
 
+*Examples updated for FastAgent v0.21.1 on September 6, 2026.*
+
 ## What "become a service" actually costs
 
 The gap is not one thing. Point at any agent you've vibed and count what's missing:
@@ -53,7 +55,7 @@ invoke(scope, prompt) => AsyncIterable<AgentEvent>
 
 Channels produce invocations. Engines fulfil them. Your infrastructure hosts them. Because everything talks through one small contract, a `channels × engines × hosts` matrix collapses into three independent lists — and none of them is allowed to reach into the others.
 
-The practical consequence is that FastAgent has nothing to move into. There's no dashboard, no control plane, no project format. The directory you already have *is* the deployable unit.
+The practical consequence is that FastAgent has nothing to move into. Your application owns its dashboard, users, and deployment. An optional session control API lets it operate conversations without adopting a hosted platform. The directory you already have *is* the deployable unit; a `fastagent.config.*` file identifies it.
 
 ## End to end, for real
 
@@ -62,7 +64,7 @@ Here's the whole path, with nothing skipped. Start with a directory — the one 
 ```bash
 npm i -g @fastagent-sh/fastagent
 fastagent init my-agent && cd my-agent
-fastagent dev
+fastagent dev --bind 127.0.0.1
 ```
 
 You now have a streaming HTTP service on `:8787`, with sessions on disk:
@@ -89,20 +91,24 @@ fastagent add telegram
 fastagent dev --tunnel     # public URL for webhook testing
 ```
 
-Each of those writes a file into `channels/`. That's the entire integration: signature verification, event mapping, streaming replies, and group-awareness are the channel's job, not yours. A file in `channels/` **is** a channel — including one you write.
+Each writes a file into `fastagent/channels/`. The adapter handles verification and event mapping. Telegram also handles streaming replies and group awareness; GitHub is ingress-only, so posting a review needs an explicit tool. A file in `channels/` **is** a channel, including one you write. With enabled channels, the default `/invoke` fallback is no longer mounted; add an HTTP channel explicitly if you need both.
 
 Give it a clock, too:
 
 ```ts
-// schedules/daily-digest.ts
-export default {
+// fastagent/schedules/daily-digest.ts
+import { defineSchedule } from "@fastagent-sh/fastagent";
+
+export default defineSchedule({
   cron: "0 9 * * *",
-  timezone: "America/New_York",
-  prompt: "Summarize yesterday's failures and post them to the ops room.",
-};
+  tz: "America/New_York",
+  prompt: "Summarize yesterday's failures and use telegram-send to send them to Telegram chat <YOUR_CHAT_ID>.",
+});
 ```
 
-Then ship the directory. There's no build artifact, because the directory is the artifact:
+Replace `<YOUR_CHAT_ID>` with an approved destination. Resident schedules need a running process; AgentCore uses EventBridge to wake the ingress service.
+
+Then ship the directory. There's no application build step, because the directory is the artifact:
 
 ```bash
 fastagent deploy fly    # writes fly.toml + Dockerfile + a runbook; --run drives it
@@ -115,9 +121,9 @@ Total new concepts introduced into your project: a directory, and a channel file
 Everything above is the standalone path. The more common case is that you already ship something, and the agent is one capability inside it. Then FastAgent isn't a service at all — it's an import.
 
 ```ts
-import { createPiAgentFromWorkspace, collect } from "@fastagent-sh/fastagent";
+import { createPiAgentFromDir, collect } from "@fastagent-sh/fastagent";
 
-const { agent } = await createPiAgentFromWorkspace("./agent", {
+const { agent } = await createPiAgentFromDir(".", {
   model: "anthropic/claude-sonnet-4",
 });
 
@@ -173,7 +179,7 @@ Some honesty is worth more than another feature list.
 - If your agent **is** the product, and you want opinionated batteries — auth, dashboards, multi-tenancy, an admin UI — a full framework will get you further faster.
 - If you're already all-in on one cloud and want one click, an integrated platform is less friction than composing.
 - If you need **deterministic multi-step orchestration** with retries and compensation, use a workflow engine and call `invoke` from it. FastAgent lets the agent decide its own steps; it doesn't pretend to be Temporal.
-- If you need **durable exactly-once execution** across restarts today, know the current state: Telegram's accepted turns replay at least once; general durability is future backend work, and it's listed as such rather than implied.
+- If you need **durable exactly-once execution** across restarts today, know the current state: Telegram, Slack, and Feishu/Lark replay accepted turns at least once. Tools must tolerate repetition; GitHub post-ACK work has no durable replay.
 
 FastAgent is pre-1.0. The stable center is the contract, and the package API is still tightening.
 
