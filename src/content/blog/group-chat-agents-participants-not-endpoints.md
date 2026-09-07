@@ -1,6 +1,6 @@
 ---
 title: "Group-chat agents should behave like participants, not endpoints"
-date: 2026-09-03
+date: 2026-09-12
 description: "Derive when an agent should speak, where it should answer, and what it should remember from the social structure of the room."
 tags:
   - channels
@@ -13,7 +13,7 @@ Most chat integrations are implemented as APIs and experienced as colleagues. Th
 
 An endpoint receives a request, returns a value, and forgets the exchange. A participant hears a room, speaks when addressed, answers where the question was asked, and remembers the conversation shared by that place.
 
-FastAgent v0.17.1 uses the second model for Slack, Feishu/Lark, and Telegram. The implementation differs by platform, but three rules stay stable:
+FastAgent v0.21.1 uses the second model for Slack, Feishu/Lark, and Telegram. The implementation differs by platform, but three rules stay stable:
 
 1. listening and speaking are separate decisions;
 2. an answer belongs where the question was asked;
@@ -185,4 +185,4 @@ Webhook verification, event parsing, and message rendering are implementation wo
 
 Answer those questions first and the session keys, queues, and routing predicates become derivable. Start with API mechanics and the product accumulates switches that couple unrelated behavior: thread placement changes memory, a permission toggle changes speaking, or a per-user session destroys room continuity.
 
-FastAgent’s full derivation is public in the versioned [participant model design note](https://github.com/fastagent-sh/fastagent/blob/v0.17.1/docs/design/participant-model.md), with channel behavior in the [v0.17.1 channel guide](https://github.com/fastagent-sh/fastagent/blob/v0.17.1/docs/channels.md). The implementation is MIT-licensed in the [FastAgent repository](https://github.com/fastagent-sh/fastagent).
+FastAgent’s full derivation is public in the [participant model design note](/docs/design/participant-model/), with channel behavior in the [channel guide](/docs/channels/). The implementation is MIT-licensed in the [FastAgent repository](https://github.com/fastagent-sh/fastagent).
