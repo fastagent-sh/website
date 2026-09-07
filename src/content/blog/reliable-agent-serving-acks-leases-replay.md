@@ -1,6 +1,6 @@
 ---
 title: "What reliable agent serving actually means: ACKs, leases, replay, and failure windows"
-date: 2026-09-09
+date: 2026-09-18
 description: "A precise guide to the reliability guarantees that sit between an accepted webhook and a completed agent turn."
 tags:
   - reliability
@@ -17,7 +17,7 @@ Reliable agent serving becomes easier to reason about when the path is split int
 receive → verify → persist intent → acknowledge → invoke → run tools → deliver → settle
 ```
 
-Each arrow has its own failure window. FastAgent v0.17.1 deliberately provides different guarantees for different channels instead of applying one durability label to all of them.
+Each arrow has its own failure window. FastAgent v0.21.1 deliberately provides different guarantees for different channels instead of applying one durability label to all of them.
 
 ## Split the delivery path into stages
 
@@ -131,7 +131,7 @@ Output delivery can be ambiguous too. A process can send a reply and crash befor
 
 ## Compare the shipped channels
 
-The following matrix describes FastAgent v0.17.1’s default adapters:
+The following matrix describes FastAgent v0.21.1’s default adapters:
 
 | Surface | Acceptance | Queue policy | Restart recovery | Important remainder |
 | --- | --- | --- | --- | --- |
@@ -195,4 +195,4 @@ The useful reliability question is never “is the agent durable?” Ask instead
 5. Which side effects are idempotent?
 6. Where does state live during deployment and scaling?
 
-FastAgent’s normative turn contract is in the versioned [Agent Handler SPEC](https://github.com/fastagent-sh/fastagent/blob/v0.17.1/docs/SPEC.md). Channel mechanics and current limits are documented in [Channels](https://github.com/fastagent-sh/fastagent/blob/v0.17.1/docs/channels.md), [Core design](https://github.com/fastagent-sh/fastagent/blob/v0.17.1/docs/design/core.md), and the [MIT-licensed source](https://github.com/fastagent-sh/fastagent).
+FastAgent’s normative turn contract is in the [Agent Handler SPEC](/docs/spec/). Channel mechanics and current limits are documented in [Channels](/docs/channels/), [Core design](/docs/design/core/), and the [MIT-licensed source](https://github.com/fastagent-sh/fastagent).
