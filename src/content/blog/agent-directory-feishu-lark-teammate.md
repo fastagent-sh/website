@@ -1,6 +1,6 @@
 ---
 title: "Turn an agent directory into a Feishu or Lark teammate"
-date: 2026-09-06
+date: 2026-09-15
 description: "Connect a file-defined agent to Feishu or Lark with explicit permissions, thread behavior, streaming cards, durable turn intent, and a deployable webhook path."
 tags:
   - feishu
@@ -11,7 +11,7 @@ tags:
 
 A Feishu or Lark agent needs more than an event callback. The app must choose an ingress transport, request the right message visibility, publish a version, preserve chat state, render long model responses, and behave predictably in rooms and threads.
 
-FastAgent v0.17.1 supplies the channel machinery around a file-defined agent. This guide covers the decisions the CLI cannot make for you and the human steps the platform does not automate.
+FastAgent v0.21.1 supplies the channel machinery around a file-defined agent. This guide covers the decisions the CLI cannot make for you and the human steps the platform does not automate.
 
 The result is a bot that:
 
@@ -136,7 +136,7 @@ The answer appears in the room quoting the question. FastAgent does not automati
 
 ### Group thread
 
-Open a thread and mention the agent once. Its answer makes it a participant. A bare continuation from the same human can then invoke it without another mention.
+Open a thread and mention the agent once. The thread's session starts from the room's recent history, so the agent does not enter it blind. Its answer makes it a participant. A bare continuation from the same human can then invoke it without another mention.
 
 Ask a second human to speak in that thread. Addressing is now ambiguous, so the next agent turn requires a mention again. The agent keeps listening in context-aware mode.
 
@@ -180,7 +180,7 @@ fastagent deploy docker --run
 
 Provide App ID and Secret. There is no webhook registration call. Health becomes ready after the long connection completes its first successful handshake, while the official SDK owns ordinary reconnects.
 
-Do not use the current FastAgent long-connection channel on the AgentCore target. FastAgent v0.17.1’s AgentCore adapter serves its HTTP `/invocations` contract and does not map this channel abstraction onto AgentCore’s optional WebSocket protocol.
+Do not use the current FastAgent long-connection channel on the AgentCore target. FastAgent v0.21.1’s AgentCore adapter serves its HTTP `/invocations` contract and does not map this channel abstraction onto AgentCore’s optional WebSocket protocol.
 
 ### Webhook
 
@@ -213,7 +213,7 @@ If the process crashes after acknowledgement, an unfinished accepted turn can re
 
 Use idempotency keys for consequential tools. Keep the channel state on durable storage. Do not let two processes share the file-backed state directory; the shipped tier is single-process.
 
-One conversation place is one queue. A busy room serializes its turns, while separate threads and chats can proceed concurrently. Session storage has no general TTL or garbage collector in v0.17.1, so a long-running deployment should monitor growth.
+One conversation place is one queue. A busy room serializes its turns, while separate threads and chats can proceed concurrently. Session storage has no general TTL or garbage collector in v0.21.1, so a long-running deployment should monitor growth.
 
 ## What remains manual
 
@@ -228,4 +228,4 @@ The onboarding flow removes repetitive setup but does not eliminate platform gov
 
 Those are useful boundaries. An agent-serving CLI should not silently grant itself broader room visibility or publish a tenant application.
 
-Read the versioned [Feishu/Lark channel guide](https://github.com/fastagent-sh/fastagent/blob/v0.17.1/docs/feishu.md), the [participant model](https://github.com/fastagent-sh/fastagent/blob/v0.17.1/docs/design/participant-model.md), and the [FastAgent source](https://github.com/fastagent-sh/fastagent) before configuring a production tenant.
+Read the [Feishu/Lark channel guide](/docs/feishu/), the [participant model](/docs/design/participant-model/), and the [FastAgent source](https://github.com/fastagent-sh/fastagent) before configuring a production tenant.
