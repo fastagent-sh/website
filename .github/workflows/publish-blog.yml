@@ -28,11 +28,11 @@ jobs:
         run: |
           publish_date="${REQUESTED_DATE:-$(date -u +%F)}"
           case "$publish_date" in
-            2026-08-28) pr=68 ;;
-            2026-08-31) pr=69 ;;
-            2026-09-03) pr=70 ;;
-            2026-09-06) pr=71 ;;
-            2026-09-09) pr=72 ;;
+            2026-09-06) pr=82 ;;
+            2026-09-09) pr=83 ;;
+            2026-09-12) pr=84 ;;
+            2026-09-15) pr=85 ;;
+            2026-09-18) pr=86 ;;
             *)
               echo "No blog post scheduled for $publish_date." >> "$GITHUB_STEP_SUMMARY"
               exit 0
