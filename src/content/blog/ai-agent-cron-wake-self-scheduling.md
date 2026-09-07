@@ -1,6 +1,6 @@
 ---
 title: "Give an AI agent a clock: cron, wake, and self-scheduling without a workflow DSL"
-date: 2026-08-31
+date: 2026-09-09
 description: "Use static schedules for known jobs and persisted wake-ups for agent-chosen follow-ups, with clear delivery and retry semantics."
 tags:
   - schedules
@@ -16,7 +16,7 @@ Those are two different kinds of time:
 - **static schedules** are known when the agent is authored;
 - **self-scheduled wake-ups** are chosen while the agent is working.
 
-FastAgent v0.17.1 supports both without introducing a workflow language. A schedule or wake-up eventually becomes the same operation as every other trigger: one call to `agent.invoke(scope, prompt)`.
+FastAgent v0.21.1 supports both without introducing a workflow language. A schedule or wake-up eventually becomes the same operation as every other trigger: one call to `agent.invoke(scope, prompt)`.
 
 ## Two kinds of time
 
@@ -205,4 +205,4 @@ Use a workflow or queue above FastAgent when the process requires:
 
 That workflow can still call `agent.invoke` for the steps that need model judgment. The boundary stays clear: the workflow owns deterministic progress; the agent owns reasoning inside one step.
 
-The versioned [quickstart schedule section](https://github.com/fastagent-sh/fastagent/blob/v0.17.1/docs/quickstart.md#8-run-on-a-clock), [deployment reference](https://github.com/fastagent-sh/fastagent/blob/v0.17.1/docs/deploy.md), and [FastAgent source](https://github.com/fastagent-sh/fastagent) contain the complete shipped behavior.
+The [quickstart schedule section](/docs/quickstart/#8-run-on-a-clock), [deployment reference](/docs/deploy/), and [FastAgent source](https://github.com/fastagent-sh/fastagent) contain the complete shipped behavior.
