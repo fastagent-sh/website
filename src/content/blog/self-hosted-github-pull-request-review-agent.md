@@ -1,6 +1,6 @@
 ---
 title: "Build a self-hosted GitHub pull request review agent with FastAgent"
-date: 2026-08-28
+date: 2026-09-06
 description: "Turn verified GitHub webhook events into focused pull request reviews using a file-defined agent you can run and inspect yourself."
 tags:
   - github
@@ -11,7 +11,7 @@ tags:
 
 A pull request review agent needs three separate pieces: a verified event that decides when to run, tools that can read and write GitHub data, and a review policy narrow enough to be useful. Treating all three as one prompt makes the result hard to secure and harder to operate.
 
-This guide builds a self-hosted reviewer with FastAgent v0.17.1. It will:
+This guide builds a self-hosted reviewer with FastAgent v0.21.1. It will:
 
 - accept only GitHub webhook deliveries with a valid HMAC signature;
 - route `opened`, `reopened`, and `synchronize` pull request events;
@@ -320,7 +320,7 @@ fastagent deploy docker
 fastagent deploy docker --run
 ```
 
-The generated local Docker topology binds only to the host by default; add a production reverse proxy or named tunnel for a stable public webhook origin. For a remote host, Fly.io, Railway, and AgentCore are available deployment targets in v0.17.1. Provide both secrets on the host:
+The generated local Docker topology binds only to the host by default; add a production reverse proxy or named tunnel for a stable public webhook origin. For a remote host, Fly.io, Railway, and AgentCore are available deployment targets in v0.21.1. Provide both secrets on the host:
 
 ```text
 GITHUB_WEBHOOK_SECRET=<webhook verification secret>
@@ -355,4 +355,4 @@ Do not send private code to a model provider without reviewing that provider’s
 
 A useful agent reviewer handles the residual work around deterministic tooling: cross-file reasoning, missing failure cases, unclear contracts, and risky assumptions. Keep the event filter small, the tools narrower than the token, and the reliability claim precise.
 
-Read the versioned [GitHub channel reference](https://github.com/fastagent-sh/fastagent/blob/v0.17.1/docs/github.md), GitHub’s [webhook event documentation](https://docs.github.com/en/webhooks/webhook-events-and-payloads), and the [FastAgent source](https://github.com/fastagent-sh/fastagent) before attaching the reviewer to a production repository.
+Read the [GitHub channel reference](/docs/github/), GitHub’s [webhook event documentation](https://docs.github.com/en/webhooks/webhook-events-and-payloads), and the [FastAgent source](https://github.com/fastagent-sh/fastagent) before attaching the reviewer to a production repository.
