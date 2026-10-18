@@ -35,7 +35,7 @@ export const collections = {
          posts without one fall back to the team, which is what the site said
          before this field existed. */
       author: z.string().default("The FastAgent team"),
-      authorUrl: z.string().url().optional(),
+      authorUrl: z.url().optional(),
       /* Per-post social card, rendered by scripts/render-post-og.mjs. Path is
          site-relative; the layout makes it absolute for og:image. */
       image: z.string().optional(),

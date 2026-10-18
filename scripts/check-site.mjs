@@ -14,7 +14,7 @@ import sharp from "sharp";
 
 import { SITE } from "../src/site.ts";
 import { nimbus, roles, term, themeColor } from "../src/theme.ts";
-import { CARD } from "./render-og.mjs";
+import { CARD } from "./og-theme.mjs";
 
 const srcDir = new URL("../src/", import.meta.url);
 const read = (p) => readFileSync(new URL(p, import.meta.url), "utf8");
@@ -275,7 +275,7 @@ const pixel = async (file, xFraction, yFraction) => {
 };
 
 /* Two committed rasters, two different owners. The OG card is a poster with
-   its own colors (scripts/render-og.mjs says why), so it answers to CARD; the
+   its own colors (scripts/og-theme.mjs holds them), so it answers to CARD; the
    favicon is a UI surface sitting next to the page in a browser tab, so its
    tile answers to the page background. Both are hand-run, both can go stale. */
 const baked = [

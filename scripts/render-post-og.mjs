@@ -64,7 +64,7 @@ const posts = readdirSync(BLOG_DIR)
   .map((file) => ({ file, data: frontmatter(readFileSync(new URL(file, BLOG_DIR), "utf8")) }))
   .filter(({ data }) => data.title && data.image);
 
-for (const { file, data } of posts) {
+for (const { data } of posts) {
   const lines = wrap(data.title, TITLE_SIZE, WIDTH - PAD * 2);
   const startY = HEIGHT / 2 - ((lines.length - 1) * TITLE_SIZE * 1.25) / 2 + 10;
   const title = lines
