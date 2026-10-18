@@ -8,7 +8,7 @@ tags:
   - agents
   - cost
 author: kid7st
-authorUrl: https://github.com/kid7st
+authorUrl: https://x.com/kid7st
 image: /og/deepseek-web-tools-for-pi.png
 ---
 
