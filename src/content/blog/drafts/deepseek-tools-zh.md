@@ -5,7 +5,7 @@
 
 一个每天搜 100 次的 agent 不便宜。检索 API 普遍按次计费：Brave 是 $5/千次，Tavily $5~8，Exa $7。一天 100 次、一个月就是 $15~25，这还没算抓取页面。
 
-DeepSeek 把同样的活定价在 **¥5 / 1,000 次成功请求**，约合 $0.70。它不是转售别人的结果：自建索引、返回排序分数、附上给模型读的长摘要。接口就两个，普通 JSON：
+DeepSeek 把同样的活定价在 **¥5 / 1,000 次成功请求**，英文价格页写作 $0.75。它不是转售别人的结果：自建索引、返回排序分数、附上给模型读的长摘要。接口就两个，普通 JSON：
 
 ```
 POST https://api.deepseek.com/v1/tools/search
@@ -105,7 +105,7 @@ deepseek_fetch {"url": "https://api-docs.deepseek.com/zh-cn/guides/search/"}
 
 | API | 标价（每 1000 次） |
 | --- | --- |
-| DeepSeek 搜索 / 抓取 | ¥5（约 $0.70） |
+| DeepSeek 搜索 / 抓取 | ¥5（$0.75） |
 | Brave 搜索（Data for AI） | $5 |
 | Tavily（基础搜索） | $5~8 |
 | Exa（搜索） | $7 |

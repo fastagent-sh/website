@@ -16,9 +16,11 @@ interface Props {
   /** Canonical path, e.g. "/blog/". */
   path?: string;
   ogType?: "website" | "article";
+  /** Social card for this page; posts pass their own, everything else keeps the site card. */
+  ogImage?: typeof OG_IMAGE;
 }
 
-const { title, description, path = "/", ogType = "website" } = Astro.props;
+const { title, description, path = "/", ogType = "website", ogImage = OG_IMAGE } = Astro.props;
 const canonical = `${SITE}${path}`;
 ---
 
@@ -57,10 +59,10 @@ const canonical = `${SITE}${path}`;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={OG_IMAGE.url} />
-    <meta property="og:image:width" content={OG_IMAGE.width} />
-    <meta property="og:image:height" content={OG_IMAGE.height} />
-    <meta property="og:image:alt" content={OG_IMAGE.alt} />
+    <meta property="og:image" content={ogImage.url} />
+    <meta property="og:image:width" content={ogImage.width} />
+    <meta property="og:image:height" content={ogImage.height} />
+    <meta property="og:image:alt" content={ogImage.alt} />
     <meta name="twitter:card" content="summary_large_image" />
     <title>{title}</title>
     <script>

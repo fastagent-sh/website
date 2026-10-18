@@ -8,13 +8,13 @@
    Run it as `npm run check`: this reads the generated tokens.css, which
    `precheck` writes. */
 import { createHash } from "node:crypto";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 
 import sharp from "sharp";
 
 import { SITE } from "../src/site.ts";
 import { nimbus, roles, term, themeColor } from "../src/theme.ts";
-import { CARD } from "./render-og.mjs";
+import { CARD } from "./og-theme.mjs";
 
 const srcDir = new URL("../src/", import.meta.url);
 const read = (p) => readFileSync(new URL(p, import.meta.url), "utf8");
@@ -275,16 +275,45 @@ const pixel = async (file, xFraction, yFraction) => {
 };
 
 /* Two committed rasters, two different owners. The OG card is a poster with
-   its own colors (scripts/render-og.mjs says why), so it answers to CARD; the
+   its own colors (scripts/og-theme.mjs holds them), so it answers to CARD; the
    favicon is a UI surface sitting next to the page in a browser tab, so its
    tile answers to the page background. Both are hand-run, both can go stale. */
 const baked = [
   ["social-preview.png", await pixel("social-preview.png", 0.004, 0.004), CARD.ground, "npm run og"],
   ["favicon.png", await pixel("favicon.png", 0.5, 0.95), themeColor.dark, "re-export it"],
 ];
+
+/* The per-post cards are committed too, and they are the ones a palette change
+   strands: scripts/render-post-og.mjs renders them by hand from the same CARD,
+   so a stale one looks like a design choice. The directory is the list. */
+for (const file of readdirSync(new URL("../public/og/", import.meta.url)).filter((f) => f.endsWith(".png"))) {
+  baked.push([`og/${file}`, await pixel(`og/${file}`, 0.004, 0.004), CARD.ground, "npm run og:posts"]);
+}
 for (const [file, got, expected, how] of baked) {
   if (got !== expected.toLowerCase()) {
     problems.push(`${file} is stale: painted ${got}, the palette says ${expected} (${how})`);
+  }
+}
+
+/* ── a post's card is a real file at the size og:image promises ────────── */
+
+/* `image` is the one link in a post's head that nothing else follows: a typo
+   points og:image at a 404 and the page itself still looks finished. Read that
+   one field rather than parsing the frontmatter a second time. */
+const blogDir = new URL("../src/content/blog/", import.meta.url);
+for (const file of readdirSync(blogDir)) {
+  if (!file.endsWith(".md")) continue;
+  const declared = readFileSync(new URL(file, blogDir), "utf8").match(/^image:\s*["']?([^"'\s]+)["']?\s*$/m)?.[1];
+  if (!declared) continue;
+  const relative = declared.replace(/^\//, "");
+  const card = new URL(`../public/${relative}`, import.meta.url);
+  if (!existsSync(card)) {
+    problems.push(`src/content/blog/${file}: image ${declared} is not a file under public/`);
+    continue;
+  }
+  const { width, height } = await sharp(card.pathname).metadata();
+  if (width !== 1200 || height !== 630) {
+    problems.push(`src/content/blog/${file}: image ${declared} is ${width}×${height}, and a post card is 1200×630`);
   }
 }
 

@@ -41,7 +41,9 @@ export async function GET({ props }: { props: SlugProps }) {
   const { item } = props;
   const { entry, title, description, version } = item;
   const data = (entry.data ?? {}) as Record<string, unknown>;
-  const rawImage = data.socialImage;
+  /* Two collections, one concept: the docs call it `socialImage` (Nimbus'
+     field) and the blog calls it `image`, and the twin emits `image` for both. */
+  const rawImage = data.socialImage ?? data.image;
   const socialImage =
     typeof rawImage === "string" && rawImage.length > 0
       ? rawImage
