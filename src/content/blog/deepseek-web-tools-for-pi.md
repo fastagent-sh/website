@@ -171,6 +171,6 @@ pi install npm:@fastagent-sh/pi-deepseek-tools
 
 The source, the demo, and the issue tracker live at [github.com/fastagent-sh/pi-deepseek-tools](https://github.com/fastagent-sh/pi-deepseek-tools). It is MIT. If the price difference is the reason you tried it, a star is the reason someone else finds it.
 
-Taking an agent from a terminal session to a service is a separate problem; the [self-hosted pull request review agent](/blog/self-hosted-github-pull-request-review-agent/) walks through the serving side.
+Taking an agent from a terminal session to a service is a separate problem. [FastAgent](https://github.com/fastagent-sh/fastagent) is the runtime this team builds for it, and the [self-hosted pull request review agent](/blog/self-hosted-github-pull-request-review-agent/) walks through the serving side.
 
 Disclosure: the package is published by fastagent, the same team that writes this blog. The API prices and limits above come from DeepSeek's own documentation and each provider's public price list, read in October 2026.
