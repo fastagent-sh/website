@@ -20,7 +20,7 @@ This is the comparison we wanted when wiring search into [pi](https://pi.dev), u
 | Brave Search | $5 | A query, with optional LLM Context passages | 50 queries/second | $5 monthly credit, about 1,000 requests |
 | Tavily | $8 basic, $16 advanced on pay-as-you-go; $5 to $7.50 on plans | A search at `basic` (1 credit) or `advanced` (2 credits) | Plan-dependent | 1,000 credits/month |
 | Exa | From $4 for search; $1 per 1,000 pages for contents; $12 to $15 for deep search | A search, or a page of contents | Plan-dependent | $10 in credits per month |
-| DeepSeek | ¥5, about $0.70, for search and ¥5 for fetch, billed separately | A successful search or a successful fetch | 5 requests/second per endpoint | None |
+| DeepSeek | ¥5, $0.75 in USD, for search and ¥5 for fetch, billed separately | A successful search or a successful fetch | 5 requests/second per endpoint | None |
 
 ## Brave Search API pricing
 
@@ -30,21 +30,23 @@ Where it bites: the result page is the unit. If your agent then wants full page 
 
 ## Tavily pricing
 
-Tavily sells credits. Pay-as-you-go is $0.008 per credit, and the monthly plans run from $0.0075 down to $0.005 per credit as volume grows. A `basic` search costs one credit, an `advanced` search costs two, so a thousand basic searches are $8 on pay-as-you-go or $5 to $7.50 on a plan, and advanced doubles it. Extraction is priced separately at one credit per five successful URLs, and a failed extraction is not billed.
+Tavily sells credits. Pay-as-you-go is $0.008 per credit, and the monthly plans run from $0.0075 down to $0.005 per credit as volume grows. A `basic` search costs one credit, an `advanced` search costs two, so a thousand basic searches are $8 on pay-as-you-go or $5 to $7.50 on a plan, and advanced doubles it. Extraction is priced separately at one credit per five successful URLs, two at `advanced` extraction depth, and a failed extraction is not billed.
 
 Where it bites: the depth flag is the price. An agent that defaults to `advanced` is paying double without a visible difference in the dashboard until the invoice arrives.
 
 ## Exa pricing
 
-Exa prices search as a floor and everything else on top: search from $4 per 1,000, page contents at $1 per 1,000 pages, deep search at $12 to $15 per 1,000, and the Answer endpoint at $5 per 1,000. The Free Tier gives $10 in credits each month.
+Exa prices search as a floor and everything else on top: search from $4 per 1,000, page contents at $1 per 1,000 pages, deep search at $12 to $15 per 1,000, and the Answer endpoint at $5 per 1,000. Monitors, which rerun a query on a schedule, are $15 per 1,000, and an Agent run costs $0.012 to $1.00 at fixed effort or is billed by usage. The Free Tier gives $10 in credits each month.
 
 Where it bites: the $4 line covers search results; if the agent needs the text of ten pages for every query, that is a second line on the bill. Deep search is a genuinely different product and priced like one.
 
 ## DeepSeek pricing
 
-DeepSeek runs its own index and charges ¥5 per 1,000 successful requests, about $0.70, for search and the same again for fetch. Search returns a rank score, an authority score, and a 600 to 800 character summary per result, so the common case does not need a fetch at all. Each endpoint allows 5 requests per second per account.
+DeepSeek runs its own index and charges ¥5 per 1,000 successful requests, $0.75 in USD, for search and the same again for fetch. Search returns a rank score, an authority score, and a 600 to 800 character summary per result, so the common case does not need a fetch at all. Each endpoint allows 5 requests per second per account.
 
 Where it bites: the rate limit is 5 QPS rather than 50, so a burst of parallel tool calls needs retries, and some sites are refused by the fetcher outright. Neither is billed, because only successful requests cost anything.
+
+One exception to the billing: server-side search and fetch calls that DeepSeek serves through its own harness, Claude Code or Codex are free until 1 November 2026, when per-request billing starts. A client that calls the API with its own key, as the pi package below does, pays from the first call.
 
 ## What the price per 1,000 hides
 
@@ -65,7 +67,7 @@ Five searches and the text of three pages, the shape of a small research step:
 | Exa | 5 searches + 3 pages of contents | about $0.02 |
 | DeepSeek | 8 successful requests, ¥0.005 each | ¥0.04, about $0.006 |
 
-At a hundred tasks a day, the spread is roughly $60 to $145 a month for Brave and Tavily, against under $2 for DeepSeek. Exa sits in between because its search floor is lower but its contents are metered separately.
+At a hundred tasks a day, that month is about $120 on Brave and $135 to $144 on Tavily, against about $18 on DeepSeek. Exa lands near $60: its search floor is lower, but its contents are metered separately.
 
 ## How to choose
 

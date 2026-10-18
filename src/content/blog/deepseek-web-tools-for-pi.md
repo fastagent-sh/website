@@ -12,9 +12,9 @@ authorUrl: https://x.com/kid7st
 image: /og/deepseek-web-tools-for-pi.png
 ---
 
-An agent that searches the web a hundred times a day is not free. Search APIs bill per request, and the usual rates are $5 to $8 per thousand calls: Brave at $5, Tavily at $5 to $8, Exa at $7. At a hundred searches a day that is $15 to $25 a month for one agent, before it fetches a single page.
+An agent that searches the web a hundred times a day is not free. Search APIs bill per request, and the usual rates are $4 to $8 per thousand calls: Brave at $5, Tavily at $5 to $8, Exa from $4 for search. At a hundred searches a day that is $12 to $25 a month for one agent, before it fetches a single page.
 
-DeepSeek's web search API prices the same work at ¥5 per 1,000 successful requests, about $0.70. It is not a reseller. DeepSeek runs its own index, returns the ranking with every result, and writes summaries that a model can read. The APIs are two plain JSON endpoints:
+DeepSeek's web search API prices the same work at ¥5 per 1,000 successful requests, $0.75 on the English price list. It is not a reseller. DeepSeek runs its own index, returns the ranking with every result, and writes summaries that a model can read. The APIs are two plain JSON endpoints:
 
 ```
 POST https://api.deepseek.com/v1/tools/search
@@ -116,10 +116,10 @@ The tools are on by default, because a package you have to switch on before it w
 
 | API | List price per 1,000 requests |
 | --- | --- |
-| DeepSeek Search / Fetch | ¥5, about $0.70 |
+| DeepSeek Search / Fetch | ¥5, $0.75 in USD |
 | Brave Search (Data for AI) | $5 |
 | Tavily (basic search) | $5 to $8 |
-| Exa (search) | $7 |
+| Exa (search) | from $4 |
 
 Two things the table does not say. Billing is per successful request: a failed call, a timeout, or a search with no results costs nothing. And the two endpoints are metered separately, so a search-heavy agent does not spend its fetch budget.
 
