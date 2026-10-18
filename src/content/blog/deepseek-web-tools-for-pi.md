@@ -1,7 +1,7 @@
 ---
-title: "The cheapest web search for a coding agent: DeepSeek tools in pi"
+title: "DeepSeek web search for pi: ¥5 per 1,000 calls"
 date: 2026-10-18
-description: "DeepSeek's Search and Fetch APIs cost ¥5 per 1,000 requests and return summaries written for models. Here is how they plug into pi, what they cost, and where they stop."
+description: "DeepSeek's web search API costs ¥5 per 1,000 requests, returns ranking scores and model-ready summaries, and installs in pi next to pi-web-access."
 tags:
   - pi
   - web-search
@@ -11,7 +11,7 @@ tags:
 
 An agent that searches the web a hundred times a day is not free. Search APIs bill per request, and the usual rates are $5 to $8 per thousand calls: Brave at $5, Tavily at $5 to $8, Exa at $7. At a hundred searches a day that is $15 to $25 a month for one agent, before it fetches a single page.
 
-DeepSeek prices the same work at ¥5 per 1,000 successful requests, about $0.70. It is not a reseller. DeepSeek runs its own index, returns the ranking with every result, and writes summaries that a model can read. The APIs are two plain JSON endpoints:
+DeepSeek's web search API prices the same work at ¥5 per 1,000 successful requests, about $0.70. It is not a reseller. DeepSeek runs its own index, returns the ranking with every result, and writes summaries that a model can read. The APIs are two plain JSON endpoints:
 
 ```
 POST https://api.deepseek.com/v1/tools/search
@@ -20,9 +20,9 @@ POST https://api.deepseek.com/v1/tools/fetch
 
 This post covers what those endpoints return, how they plug into [pi](https://pi.dev), when they beat the usual providers, and the places where they do not.
 
-![A pi session: a search returns three ranked results, then the paid tools are toggled off and on again](https://cdn.jsdelivr.net/gh/fastagent-sh/pi-deepseek-tools@main/assets/demo.gif)
+<video src="https://cdn.jsdelivr.net/gh/fastagent-sh/pi-deepseek-tools@main/assets/demo.mp4" poster="https://cdn.jsdelivr.net/gh/fastagent-sh/pi-deepseek-tools@main/assets/demo-poster.png" width="1240" height="700" autoplay loop muted playsinline style="max-width:100%;height:auto;border-radius:6px" aria-label="A pi session: a search returns three ranked results, then the paid tools are toggled off and on again"></video>
 
-## Two endpoints, no model call
+## What the DeepSeek web search API returns
 
 `POST /v1/tools/search` takes a query, a count between 1 and 50, and a flag for full page text. It returns an array of results. Each one carries a title, a URL, a short snippet, a long summary, the site name, a publish date when known, and two scores: `rerank_score` from 0 to 3 and `authority` from 0 to 4. A result with `rerank_score` of 1.5 or more is documented as a good hit; 3 or more authority is the top band.
 
@@ -41,7 +41,7 @@ Raw search APIs return fragments meant for a person scanning a page. The fields 
 
 That is the difference between a list of links and a result an agent can reason about without fetching everything.
 
-## Install it in pi
+## How to add DeepSeek web search to pi
 
 ```
 pi install npm:@fastagent-sh/pi-deepseek-tools
@@ -57,7 +57,7 @@ Your DeepSeek key comes from, in order:
 
 If you already use DeepSeek as a model provider in pi, there is nothing to configure.
 
-## Searching
+## Searching with query operators
 
 ```
 deepseek_search {"query": "deepseek v4 release", "count": 5}
@@ -109,7 +109,7 @@ The tools are on by default, because a package you have to switch on before it w
 { "deepseek-tools": { "enabledByDefault": false } }
 ```
 
-## The price comparison, with the caveats
+## DeepSeek vs Brave, Tavily and Exa: what search APIs cost
 
 | API | List price per 1,000 requests |
 | --- | --- |
@@ -144,6 +144,20 @@ return results.map((hit) => `${hit.title} — ${hit.url} (${hit.score?.toFixed(1
 
 That makes the cheap path also the scriptable one: filter by score, dedupe by host, or fetch the top three in parallel without parsing prose.
 
+## Common questions
+
+### Does it cost anything to search?
+
+Yes, but only successful requests: ¥5 per 1,000 searches, and ¥5 per 1,000 fetches, billed separately. A failed call, a timeout, or a query with no results is free. The footer counts what a session has spent so far.
+
+### Do I need a DeepSeek model to use the search API?
+
+No. The two tools are ordinary HTTP calls to `api.deepseek.com`; the model in your pi session can be anything. The key can come from `/login deepseek`, `DEEPSEEK_API_KEY`, or the `deepseekApiKey` field in `web-search.json`.
+
+### Why does `deepseek_fetch` fail on some pages?
+
+DeepSeek refuses URLs that its fetcher cannot read through its policy, and returns 404 when a page yields no Markdown. Wikipedia is a known example. The search summary usually carries enough to answer, and another source is one call away.
+
 ## Try it
 
 ```
@@ -151,5 +165,7 @@ pi install npm:@fastagent-sh/pi-deepseek-tools
 ```
 
 The source, the demo, and the issue tracker live at [github.com/fastagent-sh/pi-deepseek-tools](https://github.com/fastagent-sh/pi-deepseek-tools). It is MIT. If the price difference is the reason you tried it, a star is the reason someone else finds it.
+
+Taking an agent from a terminal session to a service is a separate problem; the [self-hosted pull request review agent](/blog/self-hosted-github-pull-request-review-agent/) walks through the serving side.
 
 Disclosure: the package is published by fastagent, the same team that writes this blog. The API prices and limits above come from DeepSeek's own documentation and each provider's public price list, read in October 2026.
