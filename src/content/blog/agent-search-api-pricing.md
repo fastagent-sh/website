@@ -83,6 +83,6 @@ We wrapped the DeepSeek endpoints into two pi tools, `deepseek_search` and `deep
 pi install npm:@fastagent-sh/pi-deepseek-tools
 ```
 
-The same team builds [FastAgent](https://github.com/fastagent-sh/fastagent), which serves a file-defined agent directory as a live service in your app, on GitHub, Telegram or Feishu. This post is about the search layer under an agent; that repository is about everything around it.
+The same team builds [FastAgent](https://github.com/fastagent-sh/fastagent), which serves a file-defined agent directory as a live service in your app, on GitHub, Telegram or Feishu. This post is about the search layer under an agent; that repository is about everything around it. If this comparison saved you a spreadsheet, [a star there](https://github.com/fastagent-sh/fastagent) is how the next person finds it.
 
 Disclosure: the package is published by fastagent, which publishes this blog. Prices above are list prices from each provider's public pricing page, read in October 2026; none of the providers reviewed the post.
