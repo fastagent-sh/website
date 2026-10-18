@@ -31,15 +31,24 @@ export const collections = {
          reads, so it is what puts a post line in /blog/llms.txt and in the
          markdown twin frontmatter. The page and the feed read it too. */
       description: z.string(),
-      /* A named author is worth a byline and a Person in the structured data;
-         posts without one fall back to the team, which is what the site said
-         before this field existed. */
-      author: z.string().default("The FastAgent team"),
+      /* A named author is a Person in the structured data and a link in the
+         byline; a post without one is the team, which is an Organization. The
+         field stays optional rather than defaulted, because "is this a person"
+         and "is there a profile to link" are different questions: a defaulted
+         name with no URL would still have to be declared an Organization. */
+      author: z.string().optional(),
       authorUrl: z.url().optional(),
       /* Per-post social card, rendered by scripts/render-post-og.mjs. Path is
          site-relative; the layout makes it absolute for og:image. */
       image: z.string().optional(),
       tags: z.array(z.string().regex(/^[a-z0-9-]+$/, "tags must be url-safe slugs")).default([]),
-    }),
+    })
+      /* An authorUrl only means something next to a name; on its own it is
+         dropped by every reader, which would leave the page quietly
+         inconsistent with its own frontmatter. */
+      .refine((data) => !data.authorUrl || data.author, {
+        message: "authorUrl needs an author: the byline links a name",
+        path: ["authorUrl"],
+      }),
   }),
 };

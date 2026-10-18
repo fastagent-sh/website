@@ -27,11 +27,13 @@ const ogImage = image
   ? { url: image.startsWith("http") ? image : `${SITE}${image}`, width: "1200", height: "630", alt: `${title} — FastAgent Blog` }
   : OG_IMAGE;
 
-/* A named author with a profile is a Person for search engines; the default
-   team byline stays an Organization. */
-const authorNode = authorUrl
-  ? { "@type": "Person", name: author, url: authorUrl }
-  : { "@type": "Organization", name: author, url: SITE };
+/* A named author is a Person; a post without one is the team, which is an
+   Organization. A profile is optional on both counts — a person who has no
+   page to link is still a person. */
+const authorName = author ?? "The FastAgent team";
+const authorNode = author
+  ? { "@type": "Person", name: author, ...(authorUrl ? { url: authorUrl } : {}) }
+  : { "@type": "Organization", name: authorName, url: SITE };
 
 const structuredData = {
   "@context": "https://schema.org",
@@ -64,7 +66,7 @@ const related = all
 >
   <Fragment slot="head">
     <meta property="article:published_time" content={date.toISOString()} />
-    <meta property="article:author" content={author} />
+    <meta property="article:author" content={authorName} />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
     <link rel="alternate" type="text/markdown" href={markdownUrl} />
   </Fragment>
@@ -76,7 +78,7 @@ const related = all
         <span aria-hidden="true">·</span>
         <time datetime={date.toISOString().slice(0, 10)}>{dateLabel}</time>
         <span aria-hidden="true">·</span>
-        {authorUrl ? <a href={authorUrl}>{author}</a> : <span>{author}</span>}
+        {authorUrl ? <a href={authorUrl}>{authorName}</a> : <span>{authorName}</span>}
       </p>
       <h1>{title}</h1>
       <p class="section-lede">{description}</p>
