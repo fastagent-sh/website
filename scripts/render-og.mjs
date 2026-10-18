@@ -38,6 +38,7 @@
 import { readFileSync } from "node:fs";
 import sharp from "sharp";
 import { brandIcons } from "../src/components/brand-icons.ts";
+import { CARD, MONO } from "./og-theme.mjs";
 
 /* pi's mark, from the same entry the page's credit lockups draw — one copy of
    the path, whichever surface renders it. A brand icon may also be a bare
@@ -46,24 +47,7 @@ import { brandIcons } from "../src/components/brand-icons.ts";
 const pi = brandIcons["pi"];
 if (typeof pi === "string") throw new Error("the pi icon is now a bare path — give it a viewBox here");
 
-export const CARD = {
-  ground: "#11151a",
-  groundFar: "#080a0d",
-  glow: "#15383d",
-  glowFade: "#0d0f12",
-  accent: "#45cbd3",
-  headline: "#f1f4f7",
-  sub: "#9ba3ae",
-  paneBg: "#0b0e12",
-  paneBar: "#141920",
-  paneLine: "#2b323c",
-  paneText: "#c3cad4",
-  dim: "#6b7480",
-  ok: "#8fdc8a",
-  str: "#e6c68a",
-};
-
-const mono = "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";
+const mono = MONO;
 const dataUri = (file) =>
   `data:image/png;base64,${readFileSync(new URL(`../public/${file}`, import.meta.url)).toString("base64")}`;
 

@@ -7,6 +7,9 @@ tags:
   - web-search
   - agents
   - cost
+author: kid7st
+authorUrl: https://github.com/kid7st
+image: /og/deepseek-web-tools-for-pi.png
 ---
 
 An agent that searches the web a hundred times a day is not free. Search APIs bill per request, and the usual rates are $5 to $8 per thousand calls: Brave at $5, Tavily at $5 to $8, Exa at $7. At a hundred searches a day that is $15 to $25 a month for one agent, before it fetches a single page.
@@ -119,6 +122,8 @@ The tools are on by default, because a package you have to switch on before it w
 | Exa (search) | $7 |
 
 Two things the table does not say. Billing is per successful request: a failed call, a timeout, or a search with no results costs nothing. And the two endpoints are metered separately, so a search-heavy agent does not spend its fetch budget.
+
+Every provider hides something in its rate: request multipliers, contents billed separately, failures billed anyway. The [full comparison of search API pricing for agents](/blog/agent-search-api-pricing/) puts the four side by side and costs out one realistic task.
 
 Rate limits are 5 requests per second per account on each endpoint. The package retries 408, 429, and 5xx up to three attempts, honoring `Retry-After`, which is usually enough to absorb a burst of parallel tool calls. A rate limit that survives the retries surfaces as an error with the API's own message instead of a silent empty result.
 

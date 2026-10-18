@@ -16,7 +16,8 @@
     "preview": "astro preview",
     "deploy": "npm run build && wrangler deploy",
     "deploy:www": "wrangler deploy --config wrangler.www.jsonc",
-    "tokens": "node scripts/build-tokens.mjs"
+    "tokens": "node scripts/build-tokens.mjs",
+    "og:posts": "node scripts/render-post-og.mjs"
   },
   "dependencies": {
     "@cloudflare/nimbus-docs": "^0.8.2",

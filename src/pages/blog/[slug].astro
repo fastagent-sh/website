@@ -12,7 +12,7 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
-const { title, date, description, tags } = post.data;
+const { title, date, description, tags, author, authorUrl, image } = post.data;
 const dateLabel = date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
 /* The markdown twin src/pages/[...slug]/index.md.ts emits for this post, and
@@ -21,6 +21,18 @@ const dateLabel = date.toLocaleDateString("en-US", { year: "numeric", month: "lo
    Same rule as there, from the same helper. */
 const markdownUrl = markdownTwin(Astro.url.pathname);
 
+/* A post with its own card gets a 1200x630 image from scripts/render-post-og.mjs;
+   one without keeps the site card, so the head never points at a missing file. */
+const ogImage = image
+  ? { url: image.startsWith("http") ? image : `${SITE}${image}`, width: "1200", height: "630", alt: `${title} — FastAgent Blog` }
+  : OG_IMAGE;
+
+/* A named author with a profile is a Person for search engines; the default
+   team byline stays an Organization. */
+const authorNode = authorUrl
+  ? { "@type": "Person", name: author, url: authorUrl }
+  : { "@type": "Organization", name: author, url: SITE };
+
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
@@ -28,8 +40,8 @@ const structuredData = {
   description,
   datePublished: date.toISOString(),
   url: `${SITE}/blog/${post.id}/`,
-  image: OG_IMAGE.url,
-  author: { "@type": "Organization", name: "The FastAgent team", url: SITE },
+  image: ogImage.url,
+  author: authorNode,
   publisher: { "@type": "Organization", name: "FastAgent", url: SITE },
 };
 
@@ -43,10 +55,16 @@ const related = all
   .map(({ p }) => p);
 ---
 
-<Site title={`${title} — FastAgent Blog`} description={description} path={`/blog/${post.id}/`} ogType="article">
+<Site
+  title={`${title} — FastAgent Blog`}
+  description={description}
+  path={`/blog/${post.id}/`}
+  ogType="article"
+  ogImage={ogImage}
+>
   <Fragment slot="head">
     <meta property="article:published_time" content={date.toISOString()} />
-    <meta property="article:author" content="The FastAgent team" />
+    <meta property="article:author" content={author} />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
     <link rel="alternate" type="text/markdown" href={markdownUrl} />
   </Fragment>
@@ -58,7 +76,7 @@ const related = all
         <span aria-hidden="true">·</span>
         <time datetime={date.toISOString().slice(0, 10)}>{dateLabel}</time>
         <span aria-hidden="true">·</span>
-        <span>The FastAgent team</span>
+        {authorUrl ? <a href={authorUrl}>{author}</a> : <span>{author}</span>}
       </p>
       <h1>{title}</h1>
       <p class="section-lede">{description}</p>

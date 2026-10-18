@@ -31,6 +31,14 @@ export const collections = {
          reads, so it is what puts a post line in /blog/llms.txt and in the
          markdown twin frontmatter. The page and the feed read it too. */
       description: z.string(),
+      /* A named author is worth a byline and a Person in the structured data;
+         posts without one fall back to the team, which is what the site said
+         before this field existed. */
+      author: z.string().default("The FastAgent team"),
+      authorUrl: z.string().url().optional(),
+      /* Per-post social card, rendered by scripts/render-post-og.mjs. Path is
+         site-relative; the layout makes it absolute for og:image. */
+      image: z.string().optional(),
       tags: z.array(z.string().regex(/^[a-z0-9-]+$/, "tags must be url-safe slugs")).default([]),
     }),
   }),
