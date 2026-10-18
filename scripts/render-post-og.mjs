@@ -19,7 +19,7 @@ const PAD = 84;
 const TITLE_SIZE = 56;
 const MAX_LINES = 4;
 
-function frontmatter(text) {
+function frontmatter(text, file) {
   const match = text.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return {};
   const data = { tags: [] };
@@ -33,7 +33,15 @@ function frontmatter(text) {
     const field = line.match(/^(\w+):\s*(.*)$/);
     if (!field) continue;
     list = null;
-    const value = field[2].trim().replace(/^["']|["']$/g, "");
+    const raw = field[2].trim();
+    /* This reader takes one line per field. A block scalar or an alias arrives
+       here as the bare character and would be rendered as the title. */
+    if (/^[>|&*]/.test(raw)) {
+      throw new Error(
+        `${file}: ${field[1]} starts with "${raw[0]}", a YAML form this reader does not parse — write it on one line`,
+      );
+    }
+    const value = raw.replace(/^["']|["']$/g, "");
     if (value) data[field[1]] = value;
     else if (field[1] === "tags") list = data.tags;
   }
@@ -55,13 +63,25 @@ function wrap(title, size, width) {
     }
   }
   if (line) lines.push(line);
-  return lines.slice(0, MAX_LINES);
+  /* A card that drops words, or lets a long word run past the edge, ships a
+     broken image that only shows up in a feed. Fail at render time instead,
+     while the person adding the post is watching the terminal. */
+  const overflowing = lines.find((line) => line.length > perLine);
+  if (overflowing) {
+    throw new Error(
+      `${title}: "${overflowing}" is wider than the ${perLine} characters a line holds — shorten it or lower TITLE_SIZE`,
+    );
+  }
+  if (lines.length > MAX_LINES) {
+    throw new Error(`${title}: wraps to ${lines.length} lines and the card holds ${MAX_LINES} — shorten the title`);
+  }
+  return lines;
 }
 
 mkdirSync(`${OUT_DIR}og/`, { recursive: true });
 const posts = readdirSync(BLOG_DIR)
   .filter((file) => file.endsWith(".md"))
-  .map((file) => ({ file, data: frontmatter(readFileSync(new URL(file, BLOG_DIR), "utf8")) }))
+  .map((file) => ({ file, data: frontmatter(readFileSync(new URL(file, BLOG_DIR), "utf8"), file) }))
   .filter(({ data }) => data.title && data.image);
 
 for (const { data } of posts) {
